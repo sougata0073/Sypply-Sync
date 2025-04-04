@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "922730687383",
+    "project_id": "supply-sync-ffb50",
+    "storage_bucket": "supply-sync-ffb50.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:922730687383:android:2976bc7a46a9026887b2d2",
+        "android_client_info": {
+          "package_name": "com.sougata.supplysync"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "922730687383-a88cuhdoe0mjclbb63mpfq072fauj1g1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sougata.supplysync",
+            "certificate_hash": "606f6bb906b28a7b7dae4426883d7898dbdafe4f"
+          }
+        },
+        {
+          "client_id": "922730687383-cst7evl0qtjv2v4d3cs77dliavpkjs09.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTeNQhe6oUAmDmxp4KQy9zAT97g0hJyz8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "922730687383-cst7evl0qtjv2v4d3cs77dliavpkjs09.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

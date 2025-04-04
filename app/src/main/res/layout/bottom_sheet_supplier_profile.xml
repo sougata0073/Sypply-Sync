@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <data>
+
+        <variable
+            name="supplier"
+            type="com.sougata.supplysync.models.Supplier" />
+
+    </data>
+
+    <ScrollView
+        android:id="@+id/parentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bottom_sheet_dialog_bg_color_primary"
+        android:fitsSystemWindows="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/upperLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/primary_color"
+                android:padding="15dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/profileImage"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:shapeAppearance="@style/circleImageView"
+                    tools:src="@drawable/ic_user_profile" />
+
+                <ImageButton
+                    android:id="@+id/editBtn"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginEnd="20dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_edit"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/deleteBtn"
+                    app:layout_constraintTop_toBottomOf="@+id/profileImage"
+                    app:tint="@color/white" />
+
+                <ImageButton
+                    android:id="@+id/deleteBtn"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_delete"
+                    app:layout_constraintBottom_toBottomOf="@id/editBtn"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/editBtn"
+                    app:tint="@color/white" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/lowerLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/night_mode_background"
+                android:padding="15dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/upperLayout">
+
+                <TextView
+                    android:id="@+id/nameLbl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="Name"
+                    android:textColor="@color/bw"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@id/emailLbl"
+                    app:layout_constraintEnd_toStartOf="@id/name"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_chainStyle="packed" />
+
+                <TextView
+                    android:id="@+id/name"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:ellipsize="end"
+                    android:gravity="end"
+                    android:maxLines="1"
+                    android:text="@{supplier.name}"
+                    android:textColor="@color/bw"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/nameLbl"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/nameLbl"
+                    app:layout_constraintTop_toTopOf="@id/nameLbl"
+                    tools:text="Sougata Saha" />
+
+                <TextView
+                    android:id="@+id/emailLbl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Email"
+                    android:textColor="@color/bw"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@id/phoneLbl"
+                    app:layout_constraintEnd_toStartOf="@id/email"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="@id/nameLbl"
+                    app:layout_constraintTop_toBottomOf="@id/nameLbl" />
+
+                <TextView
+                    android:id="@+id/email"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:gravity="end"
+                    android:maxLines="1"
+                    android:text="@{supplier.email}"
+                    android:textColor="@color/bw"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/emailLbl"
+                    app:layout_constraintEnd_toEndOf="@id/name"
+                    app:layout_constraintStart_toEndOf="@id/emailLbl"
+                    app:layout_constraintTop_toTopOf="@id/emailLbl"
+                    tools:text="sahasougata459@gmail.com" />
+
+                <TextView
+                    android:id="@+id/phoneLbl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Phone"
+                    android:textColor="@color/bw"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@id/dueAmountLbl"
+                    app:layout_constraintEnd_toStartOf="@id/phone"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="@id/emailLbl"
+                    app:layout_constraintTop_toBottomOf="@id/emailLbl" />
+
+                <TextView
+                    android:id="@+id/phone"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:ellipsize="end"
+                    android:gravity="end"
+                    android:maxLines="1"
+                    android:text="@{supplier.phone}"
+                    android:textColor="@color/bw"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/phoneLbl"
+                    app:layout_constraintEnd_toEndOf="@id/email"
+                    app:layout_constraintStart_toEndOf="@id/phoneLbl"
+                    app:layout_constraintTop_toTopOf="@id/phoneLbl"
+                    tools:text="6296320657" />
+
+                <TextView
+                    android:id="@+id/dueAmountLbl"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="Due amount"
+                    android:textColor="@color/bw"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@id/paymentDetailsLbl"
+                    app:layout_constraintEnd_toStartOf="@id/dueAmount"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="@id/phoneLbl"
+                    app:layout_constraintTop_toBottomOf="@id/phoneLbl" />
+
+                <TextView
+                    android:id="@+id/dueAmount"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:ellipsize="end"
+                    android:gravity="end"
+                    android:maxLines="1"
+                    android:textColor="@color/bw"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/dueAmountLbl"
+                    app:layout_constraintEnd_toEndOf="@id/phone"
+                    app:layout_constraintStart_toEndOf="@id/dueAmountLbl"
+                    app:layout_constraintTop_toTopOf="@id/dueAmountLbl"
+                    tools:text="20000" />
+
+                <TextView
+                    android:id="@+id/paymentDetailsLbl"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:text="Payment details"
+                    android:textColor="@color/bw"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@id/paymentDetails"
+                    app:layout_constraintEnd_toEndOf="@+id/dueAmount"
+                    app:layout_constraintStart_toStartOf="@id/dueAmountLbl"
+                    app:layout_constraintTop_toBottomOf="@id/dueAmountLbl" />
+
+                <TextView
+                    android:id="@+id/paymentDetails"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/curved_rectangular_bg_color_adaptive"
+                    android:ellipsize="end"
+                    android:maxLines="5"
+                    android:minLines="3"
+                    android:padding="10dp"
+                    android:text="@{supplier.paymentDetails}"
+                    android:textColor="@color/bw"
+                    android:textIsSelectable="true"
+                    android:textSize="15sp"
+                    android:textStyle="bold|italic"
+                    app:layout_constraintBottom_toTopOf="@id/noteLbl"
+                    app:layout_constraintEnd_toEndOf="@id/paymentDetailsLbl"
+                    app:layout_constraintStart_toStartOf="@+id/paymentDetailsLbl"
+                    app:layout_constraintTop_toBottomOf="@+id/paymentDetailsLbl"
+                    tools:text="6296320657@upi" />
+
+                <TextView
+                    android:id="@+id/noteLbl"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:ellipsize="end"
+                    android:maxLines="5"
+                    android:text="Note"
+                    android:textColor="@color/bw"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toTopOf="@id/note"
+                    app:layout_constraintEnd_toEndOf="@+id/paymentDetails"
+                    app:layout_constraintStart_toStartOf="@+id/paymentDetails"
+                    app:layout_constraintTop_toBottomOf="@id/paymentDetails" />
+
+                <TextView
+                    android:id="@+id/note"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="35dp"
+                    android:background="@drawable/curved_rectangular_bg_color_adaptive"
+                    android:minLines="3"
+                    android:padding="10dp"
+                    android:text="@{supplier.note}"
+                    android:textColor="@color/bw"
+                    android:textIsSelectable="true"
+                    android:textSize="15sp"
+                    android:textStyle="bold|italic"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@id/noteLbl"
+                    app:layout_constraintStart_toStartOf="@+id/noteLbl"
+                    app:layout_constraintTop_toBottomOf="@+id/noteLbl"
+                    tools:text="My notes" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:indicatorColor="@color/black"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+</layout>

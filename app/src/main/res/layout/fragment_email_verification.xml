@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.sougata.supplysync.login.viewmodels.EmailVerificationViewModel" />
+
+    </data>
+
+    <ScrollView
+        android:id="@+id/parentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:fitsSystemWindows="true"
+        tools:context=".login.fragments.LoginFragment">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary_color">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/appImage"
+                    android:layout_width="300dp"
+                    android:layout_height="300dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_app" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/top_curved_rectangular_bg_color_white"
+                    android:paddingStart="20dp"
+                    android:paddingTop="40dp"
+                    android:paddingEnd="20dp"
+                    android:paddingBottom="40dp">
+
+                    <TextView
+                        android:id="@+id/verificationLinkSentMessage"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="An email with verification link is sent to your email account, click that link to verify"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toTopOf="@id/whenVerifiedBtn"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/whenVerifiedBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:padding="12dp"
+                        android:text="Click when verified"
+                        android:textColor="@color/white"
+                        android:onClick="@{viewModel::onVerifiedClick}"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="8dp"
+                        app:layout_constraintBottom_toTopOf="@id/sendLinkAgainBtn"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/verificationLinkSentMessage"
+                        app:layout_constraintVertical_chainStyle="packed" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/sendLinkAgainBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:padding="12dp"
+                        android:onClick="@{viewModel::onSendLinkAgainClick}"
+                        android:text="Send verification link again"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="8dp"
+                        app:layout_constraintBottom_toTopOf="@id/timer"
+                        app:layout_constraintEnd_toEndOf="@id/whenVerifiedBtn"
+                        app:layout_constraintStart_toStartOf="@id/whenVerifiedBtn"
+                        app:layout_constraintTop_toBottomOf="@id/whenVerifiedBtn" />
+
+                    <TextView
+                        android:id="@+id/timer"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:visibility="gone"
+                        android:textStyle="bold"
+                        android:layout_marginTop="10dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="@id/sendLinkAgainBtn"
+                        app:layout_constraintStart_toStartOf="@id/sendLinkAgainBtn"
+                        app:layout_constraintTop_toBottomOf="@id/sendLinkAgainBtn" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:indicatorColor="@color/black"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+
+</layout>

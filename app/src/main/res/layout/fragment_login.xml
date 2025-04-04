@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.sougata.supplysync.login.viewmodels.LoginViewModel" />
+
+    </data>
+
+    <ScrollView
+        android:id="@+id/parentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:fitsSystemWindows="true"
+        tools:context=".login.fragments.LoginFragment">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary_color">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/appImage"
+                    android:layout_width="300dp"
+                    android:layout_height="300dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_app" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/top_curved_rectangular_bg_color_white"
+                    android:paddingStart="20dp"
+                    android:paddingTop="40dp"
+                    android:paddingEnd="20dp"
+                    android:paddingBottom="40dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/emailLyt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:hint="Email"
+                        app:boxStrokeColor="@color/material_text_input_border_color_black"
+                        app:hintTextColor="@color/grey"
+                        app:layout_constraintBottom_toTopOf="@id/passwordLyt"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_chainStyle="packed">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/email"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textEmailAddress"
+                            android:maxLines="2"
+                            android:text="@={viewModel.email}"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/passwordLyt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:hint="Password"
+                        app:boxStrokeColor="@color/material_text_input_border_color_black"
+                        app:hintTextColor="@color/grey"
+                        app:layout_constraintBottom_toTopOf="@id/loginBtn"
+                        app:layout_constraintEnd_toEndOf="@id/emailLyt"
+                        app:layout_constraintStart_toStartOf="@id/emailLyt"
+                        app:layout_constraintTop_toBottomOf="@id/emailLyt">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/password"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword"
+                            android:maxLines="2"
+                            android:text="@={viewModel.password}"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/loginBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:onClick="@{viewModel::onLoginClick}"
+                        android:padding="12dp"
+                        android:text="Login"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="8dp"
+                        app:layout_constraintBottom_toTopOf="@id/dontHaveLbl"
+                        app:layout_constraintEnd_toEndOf="@id/passwordLyt"
+                        app:layout_constraintStart_toStartOf="@id/passwordLyt"
+                        app:layout_constraintTop_toBottomOf="@id/passwordLyt" />
+
+                    <TextView
+                        android:id="@+id/dontHaveLbl"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Don't have an account ?"
+                        android:textColor="@color/black"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/createAccountBtn"
+                        app:layout_constraintHorizontal_chainStyle="packed"
+                        app:layout_constraintStart_toStartOf="@id/loginBtn"
+                        app:layout_constraintTop_toBottomOf="@id/loginBtn" />
+
+                    <TextView
+                        android:id="@+id/createAccountBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="0dp"
+                        android:layout_marginStart="10dp"
+                        android:onClick="@{viewModel::onCreateAccountClick}"
+                        android:text="Create Account"
+                        android:textColor="@color/yellow"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="@id/dontHaveLbl"
+                        app:layout_constraintEnd_toEndOf="@id/loginBtn"
+                        app:layout_constraintStart_toEndOf="@id/dontHaveLbl"
+                        app:layout_constraintTop_toTopOf="@id/dontHaveLbl" />
+
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:indicatorColor="@color/black"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+</layout>

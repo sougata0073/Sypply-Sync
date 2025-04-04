@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_nav"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.sougata.supplysync.home.fragments.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home" />
+    <fragment
+        android:id="@+id/suppliersHomeFragment"
+        android:name="com.sougata.supplysync.suppliers.fragments.SuppliersHomeFragment"
+        android:label="fragment_suppliers_home"
+        tools:layout="@layout/fragment_suppliers_home" >
+        <action
+            android:id="@+id/action_suppliersHomeFragment_to_suppliersReportsFragment"
+            app:destination="@id/suppliersReportsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+    </fragment>
+    <fragment
+        android:id="@+id/customersHomeFragment"
+        android:name="com.sougata.supplysync.customers.fragments.CustomersHomeFragment"
+        android:label="fragment_customers_home"
+        tools:layout="@layout/fragment_customers_home" />
+    <fragment
+        android:id="@+id/staffsHomeFragment"
+        android:name="com.sougata.supplysync.staffs.fragments.StaffsHomeFragment"
+        android:label="fragment_staffs_home"
+        tools:layout="@layout/fragment_staffs_home" />
+    <fragment
+        android:id="@+id/suppliersReportsFragment"
+        android:name="com.sougata.supplysync.suppliers.fragments.SuppliersReportsFragment"
+        android:label="fragment_suppliers_reports"
+        tools:layout="@layout/fragment_suppliers_reports" />
+    <fragment
+        android:id="@+id/addEditSupplierFragment"
+        android:name="com.sougata.supplysync.suppliers.fragments.AddEditSupplierFragment"
+        android:label="fragment_add_supplier"
+        tools:layout="@layout/fragment_add_edit_supplier"/>
+    <fragment
+        android:id="@+id/modelsListFragment"
+        android:name="com.sougata.supplysync.util.modelslist.ModelsListFragment"
+        android:label="fragment_models_list"
+        tools:layout="@layout/fragment_models_list"/>
+    <fragment
+        android:id="@+id/addEditSupplierPaymentFragment"
+        android:name="com.sougata.supplysync.suppliers.fragments.AddEditSupplierPaymentFragment"
+        android:label="fragment_add_edit_supplier_payment"
+        tools:layout="@layout/fragment_add_edit_supplier_payment"/>
+</navigation>

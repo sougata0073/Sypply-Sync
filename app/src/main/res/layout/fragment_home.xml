@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:orientation="vertical"
+        android:background="@color/fragment_bg"
+        tools:context=".home.fragments.HomeFragment">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="@color/night_mode_background"
+            app:cardElevation="2dp">
+
+            <TextView
+                android:id="@+id/heading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:layout_marginStart="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginBottom="10dp"
+                android:fontFamily="@font/acherus_feral_bold"
+                android:gravity="start"
+                android:text="Home"
+                android:textColor="@color/bw"
+                android:textSize="25sp" />
+
+        </androidx.cardview.widget.CardView>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="15dp">
+
+                <TextView
+                    android:id="@+id/monthlySaleLbl"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Monthly Sale"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/monthlySaleAmount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="$100,000"
+                    android:textColor="@color/bw"
+                    android:textSize="35sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="@+id/monthlySaleLbl"
+                    app:layout_constraintStart_toStartOf="@id/monthlySaleLbl"
+                    app:layout_constraintTop_toBottomOf="@id/monthlySaleLbl" />
+
+                <TextView
+                    android:id="@+id/monthlyPurchaseLbl"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Monthly Purchase"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toEndOf="@+id/monthlySaleAmount"
+                    app:layout_constraintStart_toStartOf="@id/monthlySaleAmount"
+                    app:layout_constraintTop_toBottomOf="@id/monthlySaleAmount" />
+
+                <TextView
+                    android:id="@+id/monthlyPurchaseAmount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="$10,000"
+                    android:textColor="@color/bw"
+                    android:textSize="35sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="@+id/monthlyPurchaseLbl"
+                    app:layout_constraintStart_toStartOf="@id/monthlyPurchaseLbl"
+                    app:layout_constraintTop_toBottomOf="@id/monthlyPurchaseLbl" />
+
+                <TextView
+                    android:id="@+id/ordersToReceiveLbl"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Orders To Receive"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toStartOf="@id/ordersToReceiveNumber"
+                    app:layout_constraintStart_toStartOf="@id/monthlyPurchaseAmount"
+                    app:layout_constraintTop_toBottomOf="@id/monthlyPurchaseAmount" />
+
+                <TextView
+                    android:id="@+id/ordersToReceiveNumber"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxWidth="100dp"
+                    android:maxLines="1"
+                    android:text="50"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/ordersToReceiveLbl"
+                    app:layout_constraintEnd_toEndOf="@+id/monthlyPurchaseAmount"
+                    app:layout_constraintStart_toEndOf="@id/ordersToReceiveLbl"
+                    app:layout_constraintTop_toTopOf="@id/ordersToReceiveLbl" />
+
+                <TextView
+                    android:id="@+id/ordersToShipLbl"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Orders To Ship"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toStartOf="@id/ordersToShipNumber"
+                    app:layout_constraintStart_toStartOf="@id/ordersToReceiveLbl"
+                    app:layout_constraintTop_toBottomOf="@id/ordersToReceiveLbl" />
+
+                <TextView
+                    android:id="@+id/ordersToShipNumber"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxWidth="100dp"
+                    android:maxLines="1"
+                    android:text="70"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/ordersToShipLbl"
+                    app:layout_constraintEnd_toEndOf="@+id/ordersToReceiveNumber"
+                    app:layout_constraintStart_toEndOf="@id/ordersToShipLbl"
+                    app:layout_constraintTop_toTopOf="@id/ordersToShipLbl" />
+
+                <TextView
+                    android:id="@+id/yearsSalesChartLbl"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="This Year's Sales Chart"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="@+id/ordersToShipNumber"
+                    app:layout_constraintStart_toStartOf="@id/ordersToShipLbl"
+                    app:layout_constraintTop_toBottomOf="@id/ordersToShipLbl" />
+
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/yearsSalesLineChart"
+                    android:layout_width="0dp"
+                    android:layout_height="300dp"
+                    app:layout_constraintEnd_toEndOf="@id/yearsSalesChartLbl"
+                    app:layout_constraintStart_toStartOf="@id/yearsSalesChartLbl"
+                    app:layout_constraintTop_toBottomOf="@id/yearsSalesChartLbl" />
+
+                <TextView
+                    android:id="@+id/yearsPurchaseChartLbl"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="This Year's Purchase Chart"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="@+id/yearsSalesLineChart"
+                    app:layout_constraintStart_toStartOf="@id/yearsSalesLineChart"
+                    app:layout_constraintTop_toBottomOf="@id/yearsSalesLineChart" />
+
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/yearsPurchaseLineChart"
+                    android:layout_width="0dp"
+                    android:layout_height="300dp"
+                    android:layout_marginBottom="20dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@id/yearsPurchaseChartLbl"
+                    app:layout_constraintStart_toStartOf="@id/yearsPurchaseChartLbl"
+                    app:layout_constraintTop_toBottomOf="@id/yearsPurchaseChartLbl" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </ScrollView>
+    </LinearLayout>
+
+</layout>

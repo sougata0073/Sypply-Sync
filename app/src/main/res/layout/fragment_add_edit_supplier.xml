@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierViewModel" />
+
+    </data>
+
+    <ScrollView
+        android:id="@+id/parentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:background="@color/white"
+        tools:context=".suppliers.fragments.AddEditSupplierFragment">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary_color">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/profileImage"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_user_profile"
+                    app:shapeAppearance="@style/circleImageView" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/top_curved_rectangular_bg_color_white"
+                    android:paddingStart="20dp"
+                    android:paddingTop="40dp"
+                    android:paddingEnd="20dp"
+                    android:paddingBottom="40dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/nameLyt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:hint="Name"
+                        app:boxStrokeColor="@color/material_text_input_border_color_black"
+                        app:hintTextColor="@color/grey"
+                        app:layout_constraintBottom_toTopOf="@id/emailLyt"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_chainStyle="spread_inside">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/name"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPersonName"
+                            android:maxLines="2"
+                            android:text="@={viewModel.name}"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/emailLyt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:hint="Email"
+                        app:boxStrokeColor="@color/material_text_input_border_color_black"
+                        app:hintTextColor="@color/grey"
+                        app:layout_constraintBottom_toTopOf="@id/phoneLyt"
+                        app:layout_constraintEnd_toEndOf="@id/nameLyt"
+                        app:layout_constraintStart_toStartOf="@id/nameLyt"
+                        app:layout_constraintTop_toBottomOf="@id/nameLyt">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/email"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textEmailAddress"
+                            android:maxLines="2"
+                            android:text="@={viewModel.email}"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/phoneLyt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:hint="Phone"
+                        app:boxStrokeColor="@color/material_text_input_border_color_black"
+                        app:hintTextColor="@color/grey"
+                        app:layout_constraintBottom_toTopOf="@id/dueAmountLyt"
+                        app:layout_constraintEnd_toEndOf="@id/emailLyt"
+                        app:layout_constraintStart_toStartOf="@id/emailLyt"
+                        app:layout_constraintTop_toBottomOf="@id/emailLyt">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/phone"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="phone"
+                            android:maxLines="2"
+                            android:text="@={viewModel.phone}"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/dueAmountLyt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:hint="Due amount (If any)"
+                        app:boxStrokeColor="@color/material_text_input_border_color_black"
+                        app:hintTextColor="@color/grey"
+                        app:layout_constraintBottom_toTopOf="@id/paymentDetailsLyt"
+                        app:layout_constraintEnd_toEndOf="@id/phoneLyt"
+                        app:layout_constraintStart_toStartOf="@id/phoneLyt"
+                        app:layout_constraintTop_toBottomOf="@id/phoneLyt">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/dueAmount"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:maxLines="2"
+                            android:text="@={viewModel.dueAmount}"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/paymentDetailsLyt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:hint="Payment details"
+                        app:boxStrokeColor="@color/material_text_input_border_color_black"
+                        app:hintTextColor="@color/grey"
+                        app:layout_constraintBottom_toTopOf="@id/noteLyt"
+                        app:layout_constraintEnd_toEndOf="@id/dueAmountLyt"
+                        app:layout_constraintStart_toStartOf="@id/dueAmountLyt"
+                        app:layout_constraintTop_toBottomOf="@id/dueAmountLyt">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/paymentDetails"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
+                            android:maxLines="2"
+                            android:text="@={viewModel.paymentDetails}"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/noteLyt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:hint="Note"
+                        app:boxStrokeColor="@color/material_text_input_border_color_black"
+                        app:hintTextColor="@color/grey"
+                        app:layout_constraintBottom_toTopOf="@id/saveBtn"
+                        app:layout_constraintEnd_toEndOf="@id/paymentDetailsLyt"
+                        app:layout_constraintStart_toStartOf="@id/paymentDetailsLyt"
+                        app:layout_constraintTop_toBottomOf="@id/paymentDetailsLyt">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/note"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text"
+                            android:maxLines="2"
+                            android:text="@={viewModel.note}"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/saveBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:padding="12dp"
+                        android:text="Save"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="@id/noteLyt"
+                        app:layout_constraintStart_toStartOf="@id/noteLyt"
+                        app:layout_constraintTop_toBottomOf="@id/noteLyt" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:indicatorColor="@color/black"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </ScrollView>
+
+</layout>

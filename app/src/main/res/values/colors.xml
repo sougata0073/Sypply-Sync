@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="bw">#FF000000</color>
+    <color name="primary_color">#6E60F9</color>
+    <color name="red">#E31414</color>
+    <color name="green">#34A853</color>
+    <color name="grey">#A9A9A9</color>
+    <color name="light_grey">#30212121</color>
+    <color name="yellow">#FECA3C</color>
+    <color name="fragment_bg">#FFFFFFFF</color>
+    <color name="google_blue">#4285F4</color>
+    <color name="night_mode_background">#FFFFFFFF</color>
+    <color name="shimmer_base">#E0E0E0</color>
+    <color name="shimmer_highlight">#F5F5F5</color>
+</resources>

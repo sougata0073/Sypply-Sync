@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierPaymentViewModel" />
+
+    </data>
+
+    <ScrollView
+        android:id="@+id/parentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:fitsSystemWindows="true"
+        tools:context=".suppliers.fragments.AddEditSupplierPaymentFragment">
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary_color">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/moneyImage"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_money" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/top_curved_rectangular_bg_color_white"
+                    android:paddingStart="20dp"
+                    android:paddingTop="40dp"
+                    android:paddingEnd="20dp"
+                    android:paddingBottom="40dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/amountLyt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:hint="Amount"
+                        app:boxStrokeColor="@color/material_text_input_border_color_black"
+                        app:hintTextColor="@color/grey"
+                        app:layout_constraintBottom_toTopOf="@id/dateTimeMessage"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_chainStyle="spread_inside">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/amount"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:maxLines="2"
+                            android:text="@={viewModel.amount}"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:id="@+id/dateTimeMessage"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="12sp"
+                        android:layout_marginTop="15dp"
+                        android:textStyle="bold"
+                        android:textColor="@color/black"
+                        android:text="Select a date and time or current date and time will be saved"
+                        app:layout_constraintBottom_toTopOf="@id/dateLyt"
+                        app:layout_constraintEnd_toEndOf="@id/amountLyt"
+                        app:layout_constraintStart_toStartOf="@id/amountLyt"
+                        app:layout_constraintTop_toBottomOf="@id/amountLyt"/>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/dateLyt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="20dp"
+                        android:hint="Date"
+                        app:boxStrokeColor="@color/material_text_input_border_color_black"
+                        app:hintTextColor="@color/grey"
+                        app:layout_constraintBottom_toTopOf="@id/timeLyt"
+                        app:layout_constraintEnd_toStartOf="@id/calendarBtn"
+                        app:layout_constraintStart_toStartOf="@id/amountLyt"
+                        app:layout_constraintTop_toBottomOf="@id/dateTimeMessage">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/date"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="date"
+                            android:maxLines="2"
+                            android:clickable="false"
+                            android:cursorVisible="false"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:text="@={viewModel.date}"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <ImageButton
+                        android:id="@+id/calendarBtn"
+                        android:layout_width="30dp"
+                        android:layout_height="0dp"
+                        android:layout_marginEnd="5dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_calendar"
+                        app:layout_constraintBottom_toBottomOf="@id/dateLyt"
+                        app:layout_constraintEnd_toEndOf="@id/amountLyt"
+                        app:layout_constraintStart_toEndOf="@id/dateLyt"
+                        app:layout_constraintTop_toTopOf="@id/dateLyt" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/timeLyt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="20dp"
+                        android:hint="Time"
+                        android:clickable="false"
+                        android:cursorVisible="false"
+                        android:focusable="false"
+                        android:focusableInTouchMode="false"
+                        app:boxStrokeColor="@color/material_text_input_border_color_black"
+                        app:hintTextColor="@color/grey"
+                        app:layout_constraintBottom_toTopOf="@id/supplierName"
+                        app:layout_constraintEnd_toStartOf="@id/clockBtn"
+                        app:layout_constraintStart_toStartOf="@id/dateLyt"
+                        app:layout_constraintTop_toBottomOf="@id/dateLyt">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/time"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="time"
+                            android:maxLines="2"
+                            android:clickable="false"
+                            android:cursorVisible="false"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:text="@={viewModel.time}"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:id="@+id/supplierName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textSize="16sp"
+                        android:layout_marginTop="20dp"
+                        android:textStyle="bold"
+                        android:text="@={viewModel.supplierName}"
+                        tools:text="Supplier: Sougata Saha"
+                        android:textColor="@color/black"
+                        app:layout_constraintBottom_toTopOf="@id/openSupplierListBtn"
+                        app:layout_constraintEnd_toEndOf="@id/amountLyt"
+                        app:layout_constraintStart_toStartOf="@id/amountLyt"
+                        app:layout_constraintTop_toBottomOf="@id/timeLyt"/>
+
+                    <ImageButton
+                        android:id="@+id/clockBtn"
+                        android:layout_width="30dp"
+                        android:layout_height="0dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_clock"
+                        app:layout_constraintBottom_toBottomOf="@id/timeLyt"
+                        app:layout_constraintEnd_toEndOf="@id/calendarBtn"
+                        app:layout_constraintStart_toEndOf="@id/timeLyt"
+                        app:layout_constraintTop_toTopOf="@id/timeLyt" />
+
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/openSupplierListBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:padding="12dp"
+                        android:text="Select supplier"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="8dp"
+                        app:layout_constraintBottom_toTopOf="@id/saveBtn"
+                        app:layout_constraintEnd_toEndOf="@+id/supplierName"
+                        app:layout_constraintStart_toStartOf="@id/supplierName"
+                        app:layout_constraintTop_toBottomOf="@id/supplierName" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/saveBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:padding="12dp"
+                        android:text="Save"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="@id/openSupplierListBtn"
+                        app:layout_constraintStart_toStartOf="@id/openSupplierListBtn"
+                        app:layout_constraintTop_toBottomOf="@id/openSupplierListBtn" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="gone"
+                app:indicatorColor="@color/black"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+</layout>
