@@ -245,22 +245,20 @@ class FirestoreRepository {
             return
         }
 
-        val batch = usersCol.firestore.batch()
-
         val suppliersCol = this.usersCol.document(this.currentUser.uid).collection("suppliers")
         val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
 
-        batch.delete(suppliersCol.document(supplier.id))
-        batch.update(
-            valuesCol.document("suppliers_count"), mapOf("value" to FieldValue.increment(-1))
-        )
-
-        batch.update(
-            valuesCol.document("suppliers_due_amount"),
-            mapOf("value" to FieldValue.increment(-supplier.dueAmount))
-        )
-
-        batch.commit().addOnCompleteListener {
+        this.usersCol.firestore.runTransaction {
+            it.delete(suppliersCol.document(supplier.id))
+            it.update(
+                valuesCol.document("suppliers_count"),
+                mapOf("value" to FieldValue.increment(-1))
+            )
+            it.update(
+                valuesCol.document("suppliers_due_amount"),
+                mapOf("value" to FieldValue.increment(-supplier.dueAmount))
+            )
+        }.addOnCompleteListener {
 
             if (it.isSuccessful) {
                 onComplete(Status.SUCCESS, "User deleted successfully")
@@ -271,33 +269,36 @@ class FirestoreRepository {
         }
     }
 
-    fun addSupplierItem(
-        supplierItem: SupplierItem, onComplete: (Int, String) -> Unit
+    fun addUpdateSupplierItem(
+        supplierItem: SupplierItem, action: String, onComplete: (Int, String) -> Unit
     ) {
         if (currentUser == null) {
             onComplete(Status.FAILED, KeysAndMessages.USER_NOT_FOUND)
             return
         }
 
-        val batch = this.usersCol.firestore.batch()
-
         val supplierItemsCol =
             this.usersCol.document(this.currentUser.uid).collection("supplier_items")
         val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
 
-        val supplierItemDoc = mapOf(
+        val supplierItemDoc = mutableMapOf<String, Any>(
             "name" to supplierItem.name,
             "price" to supplierItem.price,
             "details" to supplierItem.details,
-            "timestamp" to FieldValue.serverTimestamp()
         )
 
-        batch.set(supplierItemsCol.document(), supplierItemDoc)
-        batch.update(
-            valuesCol.document("supplier_items_count"), mapOf("value" to FieldValue.increment(1))
-        )
-
-        batch.commit().addOnCompleteListener {
+        this.usersCol.firestore.runTransaction {
+            if (action == TO_ADD) {
+                supplierItemDoc.put("timestamp", FieldValue.serverTimestamp())
+                it.set(supplierItemsCol.document(), supplierItemDoc)
+                it.update(
+                    valuesCol.document("supplier_items_count"),
+                    mapOf("value" to FieldValue.increment(1))
+                )
+            } else if (action == TO_UPDATE) {
+                it.update(supplierItemsCol.document(supplierItem.id), supplierItemDoc)
+            }
+        }.addOnCompleteListener {
             if (it.isSuccessful) {
                 onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
@@ -317,8 +318,6 @@ class FirestoreRepository {
             return
         }
 
-        val batch = this.usersCol.firestore.batch()
-
         val supplierPaymentsCol =
             this.usersCol.document(this.currentUser.uid).collection("supplier_payments")
 
@@ -334,14 +333,14 @@ class FirestoreRepository {
             "supplier_name" to supplierPayment.supplierName
         )
 
-        if (action == TO_ADD) {
-            supplierPaymentDoc.put("timestamp", FieldValue.serverTimestamp())
-            batch.set(supplierPaymentsCol.document(), supplierPaymentDoc)
-        } else if (action == TO_UPDATE) {
-            batch.update(supplierPaymentsCol.document(supplierPayment.id), supplierPaymentDoc)
-        }
-
-        batch.commit().addOnCompleteListener {
+        this.usersCol.firestore.runTransaction {
+            if (action == TO_ADD) {
+                supplierPaymentDoc.put("timestamp", FieldValue.serverTimestamp())
+                it.set(supplierPaymentsCol.document(), supplierPaymentDoc)
+            } else if (action == TO_UPDATE) {
+                it.update(supplierPaymentsCol.document(supplierPayment.id), supplierPaymentDoc)
+            }
+        }.addOnCompleteListener {
             if (it.isSuccessful) {
                 onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
@@ -354,22 +353,23 @@ class FirestoreRepository {
     private fun createRequiredThings(onComplete: (Int, String) -> Unit) {
 
         if (currentUser == null) {
-            // Perform Login or create account again
+            onComplete(Status.FAILED, KeysAndMessages.USER_NOT_FOUND)
             return
         }
-
-        val batch = this.usersCol.firestore.batch()
 
         // Create 'values' sub collection
         val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
 
-        // Add value fields here
-        val map = mapOf("value" to 0)
-        batch.set(valuesCol.document("suppliers_count"), map)
-        batch.set(valuesCol.document("suppliers_due_amount"), map)
-        batch.set(valuesCol.document("supplier_items_count"), map)
+        this.usersCol.firestore.runTransaction {
 
-        batch.commit().addOnCompleteListener {
+            // Add value fields here
+            val map = mapOf("value" to 0)
+
+            it.set(valuesCol.document("suppliers_count"), map)
+            it.set(valuesCol.document("suppliers_due_amount"), map)
+            it.set(valuesCol.document("supplier_items_count"), map)
+
+        }.addOnCompleteListener {
             if (it.isSuccessful) {
                 onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
@@ -391,9 +391,6 @@ class FirestoreRepository {
             onComplete(Status.FAILED, mutableListOf(), null, KeysAndMessages.USER_NOT_FOUND)
             return
         }
-
-//        Log.d("list", lastDocumentSnapshot.toString())
-//        Log.d("list", customSorting.toString())
 
         val col = this.usersCol.document(this.currentUser.uid).collection(firebaseCollectionName)
 

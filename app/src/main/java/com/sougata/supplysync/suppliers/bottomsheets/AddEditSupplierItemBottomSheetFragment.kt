@@ -1,6 +1,5 @@
 package com.sougata.supplysync.suppliers.bottomsheets
 
-import android.content.DialogInterface
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,51 +7,42 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.Bindable
 import androidx.databinding.DataBindingUtil
-import androidx.databinding.Observable
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.BottomSheetAddEditSupplierItemBinding
-import com.sougata.supplysync.firebase.FirestoreRepository
 import com.sougata.supplysync.models.SupplierItem
+import com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierItemViewModel
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 
-class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment(), Observable {
+class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
 
     private lateinit var binding: BottomSheetAddEditSupplierItemBinding
 
-    private var supplierItem: SupplierItem? = null
+    private lateinit var viewModel: AddEditSupplierItemViewModel
 
-    private lateinit var firestoreRepository: FirestoreRepository
+    private var prevSupplierItem: SupplierItem? = null
+    private var updatedSupplierItem: SupplierItem? = null
 
-    private var toAdd: Boolean = true
-
-    private val supplierItemAddedIndicator = MutableLiveData<Pair<Int, String>>()
-
-    private val supplierItemEditedIndicator = MutableLiveData<Pair<Int, String>>()
-
+    private var toAdd: Boolean = false
+    private var toEdit: Boolean = false
     private var isSupplierItemAdded = false
-
-    @Bindable
-    val name = MutableLiveData("")
-
-    @Bindable
-    val price = MutableLiveData("")
-
-    @Bindable
-    val details = MutableLiveData("")
+    private var isSupplierItemUpdated = false
 
     companion object {
         @JvmStatic
-        fun getInstance(supplierItem: SupplierItem?, toAdd: Boolean) =
+        fun getInstance(supplierItem: SupplierItem?, action: String) =
             AddEditSupplierItemBottomSheetFragment().apply {
                 arguments = Bundle().apply {
-                    if (supplierItem != null) {
-                        putParcelable("supplierItem", supplierItem)
+                    putParcelable("supplierItem", supplierItem)
+                    if (action == KeysAndMessages.TO_ADD_KEY) {
+                        putBoolean(KeysAndMessages.TO_ADD_KEY, true)
+                    } else if (action == KeysAndMessages.TO_EDIT_KEY) {
+                        putBoolean(KeysAndMessages.TO_EDIT_KEY, true)
                     }
-                    putBoolean(KeysAndMessages.TO_ADD_KEY, toAdd)
                 }
             }
     }
@@ -61,14 +51,16 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment(), Obse
         super.onCreate(savedInstanceState)
 
         this.toAdd = requireArguments().getBoolean(KeysAndMessages.TO_ADD_KEY)
+        this.toEdit = requireArguments().getBoolean(KeysAndMessages.TO_EDIT_KEY)
 
-        if (!toAdd) {
-            this.supplierItem = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (this.toEdit) {
+            this.prevSupplierItem = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 requireArguments().getParcelable("supplierItem", SupplierItem::class.java)
             } else {
                 @Suppress("DEPRECATION")
                 requireArguments().getParcelable("supplierItem")
             }
+
         }
 
     }
@@ -91,114 +83,133 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment(), Obse
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        this.firestoreRepository = FirestoreRepository()
+        this.viewModel = ViewModelProvider(this)[AddEditSupplierItemViewModel::class.java]
 
-        this.binding.bottomSheet = this
+        this.binding.viewModel = this.viewModel
+
+        this.binding.lifecycleOwner = this.viewLifecycleOwner
+
+        this.initializeUI()
 
         this.registerListeners()
     }
 
-    override fun onDismiss(dialog: DialogInterface) {
-        super.onDismiss(dialog)
+    override fun onDestroyView() {
+        super.onDestroyView()
 
-        val bundle = Bundle().apply {
-            putBoolean(KeysAndMessages.DATA_ADDED_KEY, isSupplierItemAdded)
+        if (this.isSupplierItemAdded) {
+            val bundle = Bundle().apply {
+                putBoolean(KeysAndMessages.DATA_ADDED_KEY, isSupplierItemAdded)
+            }
+            this.parentFragmentManager.setFragmentResult(
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+                bundle
+            )
         }
-        this.parentFragmentManager.setFragmentResult(
-            KeysAndMessages.RECENT_DATA_CHANGED_KEY,
-            bundle
-        )
+        if (this.isSupplierItemUpdated) {
+            val bundle = Bundle().apply {
+                putParcelable(KeysAndMessages.DATA_UPDATED_KEY, updatedSupplierItem)
+            }
+            this.parentFragmentManager.setFragmentResult(
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+                bundle
+            )
+        }
 
+    }
+
+    private fun initializeUI() {
+        this.binding.saveBtn.setOnClickListener {
+
+            if (this.toAdd) {
+                this.viewModel.addSupplierItem(this.binding.root)
+            } else if (this.toEdit) {
+
+                val supplierItem = this.prevSupplierItem
+
+                if (supplierItem == null) {
+                    Snackbar.make(
+                        requireParentFragment().requireView(),
+                        KeysAndMessages.SOMETHING_WENT_WRONG,
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+
+                    dismiss()
+
+                } else {
+                    val supplierId = supplierItem.id
+
+                    this.updatedSupplierItem = this.viewModel.updateSupplierItem(
+                        supplierId,
+                        this.binding.root
+                    )
+                }
+            }
+
+        }
+
+        if (this.toEdit) {
+            this.viewModel.apply {
+                name.value = prevSupplierItem?.name.toString()
+                price.value = prevSupplierItem?.price.toString()
+                details.value = prevSupplierItem?.details.toString()
+            }
+
+        }
     }
 
     private fun registerListeners() {
 
-        this.supplierItemAddedIndicator.observe(this.viewLifecycleOwner) {
+        this.viewModel.supplierItemAddedIndicator.observe(this.viewLifecycleOwner) {
+            this.howToObserve(it)
+        }
+        this.viewModel.supplierItemEditedIndicator.observe(this.viewLifecycleOwner) {
+            this.howToObserve(it)
+        }
 
-            if (it.first == Status.STARTED) {
+    }
 
-                this.binding.apply {
+    private fun howToObserve(observedData: Pair<Int, String>) {
+        if (observedData.first == Status.STARTED) {
 
-                    saveBtn.isClickable = false
-                    progressBar.visibility = View.VISIBLE
-                    parentLayout.alpha = 0.5F
-                }
+            this.binding.apply {
 
-            } else if (it.first == Status.SUCCESS) {
+                saveBtn.isClickable = false
+                progressBar.visibility = View.VISIBLE
+                parentLayout.alpha = 0.5F
+            }
 
-                Snackbar.make(
-                    requireParentFragment().requireView(),
-                    "Item added successfully",
-                    Snackbar.LENGTH_SHORT
-                ).show()
+        } else if (observedData.first == Status.SUCCESS) {
 
+            Snackbar.make(
+                requireParentFragment().requireView(),
+                "Item added successfully",
+                Snackbar.LENGTH_SHORT
+            ).show()
+
+            if (this.toAdd) {
                 this.isSupplierItemAdded = true
+            }
+            if (this.toEdit) {
+                this.isSupplierItemUpdated = true
+            }
 
-                this.dismiss()
+            this.dismiss()
 
-            } else if (it.first == Status.FAILED) {
+        } else if (observedData.first == Status.FAILED) {
 
-                this.binding.apply {
+            this.binding.apply {
 
-                    saveBtn.isClickable = true
-                    progressBar.visibility = View.GONE
-                    parentLayout.alpha = 1F
-
-                }
-
-                Snackbar.make(
-                    requireParentFragment().requireView(), it.second, Snackbar.LENGTH_SHORT
-                ).show()
+                saveBtn.isClickable = true
+                progressBar.visibility = View.GONE
+                parentLayout.alpha = 1F
 
             }
+
+            Snackbar.make(
+                requireParentFragment().requireView(), observedData.second, Snackbar.LENGTH_SHORT
+            ).show()
 
         }
-
     }
-
-    fun onSaveBtnClick(view: View) {
-
-        if (this.toAdd) {
-
-            val name = this.name.value.orEmpty()
-            val priceString = this.price.value.orEmpty()
-            val details = this.details.value.orEmpty()
-
-            if (name.isEmpty()) {
-                Snackbar.make(requireView(), "Name cannot be empty", Snackbar.LENGTH_SHORT).show()
-                return
-            }
-
-            var price = 0.0
-
-            if (priceString.isNotEmpty()) {
-                try {
-                    price = priceString.toDouble()
-                } catch (_: Exception) {
-                    Snackbar.make(view, "Invalid due amount", Snackbar.LENGTH_SHORT).show()
-                    return
-                }
-            }
-
-            val newSupplierItem = SupplierItem(name, price.toDouble(), details)
-
-            this.supplierItemAddedIndicator.postValue(Status.STARTED to "")
-
-            this.firestoreRepository.addSupplierItem(newSupplierItem) { status, message ->
-
-                this.supplierItemAddedIndicator.postValue(status to message)
-
-            }
-
-        } else {
-            // To edit supplier item
-
-        }
-
-    }
-
-    override fun addOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {}
-
-    override fun removeOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {}
-
 }

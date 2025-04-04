@@ -1,9 +1,9 @@
 package com.sougata.supplysync.util.modelslist
 
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -120,22 +120,31 @@ class ModelsListFragment : Fragment() {
 
             if (it.second == Status.STARTED) {
 
-                this.binding.nothingHereLbl.visibility = View.GONE
-                this.binding.progressBar.visibility = View.VISIBLE
+                this.binding.apply {
+                    nothingHereLbl.visibility = View.GONE
+                    progressBar.visibility = View.VISIBLE
+                }
 
             } else if (it.second == Status.SUCCESS) {
 
                 if (it.third == KeysAndMessages.EMPTY_LIST) {
 
-                    this.binding.progressBar.visibility = View.GONE
-                    this.binding.nothingHereLbl.visibility = View.VISIBLE
+                    this.binding.apply {
+                        progressBar.visibility = View.GONE
+                        nothingHereLbl.visibility = View.VISIBLE
+                    }
 
                 } else {
 
-                    this.binding.nothingHereLbl.visibility = View.GONE
-                    this.binding.progressBar.visibility = View.GONE
+                    this.binding.apply {
+                        nothingHereLbl.visibility = View.GONE
+                        progressBar.visibility = View.GONE
+                    }
                     this.recyclerViewAdapter.setData(it.first)
-
+                    // Formula to convert dp to px
+                    // dp = 200 here
+                    val px = (200 * Resources.getSystem().displayMetrics.density).toInt()
+                    this.binding.recyclerView.smoothScrollBy(0, px)
                 }
 
             } else if (it.second == Status.FAILED) {

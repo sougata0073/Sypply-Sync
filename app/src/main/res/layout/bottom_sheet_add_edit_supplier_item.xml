@@ -6,8 +6,8 @@
     <data>
 
         <variable
-            name="bottomSheet"
-            type="com.sougata.supplysync.suppliers.bottomsheets.AddEditSupplierItemBottomSheetFragment" />
+            name="viewModel"
+            type="com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierItemViewModel" />
 
     </data>
 
@@ -38,7 +38,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="text"
                 android:maxLines="2"
-                android:text="@={bottomSheet.name}"
+                android:text="@={viewModel.name}"
                 android:textColor="@color/bw"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -64,7 +64,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal"
                 android:maxLines="2"
-                android:text="@={bottomSheet.price}"
+                android:text="@={viewModel.price}"
                 android:textColor="@color/bw"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -90,7 +90,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="text"
                 android:maxLines="2"
-                android:text="@={bottomSheet.details}"
+                android:text="@={viewModel.details}"
                 android:textColor="@color/bw"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -103,7 +103,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_marginBottom="35dp"
-            android:onClick="@{bottomSheet::onSaveBtnClick}"
             android:padding="12dp"
             android:text="Save"
             android:backgroundTint="@color/primary_color"

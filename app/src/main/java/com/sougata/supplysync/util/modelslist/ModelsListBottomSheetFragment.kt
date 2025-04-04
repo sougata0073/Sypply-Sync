@@ -99,21 +99,28 @@ class ModelsListBottomSheetFragment : BottomSheetDialogFragment() {
 
             if (it.second == Status.STARTED) {
 
-                this.binding.nothingHereLbl.visibility = View.GONE
-                this.binding.progressBar.visibility = View.VISIBLE
+                this.binding.apply {
+                    nothingHereLbl.visibility = View.GONE
+                    progressBar.visibility = View.VISIBLE
+                }
 
             } else if (it.second == Status.SUCCESS) {
 
                 if (it.third == KeysAndMessages.EMPTY_LIST) {
 
-                    this.binding.progressBar.visibility = View.GONE
-                    this.binding.nothingHereLbl.visibility = View.VISIBLE
+                    this.binding.apply {
+                        progressBar.visibility = View.GONE
+                        nothingHereLbl.visibility = View.VISIBLE
+                    }
 
                 } else {
 
-                    this.binding.nothingHereLbl.visibility = View.GONE
-                    this.binding.progressBar.visibility = View.GONE
+                    this.binding.apply {
+                        nothingHereLbl.visibility = View.GONE
+                        progressBar.visibility = View.GONE
+                    }
                     this.recyclerViewAdapter.setData(it.first)
+                    this.binding.recyclerView.smoothScrollBy(0, 300)
 
                 }
 

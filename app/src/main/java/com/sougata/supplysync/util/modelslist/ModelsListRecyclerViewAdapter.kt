@@ -46,7 +46,6 @@ class ModelsListRecyclerViewAdapter(
             if (bottomSheet != null) {
 
                 this.binding.root.setOnClickListener {
-
                     val bundle = Bundle().apply {
                         putParcelable(KeysAndMessages.MODEL_KEY, model as Parcelable)
                     }
@@ -55,9 +54,6 @@ class ModelsListRecyclerViewAdapter(
                         bundle
                     )
                     bottomSheet.dismiss()
-
-//                    Log.d("listen", (model as Parcelable).toString() + 2)
-
                 }
 
             }

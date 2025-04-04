@@ -86,11 +86,11 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { navController, destination, arguments ->
 
-            if (destination.id == R.id.addEditSupplierFragment ||
-                destination.id == R.id.addEditSupplierPaymentFragment) {
-                this.binding.bottomNav.visibility = View.GONE
-            } else {
-                this.binding.bottomNav.visibility = View.VISIBLE
+            when (destination.id) {
+                R.id.addEditSupplierFragment, R.id.addEditSupplierPaymentFragment ->
+                    this.binding.bottomNav.visibility = View.GONE
+
+                else -> this.binding.bottomNav.visibility = View.VISIBLE
             }
 
         }

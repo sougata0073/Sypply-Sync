@@ -88,6 +88,25 @@ class ModelsListFragmentHelper(
             name.text = model.name
             details.text = model.details
             price.text = Converters.numberToMoneyString(model.price)
+
+            root.setOnClickListener {
+                MaterialAlertDialogBuilder(
+                    this@ModelsListFragmentHelper.context,
+                    R.style.materialAlertDialogStyle
+                )
+                    .setTitle(model.name)
+                    .setMessage(model.details)
+                    .setPositiveButton("Close") { dialog, _ -> dialog.dismiss() }
+                    .setNeutralButton("Edit") { dialog, _ ->
+
+                        AddEditSupplierItemBottomSheetFragment.getInstance(
+                            model,
+                            KeysAndMessages.TO_EDIT_KEY
+                        )
+                            .show(this@ModelsListFragmentHelper.fragmentManager, "supplierItemAdd")
+
+                    }.show()
+            }
         }
     }
 
@@ -152,7 +171,10 @@ class ModelsListFragmentHelper(
 
             Model.SUPPLIERS_ITEM -> {
                 {
-                    AddEditSupplierItemBottomSheetFragment.getInstance(null, true)
+                    AddEditSupplierItemBottomSheetFragment.getInstance(
+                        null,
+                        KeysAndMessages.TO_ADD_KEY
+                    )
                         .show(this.fragmentManager, "supplierItemAdd")
                 }
             }
