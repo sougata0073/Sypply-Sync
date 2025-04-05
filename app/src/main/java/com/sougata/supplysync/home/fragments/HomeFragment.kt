@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.sougata.supplysync.MainActivity
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentHomeBinding
 import com.sougata.supplysync.home.viewmodels.HomeFragmentViewModel
@@ -44,6 +45,35 @@ class HomeFragment : Fragment() {
             this.viewModel.getLineChartData(requireContext()), requireContext()
         )
 
+        this.registerListeners()
+    }
+
+    private fun registerListeners() {
+//        this.binding.scrollView.setOnScrollChangeListener(
+//            object : View.OnScrollChangeListener {
+//
+//                private val mainActivity = activity as MainActivity?
+//
+//                override fun onScrollChange(
+//                    v: View?, scrollX: Int, scrollY: Int, oldScrollX: Int, oldScrollY: Int
+//                ) {
+//
+////                    Log.d("scroll", "$oldScrollY old")
+////                    Log.d("scroll", scrollY.toString())
+//
+//                    val dy = oldScrollY - scrollY // Positive = scroll up, Negative = scroll down
+//
+////                    Log.d("scroll", dy.toString())
+//
+//                    if (dy > 0) {
+//                        this.mainActivity?.slideDownBottomNav()
+//                    } else if (dy < 0) {
+//                        this.mainActivity?.slideUpBottomNav()
+//                    }
+//                }
+//            }
+//
+//        )
     }
 
 }

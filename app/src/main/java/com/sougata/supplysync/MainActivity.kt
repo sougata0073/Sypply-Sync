@@ -80,16 +80,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun setUpNavController() {
         val navController =
-            (this.supportFragmentManager.findFragmentById(R.id.navHost) as NavHostFragment).navController
+            (this.supportFragmentManager.findFragmentById(R.id.navHostMain) as NavHostFragment).navController
 
         this.binding.bottomNav.setupWithNavController(navController)
 
         navController.addOnDestinationChangedListener { navController, destination, arguments ->
 
             when (destination.id) {
-                R.id.addEditSupplierFragment, R.id.addEditSupplierPaymentFragment ->
+                R.id.addEditSupplierFragment, R.id.addEditSupplierPaymentFragment -> {
                     this.binding.bottomNav.visibility = View.GONE
-
+                }
                 else -> this.binding.bottomNav.visibility = View.VISIBLE
             }
 

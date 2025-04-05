@@ -8,9 +8,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="@color/fragment_bg"
         android:fitsSystemWindows="true"
         android:orientation="vertical"
-        android:background="@color/fragment_bg"
         tools:context=".home.fragments.HomeFragment">
 
         <androidx.cardview.widget.CardView
@@ -36,10 +36,10 @@
 
         </androidx.cardview.widget.CardView>
 
-        <ScrollView
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            >
+            android:layout_height="match_parent">
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
@@ -212,7 +212,7 @@
                     app:layout_constraintTop_toBottomOf="@id/yearsPurchaseChartLbl" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
-        </ScrollView>
+        </androidx.core.widget.NestedScrollView>
     </LinearLayout>
 
 </layout>

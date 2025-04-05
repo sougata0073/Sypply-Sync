@@ -1,7 +1,6 @@
 package com.sougata.supplysync.util.modelslist
 
 import android.content.Intent
-import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,12 +13,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import com.sougata.supplysync.MainActivity
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentModelsListBinding
 import com.sougata.supplysync.login.LoginActivity
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
+import com.sougata.supplysync.util.ViewAnimator
 import jp.wasabeef.recyclerview.adapters.ScaleInAnimationAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -143,8 +144,8 @@ class ModelsListFragment : Fragment() {
                     this.recyclerViewAdapter.setData(it.first)
                     // Formula to convert dp to px
                     // dp = 200 here
-                    val px = (200 * Resources.getSystem().displayMetrics.density).toInt()
-                    this.binding.recyclerView.smoothScrollBy(0, px)
+//                    val px = (200 * Resources.getSystem().displayMetrics.density).toInt()
+//                    this.binding.recyclerView.smoothScrollBy(0, px)
                 }
 
             } else if (it.second == Status.FAILED) {
@@ -190,8 +191,21 @@ class ModelsListFragment : Fragment() {
         }
 
         this.binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+            private val animator = ViewAnimator(binding.fab)
+
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
+
+                if (dy > 0) { // When scroll up
+
+                    this.animator.slideDownFadeForScroll()
+
+                } else if (dy < 0) { // When scroll down
+
+                    this.animator.slideUpFadeForScroll()
+
+                }
 
                 if (!viewModel.noMoreElementLeft) {
 

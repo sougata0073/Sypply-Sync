@@ -42,7 +42,8 @@
                 android:textSize="25sp" />
         </androidx.cardview.widget.CardView>
 
-        <ScrollView
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -229,6 +230,6 @@
                     app:layout_constraintTop_toBottomOf="@id/gridLayout" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
-        </ScrollView>
+        </androidx.core.widget.NestedScrollView>
     </LinearLayout>
 </layout>
