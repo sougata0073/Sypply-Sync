@@ -4,6 +4,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.sougata.supplysync.home.viewmodels.HomeFragmentViewModel" />
+
+    </data>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -179,37 +186,89 @@
                     app:layout_constraintTop_toBottomOf="@id/ordersToShipLbl" />
 
                 <com.github.mikephil.charting.charts.LineChart
-                    android:id="@+id/yearsSalesLineChart"
+                    android:id="@+id/salesLineChart"
                     android:layout_width="0dp"
                     android:layout_height="300dp"
-                    app:layout_constraintEnd_toEndOf="@id/yearsSalesChartLbl"
-                    app:layout_constraintStart_toStartOf="@id/yearsSalesChartLbl"
+                    app:layout_constraintEnd_toEndOf="@+id/ordersToShipNumber"
+                    app:layout_constraintStart_toStartOf="@+id/ordersToShipLbl"
                     app:layout_constraintTop_toBottomOf="@id/yearsSalesChartLbl" />
 
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/progressBarSalesChart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"
+                    android:visibility="gone"
+                    app:indicatorColor="@color/bw"
+                    app:layout_constraintBottom_toBottomOf="@+id/salesLineChart"
+                    app:layout_constraintEnd_toEndOf="@+id/salesLineChart"
+                    app:layout_constraintStart_toStartOf="@+id/salesLineChart"
+                    app:layout_constraintTop_toTopOf="@+id/salesLineChart" />
+
                 <TextView
-                    android:id="@+id/yearsPurchaseChartLbl"
-                    android:layout_width="0dp"
+                    android:id="@+id/purchaseChartLbl"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="30dp"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:text="This Year's Purchase Chart"
+                    android:text="Purchase Chart by range"
                     android:textColor="@color/bw"
                     android:textSize="20sp"
                     android:textStyle="bold"
-                    app:layout_constraintEnd_toEndOf="@+id/yearsSalesLineChart"
-                    app:layout_constraintStart_toStartOf="@id/yearsSalesLineChart"
-                    app:layout_constraintTop_toBottomOf="@id/yearsSalesLineChart" />
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="@id/salesLineChart"
+                    app:layout_constraintTop_toBottomOf="@id/salesLineChart" />
+
+                <TextView
+                    android:id="@+id/purchaseChartDateRange"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="@={viewModel.purchaseChartRangeDate}"
+                    android:textColor="@color/grey"
+                    android:textSize="14sp"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toStartOf="@id/purchaseChartLbl"
+                    app:layout_constraintTop_toBottomOf="@+id/purchaseChartLbl"
+                    tools:text="From: 01-04-2025 To: 01-05-2025" />
+
+                <ImageButton
+                    android:id="@+id/purchaseChartCalendarBtn"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_calendar"
+                    app:layout_constraintBottom_toBottomOf="@+id/purchaseChartDateRange"
+                    app:layout_constraintEnd_toEndOf="@+id/salesLineChart"
+                    app:layout_constraintTop_toTopOf="@id/purchaseChartLbl"
+                    app:tint="@color/bw" />
 
                 <com.github.mikephil.charting.charts.LineChart
-                    android:id="@+id/yearsPurchaseLineChart"
+                    android:id="@+id/purchaseLineChart"
                     android:layout_width="0dp"
                     android:layout_height="300dp"
                     android:layout_marginBottom="20dp"
+                    android:visibility="invisible"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="@id/yearsPurchaseChartLbl"
-                    app:layout_constraintStart_toStartOf="@id/yearsPurchaseChartLbl"
-                    app:layout_constraintTop_toBottomOf="@id/yearsPurchaseChartLbl" />
+                    app:layout_constraintEnd_toEndOf="@+id/salesLineChart"
+                    app:layout_constraintStart_toStartOf="@+id/salesLineChart"
+                    app:layout_constraintTop_toBottomOf="@id/purchaseChartDateRange" />
+
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/progressBarPurchaseChart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"
+                    android:visibility="gone"
+                    app:indicatorColor="@color/bw"
+                    app:layout_constraintBottom_toBottomOf="@+id/purchaseLineChart"
+                    app:layout_constraintEnd_toEndOf="@+id/purchaseLineChart"
+                    app:layout_constraintStart_toStartOf="@+id/purchaseLineChart"
+                    app:layout_constraintTop_toTopOf="@+id/purchaseLineChart" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.core.widget.NestedScrollView>

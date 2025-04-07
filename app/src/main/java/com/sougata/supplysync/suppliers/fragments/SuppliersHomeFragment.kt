@@ -90,6 +90,21 @@ class SuppliersHomeFragment : Fragment() {
             }
         }
 
+        this.viewModel.numberOfOrdersToReceive.observe(this.viewLifecycleOwner) {
+
+            if (it.second == Status.STARTED) {
+
+            } else if (it.second == Status.SUCCESS) {
+
+                this.binding.ordersToReceiveNumber.text = it.first.toString()
+
+            } else if (it.second == Status.FAILED) {
+
+                failedToLoadData(it.third)
+
+            }
+        }
+
         this.parentFragmentManager.setFragmentResultListener(
             KeysAndMessages.RECENT_DATA_CHANGED_KEY, this.viewLifecycleOwner
         ) { requestKey, bundle ->
@@ -101,6 +116,7 @@ class SuppliersHomeFragment : Fragment() {
             if (isDataAdded) {
                 this.viewModel.loadDueAmountToSuppliers()
                 this.viewModel.loadNumberOfSuppliers()
+                this.viewModel.loadOrdersToReceive()
             }
 
         }

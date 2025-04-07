@@ -1,8 +1,8 @@
 package com.sougata.supplysync.suppliers.fragments
 
-import android.icu.util.Calendar
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,14 +12,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
 import com.sougata.supplysync.R
-import com.sougata.supplysync.databinding.FragmentAddEditSupplierPaymentBinding
+import com.sougata.supplysync.databinding.FragmentAddEditOrderedItemBinding
 import com.sougata.supplysync.models.Model
+import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.models.Supplier
-import com.sougata.supplysync.models.SupplierPayment
-import com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierPaymentViewModel
+import com.sougata.supplysync.models.SupplierItem
+import com.sougata.supplysync.suppliers.viewmodels.AddEditOrderedItemViewModel
+import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 import com.sougata.supplysync.util.modelslist.ModelsListBottomSheetFragment
@@ -27,23 +27,23 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class AddEditSupplierPaymentFragment : Fragment() {
+class AddEditOrderedItemFragment : Fragment() {
 
-    private lateinit var binding: FragmentAddEditSupplierPaymentBinding
+    private lateinit var binding: FragmentAddEditOrderedItemBinding
 
-    private lateinit var viewModel: AddEditSupplierPaymentViewModel
+    private lateinit var viewModel: AddEditOrderedItemViewModel
 
-    private var prevSupplierPayment: SupplierPayment? = null
-    private var updatedSupplierPayment: SupplierPayment? = null
+    private var prevOrderedItem: OrderedItem? = null
+    private var updatedOrderedItem: OrderedItem? = null
 
-    // If any other model related to this model they will be here
+    private var supplierItem: SupplierItem? = null
     private var supplier: Supplier? = null
 
-    // Flags
     private var toAdd: Boolean = false
     private var toEdit: Boolean = false
-    private var isSupplierPaymentAdded = false
-    private var isSupplierPaymentUpdated = false
+    private var isOrderedItemAdded = false
+    private var isOrderedItemUpdated = false
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,12 +52,13 @@ class AddEditSupplierPaymentFragment : Fragment() {
         this.toEdit = requireArguments().getBoolean(KeysAndMessages.TO_EDIT_KEY)
 
         if (this.toEdit) {
-            this.prevSupplierPayment = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                requireArguments().getParcelable("supplierPayment", SupplierPayment::class.java)
+            this.prevOrderedItem = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                requireArguments().getParcelable("orderedItem", OrderedItem::class.java)
             } else {
                 @Suppress("DEPRECATION")
-                requireArguments().getParcelable("supplierPayment")
+                requireArguments().getParcelable("orderedItem")
             }
+            Log.d("order", this.prevOrderedItem.toString())
 
         }
 
@@ -67,21 +68,19 @@ class AddEditSupplierPaymentFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        this.binding =
-            DataBindingUtil.inflate(
-                inflater,
-                R.layout.fragment_add_edit_supplier_payment,
-                container,
-                false
-            )
-
+        this.binding = DataBindingUtil.inflate(
+            inflater,
+            R.layout.fragment_add_edit_ordered_item,
+            container,
+            false
+        )
         return this.binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        this.viewModel = ViewModelProvider(this)[AddEditSupplierPaymentViewModel::class.java]
+        this.viewModel = ViewModelProvider(this)[AddEditOrderedItemViewModel::class.java]
 
         this.binding.viewModel = this.viewModel
 
@@ -95,9 +94,9 @@ class AddEditSupplierPaymentFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
 
-        if (this.isSupplierPaymentAdded) {
+        if (this.isOrderedItemAdded) {
             val bundle = Bundle().apply {
-                putBoolean(KeysAndMessages.DATA_ADDED_KEY, isSupplierPaymentAdded)
+                putBoolean(KeysAndMessages.DATA_ADDED_KEY, isOrderedItemAdded)
             }
             this.parentFragmentManager.setFragmentResult(
                 KeysAndMessages.RECENT_DATA_CHANGED_KEY,
@@ -105,9 +104,9 @@ class AddEditSupplierPaymentFragment : Fragment() {
             )
         }
 
-        if (this.isSupplierPaymentUpdated) {
+        if (this.isOrderedItemUpdated) {
             val bundle = Bundle().apply {
-                putParcelable(KeysAndMessages.DATA_UPDATED_KEY, updatedSupplierPayment)
+                putParcelable(KeysAndMessages.DATA_UPDATED_KEY, updatedOrderedItem)
             }
             this.parentFragmentManager.setFragmentResult(
                 KeysAndMessages.RECENT_DATA_CHANGED_KEY,
@@ -120,23 +119,36 @@ class AddEditSupplierPaymentFragment : Fragment() {
         this.binding.saveBtn.setOnClickListener {
             if (this.toAdd) {
 
+                val supplierItem = this.supplierItem
                 val supplier = this.supplier
 
-                if (supplier == null) {
+                if (supplierItem == null) {
+
                     Snackbar.make(
-                        this.binding.root,
-                        "Select a supplier first",
-                        Snackbar.LENGTH_SHORT
+                        this.binding.root, "Select an item first", Snackbar.LENGTH_SHORT
                     ).show()
+
+                } else if (supplier == null) {
+
+                    Snackbar.make(
+                        this.binding.root, "Select a supplier first", Snackbar.LENGTH_SHORT
+                    ).show()
+
                 } else {
-                    this.viewModel.addSupplierPayment(supplier.id, supplier.name, this.binding.root)
+                    this.viewModel.addOrderedItem(
+                        supplierItem.id,
+                        supplierItem.name,
+                        supplier.id,
+                        supplier.name,
+                        this.binding.root
+                    )
                 }
 
             } else if (this.toEdit) {
 
-                val supplierPayment = this.prevSupplierPayment
+                val orderedItem = this.prevOrderedItem
 
-                if (supplierPayment == null) {
+                if (orderedItem == null) {
                     Snackbar.make(
                         requireParentFragment().requireView(),
                         KeysAndMessages.SOMETHING_WENT_WRONG,
@@ -146,17 +158,29 @@ class AddEditSupplierPaymentFragment : Fragment() {
 
                 } else {
 
+                    val supplierItem = this.supplierItem
                     val supplier = this.supplier
-                    val supplierPaymentId = supplierPayment.id
-                    this.updatedSupplierPayment = this.viewModel.updateSupplierPayment(
-                        supplier?.id ?: supplierPayment.supplierId,
-                        supplier?.name ?: supplierPayment.supplierName,
-                        supplierPaymentId,
+                    val orderedItemId = orderedItem.id
+
+                    this.updatedOrderedItem = this.viewModel.updateOrderedItem(
+                        supplierItem?.id ?: orderedItem.itemId,
+                        supplierItem?.name ?: orderedItem.itemName,
+                        supplier?.id ?: orderedItem.supplierId,
+                        supplier?.name ?: orderedItem.supplierName,
+                        orderedItemId,
                         this.binding.root
                     )
+
                 }
 
             }
+        }
+
+        this.binding.openItemsListBtn.setOnClickListener {
+
+            ModelsListBottomSheetFragment.getInstance(Model.SUPPLIERS_ITEM)
+                .show(this.parentFragmentManager, "itemsList")
+
         }
 
         this.binding.openSuppliersListBtn.setOnClickListener {
@@ -177,76 +201,62 @@ class AddEditSupplierPaymentFragment : Fragment() {
 
             datePicker.addOnPositiveButtonClickListener {
                 val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-                val formatedDate = dateFormat.format(Date(it))
+                val selectedDate = dateFormat.format(Date(it))
 
-                this.viewModel.date.value = formatedDate
+                this.viewModel.date.value = selectedDate
             }
 
             datePicker.show(this.parentFragmentManager, "datePicker")
 
         }
 
-        this.binding.clockBtn.setOnClickListener {
-
-            val calendar = Calendar.getInstance()
-
-            val timePicker =
-                MaterialTimePicker.Builder()
-//                    .setTheme(R.style.materialTimePickerStyle)
-                    .setTimeFormat(TimeFormat.CLOCK_24H)
-                    .setHour(calendar.get(Calendar.HOUR_OF_DAY))
-                    .setMinute(calendar.get(Calendar.MINUTE))
-                    .setTitleText("Select time")
-                    .setInputMode(MaterialTimePicker.INPUT_MODE_CLOCK)
-                    .build()
-
-            timePicker.addOnPositiveButtonClickListener {
-
-                this.viewModel.time.value = "${timePicker.hour}:${timePicker.minute}"
-
-            }
-
-            timePicker.show(this.parentFragmentManager, "timePicker")
-
-        }
-
         if (this.toAdd) {
-            binding.supplierName.visibility = View.GONE
+            this.binding.itemName.visibility = View.GONE
+            this.binding.supplierName.visibility = View.GONE
         }
 
         if (this.toEdit) {
+
             this.viewModel.apply {
-                amount.value = prevSupplierPayment?.amount.toString()
+
+                val orderedItem = prevOrderedItem
+
+                if(orderedItem == null) {
+                    return@apply
+                }
+                amount.value = orderedItem.amount.toString()
+                quantity.value = orderedItem.quantity.toString()
+
+                var year = 0
+                var month = 0
+                var myDate = 0
+
+                Converters.getYearMonthDateFromTimestamp(orderedItem.timestamp).apply {
+                    year = first
+                    month = second
+                    myDate = third
+                }
 
                 val dateString = String.format(
                     Locale.getDefault(),
                     "%02d-%02d-%04d",
-                    prevSupplierPayment?.date,
-                    prevSupplierPayment?.month,
-                    prevSupplierPayment?.year
-                )
-                val timeString = String.format(
-                    Locale.getDefault(),
-                    "%02d:%02d",
-                    prevSupplierPayment?.hour,
-                    prevSupplierPayment?.minute
+                    myDate, month, year
                 )
 
                 date.value = dateString
-                time.value = timeString
-                note.value = prevSupplierPayment?.note
-                supplierName.value = "Supplier: ${prevSupplierPayment?.supplierName}"
+
+                itemName.value = "Item: ${orderedItem.itemName}"
+                supplierName.value = "Supplier: ${orderedItem.supplierName}"
+                isReceived.value = orderedItem.isReceived
             }
-
         }
-
     }
 
     private fun registerListeners() {
-        this.viewModel.supplierPaymentAddedIndicator.observe(this.viewLifecycleOwner) {
+        this.viewModel.orderedItemAddedIndicator.observe(this.viewLifecycleOwner) {
             howToObserve(it)
         }
-        this.viewModel.supplierPaymentEditedIndicator.observe(this.viewLifecycleOwner) {
+        this.viewModel.orderedItemEditedIndicator.observe(this.viewLifecycleOwner) {
             howToObserve(it)
         }
 
@@ -255,19 +265,30 @@ class AddEditSupplierPaymentFragment : Fragment() {
             this
         )
         { requestKey, bundle ->
-            this.supplier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+
+            val model = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 bundle.getParcelable(
                     KeysAndMessages.MODEL_KEY,
-                    Supplier::class.java
+                    Model::class.java
                 )
             } else {
                 @Suppress("DEPRECATION")
                 bundle.getParcelable(KeysAndMessages.MODEL_KEY)
             }
 
-            this.binding.supplierName.visibility = View.VISIBLE
-            this.viewModel.supplierName.value = "Supplier: ${supplier?.name}"
-//            Log.d("listen", this.supplier.toString())
+            if (model is SupplierItem) {
+                this.supplierItem = model
+                this.binding.itemName.visibility = View.VISIBLE
+                this.viewModel.itemName.value = "Item: ${supplierItem?.name}"
+            }
+            if (model is Supplier) {
+                this.supplier = model
+                this.binding.supplierName.visibility = View.VISIBLE
+                this.viewModel.supplierName.value = "Supplier: ${supplier?.name}"
+//                Log.d("listen", this.supplier.toString())
+            }
+
+
         }
     }
 
@@ -285,15 +306,15 @@ class AddEditSupplierPaymentFragment : Fragment() {
 
             Snackbar.make(
                 requireParentFragment().requireView(),
-                "Payment added successfully",
+                "Ordered item added successfully",
                 Snackbar.LENGTH_SHORT
             ).show()
 
             if (this.toAdd) {
-                this.isSupplierPaymentAdded = true
+                this.isOrderedItemAdded = true
             }
             if (this.toEdit) {
-                this.isSupplierPaymentUpdated = true
+                this.isOrderedItemUpdated = true
             }
 
             findNavController().popBackStack()
@@ -314,5 +335,6 @@ class AddEditSupplierPaymentFragment : Fragment() {
 
         }
     }
-
 }
+
+

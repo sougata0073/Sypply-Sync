@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.sougata.supplysync.R
+import com.sougata.supplysync.databinding.ItemOrderedItemsListBinding
 import com.sougata.supplysync.databinding.ItemSupplierItemsListBinding
 import com.sougata.supplysync.databinding.ItemSupplierPaymentsListBinding
 import com.sougata.supplysync.databinding.ItemSuppliersListBinding
@@ -41,6 +42,7 @@ class ModelsListRecyclerViewAdapter(
         fun bind(model: Model) {
             onBind(this.binding, model)
 
+            // It will be not null when a select only fragment used this recyclerview adapter
             val bottomSheet = bottomSheetDialogFragment
 
             if (bottomSheet != null) {
@@ -106,19 +108,22 @@ class ModelsListRecyclerViewAdapter(
         inflater: LayoutInflater,
         parent: ViewGroup
     ): ViewDataBinding {
-        val map = mapOf(
-            Model.SUPPLIER to DataBindingUtil.inflate<ItemSuppliersListBinding>(
+
+        return when(modelName) {
+            Model.SUPPLIER -> DataBindingUtil.inflate<ItemSuppliersListBinding>(
                 inflater, R.layout.item_suppliers_list, parent, false
-            ),
-            Model.SUPPLIERS_ITEM to DataBindingUtil.inflate<ItemSupplierItemsListBinding>(
+            )
+            Model.SUPPLIERS_ITEM -> DataBindingUtil.inflate<ItemSupplierItemsListBinding>(
                 inflater, R.layout.item_supplier_items_list, parent, false
-            ),
-            Model.SUPPLIER_PAYMENT to DataBindingUtil.inflate<ItemSupplierPaymentsListBinding>(
+            )
+            Model.SUPPLIER_PAYMENT -> DataBindingUtil.inflate<ItemSupplierPaymentsListBinding>(
                 inflater, R.layout.item_supplier_payments_list, parent, false
             )
+            Model.ORDERED_ITEM -> DataBindingUtil.inflate<ItemOrderedItemsListBinding>(
+                inflater, R.layout.item_ordered_items_list, parent, false
+            )
+            else -> throw Exception("Unknown model type")
+        }
 
-        )
-
-        return map[modelName]!!
     }
 }

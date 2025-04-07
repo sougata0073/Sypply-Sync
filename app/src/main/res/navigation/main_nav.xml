@@ -53,4 +53,9 @@
         android:name="com.sougata.supplysync.suppliers.fragments.AddEditSupplierPaymentFragment"
         android:label="fragment_add_edit_supplier_payment"
         tools:layout="@layout/fragment_add_edit_supplier_payment"/>
+    <fragment
+        android:id="@+id/addEditOrderedItemFragment"
+        android:name="com.sougata.supplysync.suppliers.fragments.AddEditOrderedItemFragment"
+        android:label="fragment_add_edit_ordered_item"
+        tools:layout="@layout/fragment_add_edit_ordered_item"/>
 </navigation>

@@ -1,6 +1,7 @@
 package com.sougata.supplysync.util.modelslist
 
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -86,10 +87,11 @@ class ModelsListFragment : Fragment() {
 
         this.binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
-            adapter = ScaleInAnimationAdapter(recyclerViewAdapter).apply {
-                setFirstOnly(false)
-                setDuration(80)
-            }
+            adapter = recyclerViewAdapter
+//            adapter = ScaleInAnimationAdapter(recyclerViewAdapter).apply {
+//                setFirstOnly(false)
+//                setDuration(80)
+//            }
         }
 
         this.binding.fab.setOnClickListener {

@@ -49,18 +49,5 @@ object Inputs {
         return timeFormat.format(Date())
     }
 
-    fun getTimestampFromDataTime(
-        year: Int,
-        month: Int,
-        date: Int,
-        hour: Int,
-        minute: Int
-    ): Timestamp {
 
-        val calendar = Calendar.getInstance()
-
-        calendar.set(year, month, date, hour, minute)
-
-        return Timestamp(calendar.time)
-    }
 }

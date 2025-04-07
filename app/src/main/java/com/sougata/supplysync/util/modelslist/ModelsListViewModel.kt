@@ -44,6 +44,7 @@ class ModelsListViewModel(private val modelName: String) :
                 Model.SUPPLIER -> firestoreRepository::getSuppliersList
                 Model.SUPPLIERS_ITEM -> firestoreRepository::getSupplierItemsList
                 Model.SUPPLIER_PAYMENT -> firestoreRepository::getSupplierPaymentsList
+                Model.ORDERED_ITEM -> firestoreRepository::getOrderedItemsList
                 else -> return
             }
 

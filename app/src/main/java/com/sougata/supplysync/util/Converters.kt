@@ -1,10 +1,17 @@
 package com.sougata.supplysync.util
 
-import android.util.Log
-import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
+import com.sougata.supplysync.util.Converters.getShortedNumberString
+import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Locale
+
+
+//fun main() {
+//    print(getYearMonthDateFromDateString("06-04-2025").toString())
+//}
+
 
 object Converters {
     fun numberToDouble(num: Number) = num.toDouble()
@@ -36,7 +43,7 @@ object Converters {
             } else {
                 try {
                     year = list[2].toInt()
-                    month = list[1].toInt() - 1
+                    month = list[1].toInt()
                     date = list[0].toInt()
                 } catch (_: Exception) {
                     throw Exception("Invalid date")
@@ -45,7 +52,7 @@ object Converters {
         } else {
             val calendar = Calendar.getInstance()
             year = calendar.get(Calendar.YEAR)
-            month = calendar.get(Calendar.MONTH)
+            month = calendar.get(Calendar.MONTH) + 1
             date = calendar.get(Calendar.DAY_OF_MONTH)
         }
 
@@ -57,7 +64,7 @@ object Converters {
         var hour = 0
         var minute = 0
 
-        if(timeString.isNotEmpty()) {
+        if (timeString.isNotEmpty()) {
             val list = timeString.split(':')
             if (list.size != 2) {
                 throw Exception("Invalid time")
@@ -77,4 +84,57 @@ object Converters {
 
         return hour to minute
     }
+
+    fun getShortedNumberString(num: Double): String {
+        val df = DecimalFormat("#.##")
+        return when {
+            num >= 1_00_00_000 -> "${df.format(num / 1_00_00_000.0)} Cr"
+            num >= 1_00_000 -> "${df.format(num / 1_00_000.0)} L"
+            num >= 1_000 -> "${df.format(num / 1_000.0)} K"
+            else -> num.toString()
+        }
+    }
+
+    fun getYearMonthDateFromTimestamp(timestamp: Timestamp): Triple<Int, Int, Int> {
+        val calendar = Calendar.getInstance()
+        calendar.time = timestamp.toDate()
+
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH) + 1
+        val date = calendar.get(Calendar.DAY_OF_MONTH)
+
+        return Triple(year, month, date)
+    }
+
+    fun getTimestampFromDataTime(
+        year: Int,
+        month: Int,
+        date: Int,
+        hour: Int,
+        minute: Int
+    ): Timestamp {
+
+        val calendar = Calendar.getInstance()
+
+        calendar.set(year, month - 1, date, hour, minute)
+
+        return Timestamp(calendar.time)
+    }
+
+    fun getTimestampFromDate(
+        year: Int,
+        month: Int,
+        date: Int
+    ): Timestamp {
+
+        val calendar = Calendar.getInstance()
+
+        calendar.set(year, month - 1, date)
+
+        return Timestamp(calendar.time)
+    }
 }
+
+//fun main() {
+//    print(getShortedNumberString(100000001.0))
+//}

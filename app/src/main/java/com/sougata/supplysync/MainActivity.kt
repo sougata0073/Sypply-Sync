@@ -87,9 +87,11 @@ class MainActivity : AppCompatActivity() {
         navController.addOnDestinationChangedListener { navController, destination, arguments ->
 
             when (destination.id) {
-                R.id.addEditSupplierFragment, R.id.addEditSupplierPaymentFragment -> {
+                R.id.addEditSupplierFragment, R.id.addEditSupplierPaymentFragment,
+                R.id.addEditOrderedItemFragment -> {
                     this.binding.bottomNav.visibility = View.GONE
                 }
+
                 else -> this.binding.bottomNav.visibility = View.VISIBLE
             }
 

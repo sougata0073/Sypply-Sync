@@ -10,10 +10,12 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.sougata.supplysync.R
+import com.sougata.supplysync.databinding.ItemOrderedItemsListBinding
 import com.sougata.supplysync.databinding.ItemSupplierItemsListBinding
 import com.sougata.supplysync.databinding.ItemSupplierPaymentsListBinding
 import com.sougata.supplysync.databinding.ItemSuppliersListBinding
 import com.sougata.supplysync.models.Model
+import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.models.SupplierPayment
@@ -50,6 +52,7 @@ class ModelsListFragmentHelper(
             Model.SUPPLIER -> this::bindSupplier
             Model.SUPPLIERS_ITEM -> this::bindSupplierItem
             Model.SUPPLIER_PAYMENT -> this::bindSupplierPayment
+            Model.ORDERED_ITEM -> this::bindOrderedItem
             else -> throw IllegalArgumentException("Unknown model type")
         }
     }
@@ -155,6 +158,59 @@ class ModelsListFragmentHelper(
         }
     }
 
+    private fun bindOrderedItem(binding: ViewDataBinding, model: Model) {
+        binding as ItemOrderedItemsListBinding
+        model as OrderedItem
+
+        binding.apply {
+
+            var year = 0
+            var month = 0
+            var myDate = 0
+
+            Converters.getYearMonthDateFromTimestamp(model.ordereTimestamp).apply {
+                year = first
+                month = second
+                myDate = third
+            }
+
+            val dateString = String.format(
+                Locale.getDefault(),
+                "On: %02d-%02d-%04d",
+                myDate, month, year
+            )
+
+            itemName.text = model.itemName
+            date.text = dateString
+            amount.text = Converters.numberToMoneyString(model.amount)
+
+            root.setOnClickListener {
+
+                val message =
+                    "Supplier name: ${model.supplierName}\nItem quantity: ${model.quantity}"
+
+                MaterialAlertDialogBuilder(
+                    this@ModelsListFragmentHelper.context,
+                    R.style.materialAlertDialogStyle
+                ).setTitle(model.itemName)
+                    .setMessage(message)
+                    .setPositiveButton("Close") { dialog, _ -> dialog.dismiss() }
+                    .setNeutralButton("Edit") { dialog, _ ->
+                        val bundle = Bundle().apply {
+                            putBoolean(KeysAndMessages.TO_EDIT_KEY, true)
+                            putParcelable("orderedItem", model)
+                        }
+                        this@ModelsListFragmentHelper.fragment.findNavController()
+                            .navigate(
+                                R.id.addEditOrderedItemFragment,
+                                bundle,
+                                Inputs.getFragmentAnimations()
+                            )
+                    }.show()
+            }
+        }
+    }
+
     fun getWhatToDoOnFabClick(): () -> Unit {
         // Double brackets to make scope functions
         return when (this.modelName) {
@@ -186,6 +242,17 @@ class ModelsListFragmentHelper(
                     }
                     this.fragment.findNavController().navigate(
                         R.id.addEditSupplierPaymentFragment, bundle, Inputs.getFragmentAnimations()
+                    )
+                }
+            }
+
+            Model.ORDERED_ITEM -> {
+                {
+                    val bundle = Bundle().apply {
+                        putBoolean(KeysAndMessages.TO_ADD_KEY, true)
+                    }
+                    this.fragment.findNavController().navigate(
+                        R.id.addEditOrderedItemFragment, bundle, Inputs.getFragmentAnimations()
                     )
                 }
             }

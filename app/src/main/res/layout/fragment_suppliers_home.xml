@@ -131,7 +131,7 @@
                     android:ellipsize="end"
                     android:maxWidth="100dp"
                     android:maxLines="1"
-                    android:text="70"
+                    android:text="0"
                     android:textColor="@color/bw"
                     android:textSize="20sp"
                     android:textStyle="bold"

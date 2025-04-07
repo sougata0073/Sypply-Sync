@@ -9,6 +9,7 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.sougata.supplysync.models.Model
+import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.models.SupplierPayment
@@ -108,6 +109,32 @@ class FirestoreRepository {
 
     }
 
+    fun getOrderedItemsList(
+        coroutineScope: CoroutineScope, lastDocumentSnapshot: DocumentSnapshot?,
+        onComplete: (Int, MutableList<Model>, DocumentSnapshot?, String) -> Unit
+    ) {
+        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
+            OrderedItem(
+                itemId = map["item_id"] as String,
+                itemName = map["item_name"] as String,
+                quantity = Converters.numberToInt(map["quantity"] as Number),
+                amount = Converters.numberToDouble(map["amount"] as Number),
+                supplierId = map["supplier_id"] as String,
+                supplierName = map["supplier_name"] as String,
+                ordereTimestamp = map["order_timestamp"] as Timestamp,
+                isReceived = map["is_received"] as Boolean
+            ).apply {
+                id = document.id
+                timestamp = map["timestamp"] as Timestamp
+            }
+        }
+
+        return getAnyModelsList(
+            "ordered_items", coroutineScope, lastDocumentSnapshot,
+            howToConvert, onComplete, "timestamp" to Query.Direction.ASCENDING
+        )
+    }
+
     fun getSupplierPaymentsList(
         coroutineScope: CoroutineScope, lastDocumentSnapshot: DocumentSnapshot?,
         onComplete: (Int, MutableList<Model>, DocumentSnapshot?, String) -> Unit
@@ -188,7 +215,7 @@ class FirestoreRepository {
             if (it.isSuccessful) {
                 onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
-                Log.d("list", it.exception?.message.toString())
+//                Log.d("list", it.exception?.message.toString())
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
         }
@@ -350,6 +377,147 @@ class FirestoreRepository {
 
     }
 
+    fun addUpdateOrderedItem(
+        orderedItem: OrderedItem,
+        action: String,
+        onComplete: (Int, String) -> Unit
+    ) {
+        if (currentUser == null) {
+            onComplete(Status.FAILED, KeysAndMessages.USER_NOT_FOUND)
+            return
+        }
+
+        val orderedItemsCol =
+            this.usersCol.document(this.currentUser.uid).collection("ordered_items")
+        val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
+
+        val orderedItemDoc = mutableMapOf<String, Any>(
+            "item_id" to orderedItem.itemId,
+            "item_name" to orderedItem.itemName,
+            "quantity" to orderedItem.quantity,
+            "amount" to orderedItem.amount,
+            "supplier_id" to orderedItem.supplierId,
+            "supplier_name" to orderedItem.supplierName,
+            "order_timestamp" to orderedItem.ordereTimestamp,
+            "is_received" to orderedItem.isReceived
+        )
+
+        this.usersCol.firestore.runTransaction {
+
+            if (action == TO_ADD) {
+                orderedItemDoc.put("timestamp", FieldValue.serverTimestamp())
+                it.set(orderedItemsCol.document(), orderedItemDoc)
+                if (!orderedItem.isReceived) {
+                    it.update(
+                        valuesCol.document("orders_to_receive"),
+                        mapOf("value" to FieldValue.increment(1))
+                    )
+                }
+
+            } else if (action == TO_UPDATE) {
+
+                val prevIsReceived =
+                    it.get(orderedItemsCol.document(orderedItem.id)).getBoolean("is_received")
+                        ?: false
+
+                if (prevIsReceived == true && orderedItem.isReceived == false) {
+                    it.update(
+                        valuesCol.document("orders_to_receive"),
+                        mapOf("value" to FieldValue.increment(1))
+                    )
+                } else if (prevIsReceived == false && orderedItem.isReceived == true) {
+                    it.update(
+                        valuesCol.document("orders_to_receive"),
+                        mapOf("value" to FieldValue.increment(-1))
+                    )
+                }
+                it.update(orderedItemsCol.document(orderedItem.id), orderedItemDoc)
+
+            }
+        }.addOnCompleteListener {
+            if (it.isSuccessful) {
+                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+            } else {
+                onComplete(Status.FAILED, it.exception?.message.toString())
+            }
+        }
+    }
+
+    fun getOrdersToReceive(onComplete: (Int, Int, String) -> Unit) {
+        if (currentUser == null) {
+            onComplete(Status.FAILED, 0, KeysAndMessages.USER_NOT_FOUND)
+            return
+        }
+
+        val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
+
+        valuesCol.document("orders_to_receive").get().addOnCompleteListener {
+            if (it.isSuccessful) {
+                onComplete(
+                    Status.SUCCESS,
+                    Converters.numberToInt(it.result["value"] as Number),
+                    KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                )
+            } else {
+                onComplete(Status.FAILED, 0, it.exception?.message.toString())
+            }
+        }
+    }
+
+    fun getPurchaseAmountByRange(
+        startTimestamp: Timestamp,
+        endTimestamp: Timestamp,
+        coroutineScope: CoroutineScope,
+        onComplete: (Int, MutableList<Double>, String) -> Unit
+    ) {
+
+//        Log.d("api", "getPurchaseAmountByRange called")
+
+        if (currentUser == null) {
+            onComplete(Status.FAILED, mutableListOf(), KeysAndMessages.USER_NOT_FOUND)
+            return
+        }
+
+        val orderedItemsCol =
+            this.usersCol.document(this.currentUser.uid).collection("ordered_items")
+
+        val query = orderedItemsCol
+            .whereGreaterThanOrEqualTo("order_timestamp", startTimestamp)
+            .whereLessThanOrEqualTo("order_timestamp", endTimestamp)
+            .orderBy("order_timestamp", Query.Direction.ASCENDING)
+
+        query.get().addOnCompleteListener {
+
+            if (it.isSuccessful) {
+
+                val resultList = mutableListOf<Double>()
+
+                coroutineScope.launch(Dispatchers.IO) {
+
+                    for (document in it.result.documents) {
+                        val data = document.data
+
+                        if (data != null && document.exists()) {
+                            val amount = Converters.numberToDouble(data["amount"] as Number)
+                            resultList.add(amount)
+                        }
+                    }
+
+                    onComplete(
+                        Status.SUCCESS,
+                        resultList,
+                        KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                    )
+                }
+
+            } else {
+                onComplete(Status.FAILED, mutableListOf(), it.exception?.message.toString())
+            }
+
+        }
+    }
+
+
     private fun createRequiredThings(onComplete: (Int, String) -> Unit) {
 
         if (currentUser == null) {
@@ -368,6 +536,7 @@ class FirestoreRepository {
             it.set(valuesCol.document("suppliers_count"), map)
             it.set(valuesCol.document("suppliers_due_amount"), map)
             it.set(valuesCol.document("supplier_items_count"), map)
+            it.set(valuesCol.document("orders_to_receive"), map)
 
         }.addOnCompleteListener {
             if (it.isSuccessful) {
@@ -401,7 +570,6 @@ class FirestoreRepository {
                 .startAfter(lastDocumentSnapshot)
         }.limit(10)
 
-
         query.get().addOnCompleteListener {
 
             if (it.isSuccessful) {
@@ -414,7 +582,7 @@ class FirestoreRepository {
 
                         val data = document.data
 
-                        if (document.exists() && data != null) {
+                        if (data != null && document.exists()) {
                             val model: Model = howToConvert(data, document)
                             modelsList.add(model)
                         }

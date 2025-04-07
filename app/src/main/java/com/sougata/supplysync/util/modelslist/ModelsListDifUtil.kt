@@ -2,6 +2,7 @@ package com.sougata.supplysync.util.modelslist
 
 import androidx.recyclerview.widget.DiffUtil
 import com.sougata.supplysync.models.Model
+import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.models.SupplierPayment
@@ -61,6 +62,12 @@ class ModelsListDifUtil(
                 SupplierPayment::amount, SupplierPayment::year, SupplierPayment::month,
                 SupplierPayment::date, SupplierPayment::hour, SupplierPayment::minute,
                 SupplierPayment::note, SupplierPayment::supplierId, SupplierPayment::timestamp
+            )
+
+            Model.ORDERED_ITEM -> createComparator<OrderedItem>(
+                OrderedItem::itemId, OrderedItem::itemName, OrderedItem::quantity,
+                OrderedItem::amount, OrderedItem::supplierId, OrderedItem::supplierName,
+                OrderedItem::ordereTimestamp, OrderedItem::isReceived
             )
 
             else -> throw IllegalArgumentException("Unknown model type")

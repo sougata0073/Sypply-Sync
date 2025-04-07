@@ -18,10 +18,12 @@ class SuppliersHomeViewModel : ViewModel() {
 
     val numberOfSuppliers = MutableLiveData<Triple<Int, Int, String>>()
     val dueAmountToSuppliers = MutableLiveData<Triple<Double, Int, String>>()
+    val numberOfOrdersToReceive = MutableLiveData<Triple<Int, Int, String>>()
 
     init {
         this.loadNumberOfSuppliers()
         this.loadDueAmountToSuppliers()
+        this.loadOrdersToReceive()
     }
 
     fun loadNumberOfSuppliers() {
@@ -39,6 +41,15 @@ class SuppliersHomeViewModel : ViewModel() {
 
         this.firestoreRepository.getDueAmountToSuppliers { status, amount, message ->
             this.dueAmountToSuppliers.postValue(Triple(amount, status, message))
+        }
+    }
+
+    fun loadOrdersToReceive() {
+//        Log.d("api", "orders to receive")
+        this.numberOfOrdersToReceive.postValue(Triple(0, Status.STARTED, ""))
+
+        this.firestoreRepository.getOrdersToReceive { status, count, message ->
+            this.numberOfOrdersToReceive.postValue(Triple(count, status, message))
         }
     }
 
@@ -81,8 +92,14 @@ class SuppliersHomeViewModel : ViewModel() {
     }
 
     fun onOrderedItemsClick(view: View) {
+        val bundle = Bundle().apply {
+            putString(ModelsListFragment.MODEL_NAME_KEY, Model.ORDERED_ITEM)
+        }
+
         view.findNavController()
-            .navigate(R.id.modelsListFragment)
+            .navigate(
+                R.id.modelsListFragment, bundle, Inputs.getFragmentAnimations()
+            )
     }
 
     fun onReportsClick(view: View) {

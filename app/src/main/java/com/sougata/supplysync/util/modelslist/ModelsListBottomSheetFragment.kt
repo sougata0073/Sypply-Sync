@@ -120,7 +120,7 @@ class ModelsListBottomSheetFragment : BottomSheetDialogFragment() {
                         progressBar.visibility = View.GONE
                     }
                     this.recyclerViewAdapter.setData(it.first)
-                    this.binding.recyclerView.smoothScrollBy(0, 300)
+//                    this.binding.recyclerView.smoothScrollBy(0, 300)
 
                 }
 

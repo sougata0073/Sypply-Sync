@@ -1,6 +1,7 @@
 package com.sougata.supplysync.models
 
 import android.os.Parcelable
+import com.google.firebase.Timestamp
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -11,8 +12,6 @@ data class OrderedItem(
     var amount: Double,
     var supplierId: String,
     var supplierName: String,
-    var year: Int,
-    var month: Int,
-    var date: Int,
+    var ordereTimestamp: Timestamp,
     var isReceived: Boolean
 ): Model(), Parcelable

@@ -126,21 +126,13 @@ class AddEditSupplierPaymentViewModel : ViewModel(), Observable {
         }
 
 //        Log.d("mytag", supplierPaymentId.toString())
-
-        if(supplierPaymentId.orEmpty().isNotEmpty()) {
-            month++
-        }
+//
+//        if(supplierPaymentId.orEmpty().isNotEmpty()) {
+//            month++
+//        }
 
         return SupplierPayment(
-            amount,
-            year,
-            month,
-            date,
-            hour,
-            minute,
-            note,
-            supplierId,
-            supplierName
+            amount, year, month, date, hour, minute, note, supplierId, supplierName
         ).apply { id = supplierPaymentId.orEmpty() }
     }
 
