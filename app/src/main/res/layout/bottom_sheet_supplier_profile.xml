@@ -45,30 +45,18 @@
                     app:shapeAppearance="@style/circleImageView"
                     tools:src="@drawable/ic_user_profile" />
 
-                <ImageButton
+                <TextView
                     android:id="@+id/editBtn"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:layout_marginEnd="20dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ic_edit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:fontFamily="@font/acherus_feral_bold"
+                    android:text="Edit"
+                    android:textColor="@color/white"
+                    android:textSize="18sp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/deleteBtn"
-                    app:layout_constraintTop_toBottomOf="@+id/profileImage"
-                    app:tint="@color/white" />
-
-                <ImageButton
-                    android:id="@+id/deleteBtn"
-                    android:layout_width="25dp"
-                    android:layout_height="25dp"
-                    android:background="?attr/selectableItemBackgroundBorderless"
-                    android:scaleType="fitCenter"
-                    android:src="@drawable/ic_delete"
-                    app:layout_constraintBottom_toBottomOf="@id/editBtn"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/editBtn"
-                    app:tint="@color/white" />
+                    app:layout_constraintTop_toBottomOf="@+id/profileImage" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

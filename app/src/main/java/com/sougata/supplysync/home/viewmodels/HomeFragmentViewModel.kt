@@ -1,7 +1,6 @@
 package com.sougata.supplysync.home.viewmodels
 
 import android.app.Application
-import android.util.Log
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
@@ -11,7 +10,7 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.google.firebase.Timestamp
 import com.sougata.supplysync.R
-import com.sougata.supplysync.firebase.FirestoreRepository
+import com.sougata.supplysync.firebase.SupplierFirestoreRepository
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.Status
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +20,7 @@ import java.util.Locale
 
 class HomeFragmentViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val firestoreRepository = FirestoreRepository()
+    private val supplierFirestoreRepository = SupplierFirestoreRepository()
 
 //    fun getBarChartData(context: Context): BarData {
 //        val list = listOf(
@@ -110,7 +109,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 
         this.purchaseChartData.postValue(Triple(null, Status.STARTED, ""))
 
-        this.firestoreRepository.getPurchaseAmountByRange(
+        this.supplierFirestoreRepository.getPurchaseAmountByRange(
             startTimestamp,
             endTimestamp,
             viewModelScope

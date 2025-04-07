@@ -6,10 +6,9 @@ import androidx.databinding.Observable
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
-import com.sougata.supplysync.firebase.FirestoreRepository
+import com.sougata.supplysync.firebase.SupplierFirestoreRepository
 import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.util.Converters
-import com.sougata.supplysync.util.Inputs
 import com.sougata.supplysync.util.Status
 
 class AddEditOrderedItemViewModel : ViewModel(), Observable {
@@ -31,7 +30,7 @@ class AddEditOrderedItemViewModel : ViewModel(), Observable {
     @Bindable
     val supplierName = MutableLiveData("")
 
-    private val firestoreRepository = FirestoreRepository()
+    private val supplierFirestoreRepository = SupplierFirestoreRepository()
 
     val orderedItemAddedIndicator = MutableLiveData<Pair<Int, String>>()
     val orderedItemEditedIndicator = MutableLiveData<Pair<Int, String>>()
@@ -53,9 +52,9 @@ class AddEditOrderedItemViewModel : ViewModel(), Observable {
 
         this.orderedItemAddedIndicator.postValue(Status.STARTED to "")
 
-        this.firestoreRepository.addUpdateOrderedItem(
+        this.supplierFirestoreRepository.addUpdateOrderedItem(
             orderedItem,
-            FirestoreRepository.TO_ADD
+            SupplierFirestoreRepository.TO_ADD
         ) { status, message ->
             this.orderedItemAddedIndicator.postValue(status to message)
         }
@@ -79,9 +78,9 @@ class AddEditOrderedItemViewModel : ViewModel(), Observable {
 
         this.orderedItemEditedIndicator.postValue(Status.STARTED to "")
 
-        this.firestoreRepository.addUpdateOrderedItem(
+        this.supplierFirestoreRepository.addUpdateOrderedItem(
             orderedItem,
-            FirestoreRepository.TO_UPDATE
+            SupplierFirestoreRepository.TO_UPDATE
         ) { status, message ->
             this.orderedItemEditedIndicator.postValue(status to message)
         }

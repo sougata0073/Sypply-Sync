@@ -12,7 +12,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.BottomSheetSupplierProfileBinding
-import com.sougata.supplysync.firebase.FirestoreRepository
+import com.sougata.supplysync.firebase.SupplierFirestoreRepository
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Converters
@@ -24,8 +24,6 @@ class SupplierProfileBottomSheetFragment : BottomSheetDialogFragment() {
     private lateinit var binding: BottomSheetSupplierProfileBinding
 
     private lateinit var supplier: Supplier
-
-    private lateinit var firestoreRepository: FirestoreRepository
 
     companion object {
         @JvmStatic
@@ -65,7 +63,7 @@ class SupplierProfileBottomSheetFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        this.firestoreRepository = FirestoreRepository()
+        this.binding.supplier = this.supplier
 
         this.initializeUI()
 
@@ -96,41 +94,6 @@ class SupplierProfileBottomSheetFragment : BottomSheetDialogFragment() {
             this.dismiss()
         }
 
-        this.binding.deleteBtn.setOnClickListener {
-
-            this.binding.parentLayout.alpha = 0.5f
-            this.binding.progressBar.visibility = View.VISIBLE
-
-            this.firestoreRepository.deleteSupplier(this.supplier) { status, message ->
-
-                Snackbar.make(
-                    requireParentFragment().requireView(),
-                    message,
-                    Snackbar.LENGTH_SHORT
-                ).show()
-
-                if (status == Status.SUCCESS) {
-
-                    val bundle = Bundle().apply {
-                        putParcelable(KeysAndMessages.DATA_REMOVED_KEY, supplier)
-                    }
-
-                    this.parentFragmentManager.setFragmentResult(
-                        KeysAndMessages.RECENT_DATA_CHANGED_KEY,
-                        bundle
-                    )
-
-                    this.dismiss()
-                } else if (status == Status.FAILED) {
-                    this.binding.parentLayout.alpha = 1f
-                    this.binding.progressBar.visibility = View.GONE
-                }
-
-            }
-
-        }
-
-        this.binding.supplier = this.supplier
     }
 
 }

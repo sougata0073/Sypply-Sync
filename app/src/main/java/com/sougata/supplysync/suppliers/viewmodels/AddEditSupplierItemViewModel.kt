@@ -6,7 +6,7 @@ import androidx.databinding.Observable
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
-import com.sougata.supplysync.firebase.FirestoreRepository
+import com.sougata.supplysync.firebase.SupplierFirestoreRepository
 import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.util.Status
 
@@ -21,7 +21,7 @@ class AddEditSupplierItemViewModel : ViewModel(), Observable {
     @Bindable
     val details = MutableLiveData("")
 
-    private val firestoreRepository = FirestoreRepository()
+    private val supplierFirestoreRepository = SupplierFirestoreRepository()
 
     val supplierItemAddedIndicator = MutableLiveData<Pair<Int, String>>()
     val supplierItemEditedIndicator = MutableLiveData<Pair<Int, String>>()
@@ -36,9 +36,9 @@ class AddEditSupplierItemViewModel : ViewModel(), Observable {
 
         this.supplierItemAddedIndicator.postValue(Status.STARTED to "")
 
-        this.firestoreRepository.addUpdateSupplierItem(
+        this.supplierFirestoreRepository.addUpdateSupplierItem(
             supplierItem,
-            FirestoreRepository.TO_ADD
+            SupplierFirestoreRepository.TO_ADD
         ) { status, message ->
             this.supplierItemAddedIndicator.postValue(status to message)
         }
@@ -54,9 +54,9 @@ class AddEditSupplierItemViewModel : ViewModel(), Observable {
 
         this.supplierItemEditedIndicator.postValue(Status.STARTED to "")
 
-        this.firestoreRepository.addUpdateSupplierItem(
+        this.supplierFirestoreRepository.addUpdateSupplierItem(
             supplierItem,
-            FirestoreRepository.TO_UPDATE
+            SupplierFirestoreRepository.TO_UPDATE
         ) { status, message ->
             this.supplierItemEditedIndicator.postValue(status to message)
         }

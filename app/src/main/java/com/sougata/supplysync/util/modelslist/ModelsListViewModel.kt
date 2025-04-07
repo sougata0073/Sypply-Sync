@@ -4,17 +4,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.DocumentSnapshot
-import com.sougata.supplysync.firebase.FirestoreRepository
+import com.sougata.supplysync.firebase.SupplierFirestoreRepository
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class ModelsListViewModel(private val modelName: String) :
     ViewModel() {
 
-    val firestoreRepository = FirestoreRepository()
+    val supplierFirestoreRepository = SupplierFirestoreRepository()
     val itemsList = MutableLiveData<Triple<MutableList<Model>, Int, String>>()
     var noMoreElementLeft = false
     var lastDocumentSnapshot: DocumentSnapshot? = null
@@ -41,10 +39,10 @@ class ModelsListViewModel(private val modelName: String) :
         // The datatype will be equal to the parameters of the function
         val fetchList =
             when (this.modelName) {
-                Model.SUPPLIER -> firestoreRepository::getSuppliersList
-                Model.SUPPLIERS_ITEM -> firestoreRepository::getSupplierItemsList
-                Model.SUPPLIER_PAYMENT -> firestoreRepository::getSupplierPaymentsList
-                Model.ORDERED_ITEM -> firestoreRepository::getOrderedItemsList
+                Model.SUPPLIER -> supplierFirestoreRepository::getSuppliersList
+                Model.SUPPLIERS_ITEM -> supplierFirestoreRepository::getSupplierItemsList
+                Model.SUPPLIER_PAYMENT -> supplierFirestoreRepository::getSupplierPaymentsList
+                Model.ORDERED_ITEM -> supplierFirestoreRepository::getOrderedItemsList
                 else -> return
             }
 

@@ -11,11 +11,13 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentAddEditSupplierPaymentBinding
+import com.sougata.supplysync.firebase.SupplierFirestoreRepository
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.models.SupplierPayment
@@ -33,7 +35,7 @@ class AddEditSupplierPaymentFragment : Fragment() {
 
     private lateinit var viewModel: AddEditSupplierPaymentViewModel
 
-    private var prevSupplierPayment: SupplierPayment? = null
+    private lateinit var prevSupplierPayment: SupplierPayment
     private var updatedSupplierPayment: SupplierPayment? = null
 
     // If any other model related to this model they will be here
@@ -44,6 +46,9 @@ class AddEditSupplierPaymentFragment : Fragment() {
     private var toEdit: Boolean = false
     private var isSupplierPaymentAdded = false
     private var isSupplierPaymentUpdated = false
+    private var isSupplierPaymentDeleted = false
+
+    private val supplierFirestoreRepository = SupplierFirestoreRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,7 +62,7 @@ class AddEditSupplierPaymentFragment : Fragment() {
             } else {
                 @Suppress("DEPRECATION")
                 requireArguments().getParcelable("supplierPayment")
-            }
+            }!!
 
         }
 
@@ -114,6 +119,17 @@ class AddEditSupplierPaymentFragment : Fragment() {
                 bundle
             )
         }
+
+        if (this.isSupplierPaymentDeleted) {
+            val bundle = Bundle().apply {
+                putParcelable(KeysAndMessages.DATA_REMOVED_KEY, prevSupplierPayment)
+            }
+
+            this.parentFragmentManager.setFragmentResult(
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+                bundle
+            )
+        }
     }
 
     private fun initializeUI() {
@@ -134,27 +150,14 @@ class AddEditSupplierPaymentFragment : Fragment() {
 
             } else if (this.toEdit) {
 
-                val supplierPayment = this.prevSupplierPayment
-
-                if (supplierPayment == null) {
-                    Snackbar.make(
-                        requireParentFragment().requireView(),
-                        KeysAndMessages.SOMETHING_WENT_WRONG,
-                        Snackbar.LENGTH_SHORT
-                    ).show()
-                    findNavController().popBackStack()
-
-                } else {
-
-                    val supplier = this.supplier
-                    val supplierPaymentId = supplierPayment.id
-                    this.updatedSupplierPayment = this.viewModel.updateSupplierPayment(
-                        supplier?.id ?: supplierPayment.supplierId,
-                        supplier?.name ?: supplierPayment.supplierName,
-                        supplierPaymentId,
-                        this.binding.root
-                    )
-                }
+                val supplier = this.supplier
+                val supplierPaymentId = this.prevSupplierPayment.id
+                this.updatedSupplierPayment = this.viewModel.updateSupplierPayment(
+                    supplier?.id ?: this.prevSupplierPayment.supplierId,
+                    supplier?.name ?: this.prevSupplierPayment.supplierName,
+                    supplierPaymentId,
+                    this.binding.root
+                )
 
             }
         }
@@ -210,32 +213,72 @@ class AddEditSupplierPaymentFragment : Fragment() {
 
         }
 
+        this.binding.deleteBtn.setOnClickListener {
+
+            MaterialAlertDialogBuilder(
+                requireContext(),
+                R.style.materialAlertDialogStyle
+            ).setTitle("Warning")
+                .setMessage("Are you sure you want to delete this payment?")
+                .setPositiveButton("Yes") { dialog, _ ->
+
+                    this.binding.parentLayout.alpha = 0.5f
+                    this.binding.progressBar.visibility = View.VISIBLE
+
+                    this.supplierFirestoreRepository.deleteSupplierPayment(this.prevSupplierPayment) { status, message ->
+
+                        Snackbar.make(
+                            requireParentFragment().requireView(),
+                            message,
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+
+                        if (status == Status.SUCCESS) {
+
+                            this.isSupplierPaymentDeleted = true
+
+                            findNavController().popBackStack()
+
+                        } else if (status == Status.FAILED) {
+                            this.binding.parentLayout.alpha = 1f
+                            this.binding.progressBar.visibility = View.GONE
+                        }
+
+                    }
+                }
+                .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+                .show()
+
+        }
+
         if (this.toAdd) {
             binding.supplierName.visibility = View.GONE
+            binding.deleteBtn.visibility = View.INVISIBLE
         }
 
         if (this.toEdit) {
+            this.binding.deleteBtn.visibility = View.VISIBLE
             this.viewModel.apply {
-                amount.value = prevSupplierPayment?.amount.toString()
+                amount.value = prevSupplierPayment.amount.toString()
 
                 val dateString = String.format(
                     Locale.getDefault(),
                     "%02d-%02d-%04d",
-                    prevSupplierPayment?.date,
-                    prevSupplierPayment?.month,
-                    prevSupplierPayment?.year
+                    prevSupplierPayment.date,
+                    prevSupplierPayment.month,
+                    prevSupplierPayment.year
                 )
                 val timeString = String.format(
                     Locale.getDefault(),
                     "%02d:%02d",
-                    prevSupplierPayment?.hour,
-                    prevSupplierPayment?.minute
+                    prevSupplierPayment.hour,
+                    prevSupplierPayment.minute
                 )
 
                 date.value = dateString
                 time.value = timeString
-                note.value = prevSupplierPayment?.note
-                supplierName.value = "Supplier: ${prevSupplierPayment?.supplierName}"
+                note.value = prevSupplierPayment.note
+                supplierName.value = "Supplier: ${prevSupplierPayment.supplierName}"
             }
 
         }

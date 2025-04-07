@@ -5,14 +5,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.databinding.Bindable
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.BottomSheetAddEditSupplierItemBinding
+import com.sougata.supplysync.firebase.SupplierFirestoreRepository
 import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierItemViewModel
 import com.sougata.supplysync.util.KeysAndMessages
@@ -24,13 +24,16 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
 
     private lateinit var viewModel: AddEditSupplierItemViewModel
 
-    private var prevSupplierItem: SupplierItem? = null
+    private lateinit var prevSupplierItem: SupplierItem
     private var updatedSupplierItem: SupplierItem? = null
 
     private var toAdd: Boolean = false
     private var toEdit: Boolean = false
     private var isSupplierItemAdded = false
     private var isSupplierItemUpdated = false
+    private var isSupplierItemDeleted = false
+
+    private val supplierFirestoreRepository = SupplierFirestoreRepository()
 
     companion object {
         @JvmStatic
@@ -59,7 +62,7 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
             } else {
                 @Suppress("DEPRECATION")
                 requireArguments().getParcelable("supplierItem")
-            }
+            }!!
 
         }
 
@@ -115,6 +118,15 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
                 bundle
             )
         }
+        if (this.isSupplierItemDeleted) {
+            val bundle = Bundle().apply {
+                putParcelable(KeysAndMessages.DATA_REMOVED_KEY, prevSupplierItem)
+            }
+            this.parentFragmentManager.setFragmentResult(
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY, bundle
+            )
+        }
+
 
     }
 
@@ -125,34 +137,65 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
                 this.viewModel.addSupplierItem(this.binding.root)
             } else if (this.toEdit) {
 
-                val supplierItem = this.prevSupplierItem
+                val supplierId = this.prevSupplierItem.id
 
-                if (supplierItem == null) {
-                    Snackbar.make(
-                        requireParentFragment().requireView(),
-                        KeysAndMessages.SOMETHING_WENT_WRONG,
-                        Snackbar.LENGTH_SHORT
-                    ).show()
+                this.updatedSupplierItem = this.viewModel.updateSupplierItem(
+                    supplierId,
+                    this.binding.root
+                )
 
-                    dismiss()
-
-                } else {
-                    val supplierId = supplierItem.id
-
-                    this.updatedSupplierItem = this.viewModel.updateSupplierItem(
-                        supplierId,
-                        this.binding.root
-                    )
-                }
             }
 
         }
 
+        this.binding.deleteBtn.setOnClickListener {
+
+            MaterialAlertDialogBuilder(
+                requireContext(),
+                R.style.materialAlertDialogStyle
+            ).setTitle("Warning")
+                .setMessage("Are you sure you want to delete this item?")
+                .setPositiveButton("Yes") { dialog, _ ->
+
+                    this.binding.parentLayout.alpha = 0.5f
+                    this.binding.progressBar.visibility = View.VISIBLE
+
+                    this.supplierFirestoreRepository.deleteSupplierItem(this.prevSupplierItem) { status, message ->
+
+                        Snackbar.make(
+                            requireParentFragment().requireView(),
+                            message,
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+
+                        if (status == Status.SUCCESS) {
+
+                            this.isSupplierItemDeleted = true
+
+                            this.dismiss()
+
+                        } else if (status == Status.FAILED) {
+                            this.binding.parentLayout.alpha = 1f
+                            this.binding.progressBar.visibility = View.GONE
+                        }
+
+                    }
+                }
+                .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+                .show()
+
+        }
+
+        if (this.toAdd) {
+            binding.deleteBtn.visibility = View.GONE
+        }
+
         if (this.toEdit) {
+            this.binding.deleteBtn.visibility = View.VISIBLE
             this.viewModel.apply {
-                name.value = prevSupplierItem?.name.toString()
-                price.value = prevSupplierItem?.price.toString()
-                details.value = prevSupplierItem?.details.toString()
+                name.value = prevSupplierItem.name.toString()
+                price.value = prevSupplierItem.price.toString()
+                details.value = prevSupplierItem.details.toString()
             }
 
         }

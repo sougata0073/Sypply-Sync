@@ -25,9 +25,9 @@ class AuthenticationRepository {
 
                         user.uid = currentUser.uid
 
-                        val firestoreRepository = FirestoreRepository()
+                        val supplierFirestoreRepository = SupplierFirestoreRepository()
 
-                        firestoreRepository.insertUserToFirestore(user) { status, message ->
+                        supplierFirestoreRepository.insertUserToFirestore(user) { status, message ->
 
                             if (status == Status.SUCCESS) {
                                 this.sendEmailVerificationLink { status, message ->

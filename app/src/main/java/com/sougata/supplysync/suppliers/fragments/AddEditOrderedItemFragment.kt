@@ -2,7 +2,6 @@ package com.sougata.supplysync.suppliers.fragments
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,9 +10,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentAddEditOrderedItemBinding
+import com.sougata.supplysync.firebase.SupplierFirestoreRepository
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.models.Supplier
@@ -33,7 +34,7 @@ class AddEditOrderedItemFragment : Fragment() {
 
     private lateinit var viewModel: AddEditOrderedItemViewModel
 
-    private var prevOrderedItem: OrderedItem? = null
+    private lateinit var prevOrderedItem: OrderedItem
     private var updatedOrderedItem: OrderedItem? = null
 
     private var supplierItem: SupplierItem? = null
@@ -43,6 +44,9 @@ class AddEditOrderedItemFragment : Fragment() {
     private var toEdit: Boolean = false
     private var isOrderedItemAdded = false
     private var isOrderedItemUpdated = false
+    private var isOrderedItemDeleted = false
+
+    private val supplierFirestoreRepository = SupplierFirestoreRepository()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,8 +61,8 @@ class AddEditOrderedItemFragment : Fragment() {
             } else {
                 @Suppress("DEPRECATION")
                 requireArguments().getParcelable("orderedItem")
-            }
-            Log.d("order", this.prevOrderedItem.toString())
+            }!!
+//            Log.d("order", this.prevOrderedItem.toString())
 
         }
 
@@ -113,6 +117,17 @@ class AddEditOrderedItemFragment : Fragment() {
                 bundle
             )
         }
+
+        if (this.isOrderedItemDeleted) {
+            val bundle = Bundle().apply {
+                putParcelable(KeysAndMessages.DATA_REMOVED_KEY, prevOrderedItem)
+            }
+
+            this.parentFragmentManager.setFragmentResult(
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+                bundle
+            )
+        }
     }
 
     private fun initializeUI() {
@@ -146,33 +161,18 @@ class AddEditOrderedItemFragment : Fragment() {
 
             } else if (this.toEdit) {
 
-                val orderedItem = this.prevOrderedItem
+                val supplierItem = this.supplierItem
+                val supplier = this.supplier
+                val orderedItemId = this.prevOrderedItem.id
 
-                if (orderedItem == null) {
-                    Snackbar.make(
-                        requireParentFragment().requireView(),
-                        KeysAndMessages.SOMETHING_WENT_WRONG,
-                        Snackbar.LENGTH_SHORT
-                    ).show()
-                    findNavController().popBackStack()
-
-                } else {
-
-                    val supplierItem = this.supplierItem
-                    val supplier = this.supplier
-                    val orderedItemId = orderedItem.id
-
-                    this.updatedOrderedItem = this.viewModel.updateOrderedItem(
-                        supplierItem?.id ?: orderedItem.itemId,
-                        supplierItem?.name ?: orderedItem.itemName,
-                        supplier?.id ?: orderedItem.supplierId,
-                        supplier?.name ?: orderedItem.supplierName,
-                        orderedItemId,
-                        this.binding.root
-                    )
-
-                }
-
+                this.updatedOrderedItem = this.viewModel.updateOrderedItem(
+                    supplierItem?.id ?: this.prevOrderedItem.itemId,
+                    supplierItem?.name ?: this.prevOrderedItem.itemName,
+                    supplier?.id ?: this.prevOrderedItem.supplierId,
+                    supplier?.name ?: this.prevOrderedItem.supplierName,
+                    orderedItemId,
+                    this.binding.root
+                )
             }
         }
 
@@ -210,28 +210,64 @@ class AddEditOrderedItemFragment : Fragment() {
 
         }
 
+        this.binding.deleteBtn.setOnClickListener {
+
+            MaterialAlertDialogBuilder(
+                requireContext(),
+                R.style.materialAlertDialogStyle
+            ).setTitle("Warning")
+                .setMessage("Are you sure you want to delete this item?")
+                .setPositiveButton("Yes") { dialog, _ ->
+
+                    this.binding.parentLayout.alpha = 0.5f
+                    this.binding.progressBar.visibility = View.VISIBLE
+
+                    this.supplierFirestoreRepository.deleteOrderedItem(this.prevOrderedItem) { status, message ->
+
+                        Snackbar.make(
+                            requireParentFragment().requireView(),
+                            message,
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+
+                        if (status == Status.SUCCESS) {
+
+                            this.isOrderedItemDeleted = true
+
+                            findNavController().popBackStack()
+
+                        } else if (status == Status.FAILED) {
+                            this.binding.parentLayout.alpha = 1f
+                            this.binding.progressBar.visibility = View.GONE
+                        }
+
+                    }
+                }
+                .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+                .show()
+
+        }
+
         if (this.toAdd) {
-            this.binding.itemName.visibility = View.GONE
-            this.binding.supplierName.visibility = View.GONE
+            this.binding.apply {
+                itemName.visibility = View.GONE
+                binding.supplierName.visibility = View.GONE
+                binding.deleteBtn.visibility = View.INVISIBLE
+            }
         }
 
         if (this.toEdit) {
-
+            this.binding.deleteBtn.visibility = View.VISIBLE
             this.viewModel.apply {
 
-                val orderedItem = prevOrderedItem
-
-                if(orderedItem == null) {
-                    return@apply
-                }
-                amount.value = orderedItem.amount.toString()
-                quantity.value = orderedItem.quantity.toString()
+                amount.value = prevOrderedItem.amount.toString()
+                quantity.value = prevOrderedItem.quantity.toString()
 
                 var year = 0
                 var month = 0
                 var myDate = 0
 
-                Converters.getYearMonthDateFromTimestamp(orderedItem.timestamp).apply {
+                Converters.getYearMonthDateFromTimestamp(prevOrderedItem.timestamp).apply {
                     year = first
                     month = second
                     myDate = third
@@ -245,9 +281,9 @@ class AddEditOrderedItemFragment : Fragment() {
 
                 date.value = dateString
 
-                itemName.value = "Item: ${orderedItem.itemName}"
-                supplierName.value = "Supplier: ${orderedItem.supplierName}"
-                isReceived.value = orderedItem.isReceived
+                itemName.value = "Item: ${prevOrderedItem.itemName}"
+                supplierName.value = "Supplier: ${prevOrderedItem.supplierName}"
+                isReceived.value = prevOrderedItem.isReceived
             }
         }
     }

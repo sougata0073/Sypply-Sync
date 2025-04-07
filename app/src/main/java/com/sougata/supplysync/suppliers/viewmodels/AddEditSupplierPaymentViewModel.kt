@@ -1,13 +1,12 @@
 package com.sougata.supplysync.suppliers.viewmodels
 
-import android.util.Log
 import android.view.View
 import androidx.databinding.Bindable
 import androidx.databinding.Observable
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
-import com.sougata.supplysync.firebase.FirestoreRepository
+import com.sougata.supplysync.firebase.SupplierFirestoreRepository
 import com.sougata.supplysync.models.SupplierPayment
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.Status
@@ -29,7 +28,7 @@ class AddEditSupplierPaymentViewModel : ViewModel(), Observable {
     @Bindable
     val supplierName = MutableLiveData("")
 
-    private val firestoreRepository = FirestoreRepository()
+    private val supplierFirestoreRepository = SupplierFirestoreRepository()
 
     val supplierPaymentAddedIndicator = MutableLiveData<Pair<Int, String>>()
     val supplierPaymentEditedIndicator = MutableLiveData<Pair<Int, String>>()
@@ -45,9 +44,9 @@ class AddEditSupplierPaymentViewModel : ViewModel(), Observable {
 
         this.supplierPaymentAddedIndicator.postValue(Status.STARTED to "")
 
-        this.firestoreRepository.addUpdateSupplierPayment(
+        this.supplierFirestoreRepository.addUpdateSupplierPayment(
             supplierPayment,
-            FirestoreRepository.TO_ADD
+            SupplierFirestoreRepository.TO_ADD
         ) { status, message ->
             this.supplierPaymentAddedIndicator.postValue(status to message)
         }
@@ -69,9 +68,9 @@ class AddEditSupplierPaymentViewModel : ViewModel(), Observable {
 
         this.supplierPaymentEditedIndicator.postValue(Status.STARTED to "")
 
-        this.firestoreRepository.addUpdateSupplierPayment(
+        this.supplierFirestoreRepository.addUpdateSupplierPayment(
             supplierPayment,
-            FirestoreRepository.TO_UPDATE
+            SupplierFirestoreRepository.TO_UPDATE
         ) { status, message ->
             this.supplierPaymentEditedIndicator.postValue(status to message)
         }

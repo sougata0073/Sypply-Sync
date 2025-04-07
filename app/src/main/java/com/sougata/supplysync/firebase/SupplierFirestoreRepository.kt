@@ -1,6 +1,5 @@
 package com.sougata.supplysync.firebase
 
-import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -21,7 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class FirestoreRepository {
+class SupplierFirestoreRepository {
 
     private val currentUser = Firebase.auth.currentUser
     private val db = Firebase.firestore
@@ -222,80 +221,6 @@ class FirestoreRepository {
 
     }
 
-    fun getNumberOfSuppliers(onComplete: (Int, Int, String) -> Unit) {
-
-        if (currentUser == null) {
-            onComplete(Status.FAILED, 0, KeysAndMessages.USER_NOT_FOUND)
-            return
-        }
-
-        val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
-
-        valuesCol.document("suppliers_count").get().addOnCompleteListener {
-            if (it.isSuccessful) {
-                onComplete(
-                    Status.SUCCESS,
-                    Converters.numberToInt(it.result["value"] as Number),
-                    KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
-                )
-            } else {
-                onComplete(Status.FAILED, 0, it.exception?.message.toString())
-            }
-        }
-    }
-
-    fun getDueAmountToSuppliers(onComplete: (Int, Double, String) -> Unit) {
-        if (currentUser == null) {
-            onComplete(Status.FAILED, 0.0, KeysAndMessages.USER_NOT_FOUND)
-            return
-        }
-
-        val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
-
-        valuesCol.document("suppliers_due_amount").get().addOnCompleteListener {
-            if (it.isSuccessful) {
-                onComplete(
-                    Status.SUCCESS,
-                    Converters.numberToDouble(it.result["value"] as Number),
-                    KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
-                )
-            } else {
-                onComplete(Status.FAILED, 0.0, it.exception?.message.toString())
-            }
-        }
-    }
-
-    fun deleteSupplier(supplier: Supplier, onComplete: (Int, String) -> Unit) {
-
-        if (currentUser == null) {
-            onComplete(Status.FAILED, KeysAndMessages.USER_NOT_FOUND)
-            return
-        }
-
-        val suppliersCol = this.usersCol.document(this.currentUser.uid).collection("suppliers")
-        val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
-
-        this.usersCol.firestore.runTransaction {
-            it.delete(suppliersCol.document(supplier.id))
-            it.update(
-                valuesCol.document("suppliers_count"),
-                mapOf("value" to FieldValue.increment(-1))
-            )
-            it.update(
-                valuesCol.document("suppliers_due_amount"),
-                mapOf("value" to FieldValue.increment(-supplier.dueAmount))
-            )
-        }.addOnCompleteListener {
-
-            if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, "User deleted successfully")
-            } else {
-                onComplete(Status.FAILED, it.exception?.message.toString())
-            }
-
-        }
-    }
-
     fun addUpdateSupplierItem(
         supplierItem: SupplierItem, action: String, onComplete: (Int, String) -> Unit
     ) {
@@ -443,6 +368,51 @@ class FirestoreRepository {
         }
     }
 
+
+
+    fun getNumberOfSuppliers(onComplete: (Int, Int, String) -> Unit) {
+
+        if (currentUser == null) {
+            onComplete(Status.FAILED, 0, KeysAndMessages.USER_NOT_FOUND)
+            return
+        }
+
+        val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
+
+        valuesCol.document("suppliers_count").get().addOnCompleteListener {
+            if (it.isSuccessful) {
+                onComplete(
+                    Status.SUCCESS,
+                    Converters.numberToInt(it.result["value"] as Number),
+                    KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                )
+            } else {
+                onComplete(Status.FAILED, 0, it.exception?.message.toString())
+            }
+        }
+    }
+
+    fun getDueAmountToSuppliers(onComplete: (Int, Double, String) -> Unit) {
+        if (currentUser == null) {
+            onComplete(Status.FAILED, 0.0, KeysAndMessages.USER_NOT_FOUND)
+            return
+        }
+
+        val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
+
+        valuesCol.document("suppliers_due_amount").get().addOnCompleteListener {
+            if (it.isSuccessful) {
+                onComplete(
+                    Status.SUCCESS,
+                    Converters.numberToDouble(it.result["value"] as Number),
+                    KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                )
+            } else {
+                onComplete(Status.FAILED, 0.0, it.exception?.message.toString())
+            }
+        }
+    }
+
     fun getOrdersToReceive(onComplete: (Int, Int, String) -> Unit) {
         if (currentUser == null) {
             onComplete(Status.FAILED, 0, KeysAndMessages.USER_NOT_FOUND)
@@ -463,6 +433,118 @@ class FirestoreRepository {
             }
         }
     }
+
+
+
+    fun deleteSupplier(supplier: Supplier, onComplete: (Int, String) -> Unit) {
+
+        if (currentUser == null) {
+            onComplete(Status.FAILED, KeysAndMessages.USER_NOT_FOUND)
+            return
+        }
+
+        val suppliersCol = this.usersCol.document(this.currentUser.uid).collection("suppliers")
+        val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
+
+        this.usersCol.firestore.runTransaction {
+            it.delete(suppliersCol.document(supplier.id))
+            it.update(
+                valuesCol.document("suppliers_count"),
+                mapOf("value" to FieldValue.increment(-1))
+            )
+            it.update(
+                valuesCol.document("suppliers_due_amount"),
+                mapOf("value" to FieldValue.increment(-supplier.dueAmount))
+            )
+        }.addOnCompleteListener {
+
+            if (it.isSuccessful) {
+                onComplete(Status.SUCCESS, "Supplier deleted successfully")
+            } else {
+                onComplete(Status.FAILED, it.exception?.message.toString())
+            }
+
+        }
+    }
+
+    fun deleteSupplierItem(supplierItem: SupplierItem, onComplete: (Int, String) -> Unit) {
+        if (currentUser == null) {
+            onComplete(Status.FAILED, KeysAndMessages.USER_NOT_FOUND)
+            return
+        }
+
+        val supplierItemsCol = this.usersCol.document(this.currentUser.uid).collection("supplier_items")
+        val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
+
+        this.usersCol.firestore.runTransaction {
+            it.delete(supplierItemsCol.document(supplierItem.id))
+            it.update(
+                valuesCol.document("supplier_items_count"),
+                mapOf("value" to FieldValue.increment(-1))
+            )
+        }.addOnCompleteListener {
+
+            if (it.isSuccessful) {
+                onComplete(Status.SUCCESS, "Item deleted successfully")
+            } else {
+                onComplete(Status.FAILED, it.exception?.message.toString())
+            }
+
+        }
+
+    }
+
+    fun deleteSupplierPayment(supplierPayment: SupplierPayment, onComplete: (Int, String) -> Unit) {
+        if (currentUser == null) {
+            onComplete(Status.FAILED, KeysAndMessages.USER_NOT_FOUND)
+            return
+        }
+
+        val supplierPaymentsCol = this.usersCol.document(this.currentUser.uid).collection("supplier_payments")
+        val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
+
+        this.usersCol.firestore.runTransaction {
+            it.delete(supplierPaymentsCol.document(supplierPayment.id))
+        }.addOnCompleteListener {
+
+            if (it.isSuccessful) {
+                onComplete(Status.SUCCESS, "Payment deleted successfully")
+            } else {
+                onComplete(Status.FAILED, it.exception?.message.toString())
+            }
+
+        }
+
+    }
+
+    fun deleteOrderedItem(orderedItem: OrderedItem, onComplete: (Int, String) -> Unit) {
+        if (currentUser == null) {
+            onComplete(Status.FAILED, KeysAndMessages.USER_NOT_FOUND)
+            return
+        }
+
+        val orderedItemsCol = this.usersCol.document(this.currentUser.uid).collection("ordered_items")
+        val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
+
+        this.usersCol.firestore.runTransaction {
+            it.delete(orderedItemsCol.document(orderedItem.id))
+            if(!orderedItem.isReceived) {
+                it.update(
+                    valuesCol.document("orders_to_receive"),
+                    mapOf("value" to FieldValue.increment(-1))
+                )
+            }
+        }.addOnCompleteListener {
+            if (it.isSuccessful) {
+                onComplete(Status.SUCCESS, "Ordered item deleted successfully")
+            } else {
+                onComplete(Status.FAILED, it.exception?.message.toString())
+            }
+        }
+    }
+
+
+
 
     fun getPurchaseAmountByRange(
         startTimestamp: Timestamp,

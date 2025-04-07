@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.findNavController
 import com.sougata.supplysync.R
-import com.sougata.supplysync.firebase.FirestoreRepository
+import com.sougata.supplysync.firebase.SupplierFirestoreRepository
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.util.Inputs
 import com.sougata.supplysync.util.Status
@@ -14,7 +14,7 @@ import com.sougata.supplysync.util.modelslist.ModelsListFragment
 
 class SuppliersHomeViewModel : ViewModel() {
 
-    val firestoreRepository = FirestoreRepository()
+    val supplierFirestoreRepository = SupplierFirestoreRepository()
 
     val numberOfSuppliers = MutableLiveData<Triple<Int, Int, String>>()
     val dueAmountToSuppliers = MutableLiveData<Triple<Double, Int, String>>()
@@ -30,7 +30,7 @@ class SuppliersHomeViewModel : ViewModel() {
 //        Log.d("api", "num supplier")
         this.numberOfSuppliers.postValue(Triple(0, Status.STARTED, ""))
 
-        this.firestoreRepository.getNumberOfSuppliers { status, count, message ->
+        this.supplierFirestoreRepository.getNumberOfSuppliers { status, count, message ->
             this.numberOfSuppliers.postValue(Triple(count, status, message))
         }
     }
@@ -39,7 +39,7 @@ class SuppliersHomeViewModel : ViewModel() {
 //        Log.d("api", "due amount supplier")
         this.dueAmountToSuppliers.postValue(Triple(0.0, Status.STARTED, ""))
 
-        this.firestoreRepository.getDueAmountToSuppliers { status, amount, message ->
+        this.supplierFirestoreRepository.getDueAmountToSuppliers { status, amount, message ->
             this.dueAmountToSuppliers.postValue(Triple(amount, status, message))
         }
     }
@@ -48,7 +48,7 @@ class SuppliersHomeViewModel : ViewModel() {
 //        Log.d("api", "orders to receive")
         this.numberOfOrdersToReceive.postValue(Triple(0, Status.STARTED, ""))
 
-        this.firestoreRepository.getOrdersToReceive { status, count, message ->
+        this.supplierFirestoreRepository.getOrdersToReceive { status, count, message ->
             this.numberOfOrdersToReceive.postValue(Triple(count, status, message))
         }
     }
