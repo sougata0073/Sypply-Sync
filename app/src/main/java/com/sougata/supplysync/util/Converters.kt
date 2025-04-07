@@ -1,7 +1,6 @@
 package com.sougata.supplysync.util
 
 import com.google.firebase.Timestamp
-import com.sougata.supplysync.util.Converters.getShortedNumberString
 import java.text.DecimalFormat
 import java.text.NumberFormat
 import java.util.Calendar
@@ -9,7 +8,9 @@ import java.util.Locale
 
 
 //fun main() {
-//    print(getYearMonthDateFromDateString("06-04-2025").toString())
+//
+//
+//
 //}
 
 

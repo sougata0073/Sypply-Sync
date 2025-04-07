@@ -1,4 +1,4 @@
-package com.sougata.supplysync.firebase
+package com.sougata.supplysync.cloud
 
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
@@ -501,7 +501,6 @@ class SupplierFirestoreRepository {
         }
 
         val supplierPaymentsCol = this.usersCol.document(this.currentUser.uid).collection("supplier_payments")
-        val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
 
         this.usersCol.firestore.runTransaction {
             it.delete(supplierPaymentsCol.document(supplierPayment.id))

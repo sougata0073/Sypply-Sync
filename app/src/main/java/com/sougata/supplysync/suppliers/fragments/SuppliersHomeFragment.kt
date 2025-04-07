@@ -25,6 +25,8 @@ class SuppliersHomeFragment : Fragment() {
 
     private lateinit var viewModel: SuppliersHomeViewModel
 
+    private var isDataAdded = false
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -56,6 +58,21 @@ class SuppliersHomeFragment : Fragment() {
 //        Log.d("FragmentsLog", "onViewCreated() called")
 
     }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        val bundle = Bundle().apply {
+            putBoolean(
+                KeysAndMessages.DATA_ADDED_KEY, isDataAdded
+            )
+        }
+        this.parentFragmentManager.setFragmentResult(
+            KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+            bundle
+        )
+    }
+
 
     private fun registerSubscribers() {
 
@@ -111,7 +128,7 @@ class SuppliersHomeFragment : Fragment() {
 
 //            Log.d("FragmentsLog", "listened")
 
-            val isDataAdded = bundle.getBoolean(KeysAndMessages.DATA_ADDED_KEY)
+            this.isDataAdded = bundle.getBoolean(KeysAndMessages.DATA_ADDED_KEY)
 
             if (isDataAdded) {
                 this.viewModel.loadDueAmountToSuppliers()

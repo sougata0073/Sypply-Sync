@@ -1,24 +1,17 @@
 package com.sougata.supplysync.suppliers.viewmodels
 
 import android.view.View
-import androidx.databinding.Bindable
-import androidx.databinding.Observable
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
-import com.sougata.supplysync.firebase.SupplierFirestoreRepository
+import com.sougata.supplysync.cloud.SupplierFirestoreRepository
 import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.util.Status
 
-class AddEditSupplierItemViewModel : ViewModel(), Observable {
+class AddEditSupplierItemViewModel : ViewModel() {
 
-    @Bindable
     val name = MutableLiveData("")
-
-    @Bindable
     val price = MutableLiveData("")
-
-    @Bindable
     val details = MutableLiveData("")
 
     private val supplierFirestoreRepository = SupplierFirestoreRepository()
@@ -84,13 +77,6 @@ class AddEditSupplierItemViewModel : ViewModel(), Observable {
         }
 
         return SupplierItem(name, price, details).apply { id = supplierItemId.orEmpty() }
-    }
-
-
-    override fun addOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {
-    }
-
-    override fun removeOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {
     }
 
 }

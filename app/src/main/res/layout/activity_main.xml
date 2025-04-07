@@ -16,28 +16,25 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:defaultNavHost="true"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             app:navGraph="@navigation/main_nav" />
 
-        <com.google.android.material.bottomnavigation.BottomNavigationView
+        <me.ibrahimsn.lib.SmoothBottomBar
             android:id="@+id/bottomNav"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             android:layout_gravity="bottom"
+            android:elevation="5dp"
+            app:indicatorRadius="8dp"
+            app:backgroundColor="@color/night_mode_background"
+            app:iconTint="@color/bw"
+            app:iconTintActive="@color/bw"
+            app:indicatorColor="@color/bottom_nav_active_indicator"
             app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
-            android:background="@color/night_mode_background"
-            android:fontFamily="@font/acherus_feral_bold"
-            android:textSize="15sp"
-            app:itemIconSize="20dp"
-            app:itemIconTint="@color/bw"
-            app:itemTextColor="@color/bw"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:menu="@menu/bottom_nav_menu" />
+            app:menu="@menu/bottom_nav_menu"
+            app:textColor="@color/bw" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

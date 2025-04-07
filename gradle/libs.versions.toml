@@ -11,13 +11,15 @@ activity = "1.10.1"
 constraintlayout = "2.2.1"
 lifecycle = "2.8.7"
 navigation = "2.8.9"
-coroutines = "1.7.3"
+coroutines = "1.10.1"
 firebaseBom = "33.12.0"
 mpAndroidChart = "3.1.0"
 glide = "4.16.0"
 recyclerviewAnimators = "4.0.2"
 shimmer = "0.5.0"
 annotation = "1.9.1"
+supabaseBom = "3.1.4"
+smoothBottomNav = "1.7.9"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -37,11 +39,14 @@ kotlinx-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutin
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
 firebase-authentication = { group = "com.google.firebase", name = "firebase-auth" }
+supabase-bom = { group = "io.github.jan-tennert.supabase", name = "bom", version.ref = "supabaseBom" }
+supabase-storage = { group = "io.github.jan-tennert.supabase", name = "storage-kt" }
 mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpAndroidChart" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 recyclerview-animators = { group = "jp.wasabeef", name = "recyclerview-animators", version.ref = "recyclerviewAnimators" }
 shimmer = { group = "com.facebook.shimmer", name = "shimmer", version.ref = "shimmer" }
 androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
+smoothBottomBar = { group = "com.github.ibrahimsn98", name = "SmoothBottomBar", version.ref = "smoothBottomNav" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -17,7 +17,7 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentAddEditSupplierPaymentBinding
-import com.sougata.supplysync.firebase.SupplierFirestoreRepository
+import com.sougata.supplysync.cloud.SupplierFirestoreRepository
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.models.SupplierPayment

@@ -1,43 +1,29 @@
 package com.sougata.supplysync.suppliers.viewmodels
 
 import android.view.View
-import androidx.databinding.Bindable
-import androidx.databinding.Observable
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
-import com.sougata.supplysync.firebase.SupplierFirestoreRepository
+import com.sougata.supplysync.cloud.SupplierFirestoreRepository
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.util.Inputs
 import com.sougata.supplysync.util.Status
 
-class AddEditSupplierViewModel : ViewModel(), Observable {
+class AddEditSupplierViewModel : ViewModel() {
 
-    @Bindable
     val name = MutableLiveData("")
-
-    @Bindable
     val email = MutableLiveData("")
-
-    @Bindable
     val phone = MutableLiveData("")
-
-    @Bindable
     val dueAmount = MutableLiveData("")
-
-    @Bindable
     val paymentDetails = MutableLiveData("")
-
-    @Bindable
     val note = MutableLiveData("")
-
-    @Bindable
     val profileImageUrl = MutableLiveData("")
 
     private val supplierFirestoreRepository = SupplierFirestoreRepository()
 
     val supplierAddedIndicator = MutableLiveData<Pair<Int, String>>()
     val supplierEditedIndicator = MutableLiveData<Pair<Int, String>>()
+
 
     fun addSupplier(view: View) {
         val supplier = try {
@@ -110,11 +96,5 @@ class AddEditSupplierViewModel : ViewModel(), Observable {
             if (profileImageUrl.isEmpty()) Inputs.getRandomImageUrl() else profileImageUrl
         ).apply { id = supplierId.orEmpty() }
     }
-
-
-    override fun addOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {}
-
-    override fun removeOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {}
-
 
 }

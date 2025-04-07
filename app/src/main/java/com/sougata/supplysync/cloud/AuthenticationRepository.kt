@@ -1,4 +1,4 @@
-package com.sougata.supplysync.firebase
+package com.sougata.supplysync.cloud
 
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.ktx.auth

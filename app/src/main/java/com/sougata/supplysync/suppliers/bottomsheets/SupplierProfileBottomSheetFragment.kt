@@ -9,15 +9,12 @@ import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
-import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.BottomSheetSupplierProfileBinding
-import com.sougata.supplysync.firebase.SupplierFirestoreRepository
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.Inputs
-import com.sougata.supplysync.util.Status
 
 class SupplierProfileBottomSheetFragment : BottomSheetDialogFragment() {
 

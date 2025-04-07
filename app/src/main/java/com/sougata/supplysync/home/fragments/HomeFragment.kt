@@ -34,6 +34,8 @@ class HomeFragment : Fragment() {
 
     private lateinit var viewModel: HomeFragmentViewModel
 
+    private var isDataAdded = false
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -57,6 +59,22 @@ class HomeFragment : Fragment() {
         this.initializeUI()
 
         this.registerListeners()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+//        Log.d("FragmentsLog", "onDestroyView() called home")
+
+        val bundle = Bundle().apply {
+            putBoolean(
+                KeysAndMessages.DATA_ADDED_KEY, isDataAdded
+            )
+        }
+        this.parentFragmentManager.setFragmentResult(
+            KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+            bundle
+        )
     }
 
     private fun initializeUI() {
@@ -97,6 +115,21 @@ class HomeFragment : Fragment() {
 
     private fun registerListeners() {
 
+        this.viewModel.numberOfOrdersToReceive.observe(this.viewLifecycleOwner) {
+
+            if (it.second == Status.STARTED) {
+
+            } else if (it.second == Status.SUCCESS) {
+
+                this.binding.ordersToReceiveNumber.text = it.first.toString()
+
+            } else if (it.second == Status.FAILED) {
+
+                this.onFailedToLoadData(it.third)
+
+            }
+        }
+
         this.viewModel.purchaseChartData.observe(this.viewLifecycleOwner) {
 
             if (it.second == Status.STARTED) {
@@ -133,6 +166,20 @@ class HomeFragment : Fragment() {
 
                 this.onFailedToLoadData(it.third)
 
+            }
+
+        }
+
+        this.parentFragmentManager.setFragmentResultListener(
+            KeysAndMessages.RECENT_DATA_CHANGED_KEY, this.viewLifecycleOwner
+        ) { requestKey, bundle ->
+
+//            Log.d("FragmentsLog", "listened")
+
+            this.isDataAdded = bundle.getBoolean(KeysAndMessages.DATA_ADDED_KEY)
+
+            if (isDataAdded) {
+                this.viewModel.loadOrdersToReceive()
             }
 
         }

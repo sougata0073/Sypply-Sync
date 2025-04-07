@@ -9,7 +9,7 @@ import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ActivityLogInBinding
-import com.sougata.supplysync.firebase.AuthenticationRepository
+import com.sougata.supplysync.cloud.AuthenticationRepository
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 

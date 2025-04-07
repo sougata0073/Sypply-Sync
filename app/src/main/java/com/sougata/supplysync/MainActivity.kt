@@ -2,22 +2,25 @@ package com.sougata.supplysync
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
 import com.sougata.supplysync.databinding.ActivityMainBinding
 import com.sougata.supplysync.login.LoginActivity
 import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.ViewAnimator
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
 
     private lateinit var viewModel: MainActivityViewModel
+
+    private lateinit var navController: NavController
 
     override fun onStart() {
         super.onStart()
@@ -70,29 +73,36 @@ class MainActivity : AppCompatActivity() {
 
         this.binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        this.binding.bottomNav.isItemActiveIndicatorEnabled = false
-
         this.binding.lifecycleOwner = this
 
-        this.setUpNavController()
-
+        this.setupBottomNav()
     }
 
-    private fun setUpNavController() {
-        val navController =
+    private fun setupBottomNav() {
+
+        this.navController =
             (this.supportFragmentManager.findFragmentById(R.id.navHostMain) as NavHostFragment).navController
 
-        this.binding.bottomNav.setupWithNavController(navController)
+        val popupMenu = PopupMenu(this, this.binding.bottomNav)
+        popupMenu.inflate(R.menu.bottom_nav_menu)
+        val menu = popupMenu.menu
+        this.binding.bottomNav.setupWithNavController(menu, this.navController)
 
-        navController.addOnDestinationChangedListener { navController, destination, arguments ->
+        val viewAnimator = ViewAnimator(this.binding.bottomNav)
+
+        this.navController.addOnDestinationChangedListener { navController, destination, arguments ->
 
             when (destination.id) {
                 R.id.addEditSupplierFragment, R.id.addEditSupplierPaymentFragment,
                 R.id.addEditOrderedItemFragment -> {
-                    this.binding.bottomNav.visibility = View.GONE
+                    viewAnimator.slideDownFade()
                 }
 
-                else -> this.binding.bottomNav.visibility = View.VISIBLE
+                else -> {
+                    if (this.binding.bottomNav.alpha != 1f) {
+                        viewAnimator.slideUpFade()
+                    }
+                }
             }
 
         }

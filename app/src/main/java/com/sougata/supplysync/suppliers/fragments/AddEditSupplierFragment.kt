@@ -2,9 +2,12 @@ package com.sougata.supplysync.suppliers.fragments
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -12,8 +15,8 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
+import com.sougata.supplysync.cloud.SupplierFirestoreRepository
 import com.sougata.supplysync.databinding.FragmentAddEditSupplierBinding
-import com.sougata.supplysync.firebase.SupplierFirestoreRepository
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierViewModel
 import com.sougata.supplysync.util.KeysAndMessages
@@ -35,6 +38,11 @@ class AddEditSupplierFragment : Fragment() {
     private var isSupplierDeleted = false
 
     private val supplierFirestoreRepository = SupplierFirestoreRepository()
+
+    private val imageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) {
+        Log.d("img", it.toString())
+        Log.d("tagy", "Hello")
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,6 +118,11 @@ class AddEditSupplierFragment : Fragment() {
     }
 
     private fun initializeUI() {
+
+        this.binding.profileImage.setOnClickListener {
+            this.imageLauncher.launch("image/*")
+        }
+
         this.binding.saveBtn.setOnClickListener {
 
             if (this.toAdd) {
@@ -167,7 +180,7 @@ class AddEditSupplierFragment : Fragment() {
 
         }
 
-        if(this.toAdd) {
+        if (this.toAdd) {
             binding.deleteBtn.visibility = View.INVISIBLE
         }
 

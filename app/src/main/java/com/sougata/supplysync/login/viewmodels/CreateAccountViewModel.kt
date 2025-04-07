@@ -1,34 +1,22 @@
 package com.sougata.supplysync.login.viewmodels
 
-import android.os.Bundle
 import android.view.View
-import androidx.databinding.Bindable
-import androidx.databinding.Observable
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
-import com.sougata.supplysync.firebase.AuthenticationRepository
+import com.sougata.supplysync.cloud.AuthenticationRepository
 import com.sougata.supplysync.models.User
 import com.sougata.supplysync.util.Status
 import com.sougata.supplysync.util.Validations
 
-class CreateAccountViewModel : ViewModel(), Observable {
+class CreateAccountViewModel : ViewModel() {
 
-    @Bindable
     val name = MutableLiveData("")
-
-    @Bindable
     val email = MutableLiveData("")
-
-    @Bindable
     val phone = MutableLiveData("")
-
-    @Bindable
     val password = MutableLiveData("")
-
-    @Bindable
     val confirmPassword = MutableLiveData("")
 
     val accountCreationIndicator = MutableLiveData<Triple<User, Int, String>>()
@@ -83,13 +71,6 @@ class CreateAccountViewModel : ViewModel(), Observable {
 
     fun onLoginClick(view: View) {
         view.findNavController().navigate(R.id.action_createAccountFragment_to_loginFragment)
-    }
-
-    override fun addOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {
-
-    }
-
-    override fun removeOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {
     }
 
 }

@@ -1,33 +1,21 @@
 package com.sougata.supplysync.suppliers.viewmodels
 
 import android.view.View
-import androidx.databinding.Bindable
-import androidx.databinding.Observable
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
-import com.sougata.supplysync.firebase.SupplierFirestoreRepository
+import com.sougata.supplysync.cloud.SupplierFirestoreRepository
 import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.Status
 
-class AddEditOrderedItemViewModel : ViewModel(), Observable {
-    @Bindable
+class AddEditOrderedItemViewModel : ViewModel() {
+
     val amount = MutableLiveData("")
-
-    @Bindable
     val quantity = MutableLiveData("")
-
-    @Bindable
     val date = MutableLiveData("")
-
-//    @Bindable
     val isReceived = MutableLiveData<Boolean>()
-
-    @Bindable
     val itemName = MutableLiveData("")
-
-    @Bindable
     val supplierName = MutableLiveData("")
 
     private val supplierFirestoreRepository = SupplierFirestoreRepository()
@@ -150,7 +138,4 @@ class AddEditOrderedItemViewModel : ViewModel(), Observable {
     }
 
 
-    override fun addOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {}
-
-    override fun removeOnPropertyChangedCallback(callback: Observable.OnPropertyChangedCallback?) {}
 }

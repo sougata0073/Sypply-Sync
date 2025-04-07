@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -13,7 +15,6 @@ plugins {
 
     // For parcelable
     id("kotlin-parcelize")
-
 }
 
 android {
@@ -28,6 +29,14 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        vectorDrawables.useSupportLibrary = true
+
+        val properties = Properties()
+        properties.load(project.rootProject.file("local.properties").inputStream())
+
+        buildConfigField("String", "SUPABASE_API_KEY", properties.getProperty("SUPABASE_API_KEY"))
+
     }
 
     buildTypes {
@@ -37,6 +46,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -47,8 +57,8 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
-        dataBinding = true
         buildConfig = true
+        dataBinding = true
         viewBinding = true
     }
 }
@@ -87,4 +97,11 @@ dependencies {
     implementation(libs.glide)
     implementation(libs.shimmer)
     implementation(libs.recyclerview.animators)
+
+    // Supabase libraries
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.storage)
+
+    // Animated bottom nav
+    implementation(libs.smoothBottomBar)
 }

@@ -22,24 +22,22 @@
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="56dp"
             app:cardBackgroundColor="@color/night_mode_background"
             app:cardElevation="2dp">
 
             <TextView
                 android:id="@+id/heading"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_gravity="start"
                 android:layout_marginStart="15dp"
-                android:layout_marginTop="10dp"
                 android:layout_marginEnd="15dp"
-                android:layout_marginBottom="10dp"
                 android:fontFamily="@font/acherus_feral_bold"
-                android:gravity="start"
+                android:gravity="center_vertical"
                 android:text="Home"
                 android:textColor="@color/bw"
-                android:textSize="25sp" />
+                android:textSize="20sp" />
 
         </androidx.cardview.widget.CardView>
 

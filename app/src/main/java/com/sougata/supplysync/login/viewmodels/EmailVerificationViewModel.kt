@@ -3,8 +3,7 @@ package com.sougata.supplysync.login.viewmodels
 import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.sougata.supplysync.firebase.AuthenticationRepository
-import com.sougata.supplysync.models.User
+import com.sougata.supplysync.cloud.AuthenticationRepository
 import com.sougata.supplysync.util.Status
 
 class EmailVerificationViewModel : ViewModel() {
