@@ -12,6 +12,6 @@ data class OrderedItem(
     var amount: Double,
     var supplierId: String,
     var supplierName: String,
-    var ordereTimestamp: Timestamp,
+    var orderTimestamp: Timestamp,
     var isReceived: Boolean
 ): Model(), Parcelable

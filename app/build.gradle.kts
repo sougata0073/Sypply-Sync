@@ -98,10 +98,10 @@ dependencies {
     implementation(libs.shimmer)
     implementation(libs.recyclerview.animators)
 
-    // Supabase libraries
-    implementation(platform(libs.supabase.bom))
-    implementation(libs.supabase.storage)
-
     // Animated bottom nav
     implementation(libs.smoothBottomBar)
+
+    // IText PDF maker
+    implementation(libs.iText)
+
 }

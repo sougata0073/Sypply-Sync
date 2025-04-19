@@ -120,7 +120,11 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
 //        }
 
         return SupplierPayment(
-            amount, year, month, date, hour, minute, note, supplierId, supplierName
+            amount = amount,
+            paymentTimestamp = Converters.getTimestampFromDataTime(year, month, date, hour, minute),
+            note = note,
+            supplierId = supplierId,
+            supplierName = supplierName
         ).apply { id = supplierPaymentId.orEmpty() }
     }
 

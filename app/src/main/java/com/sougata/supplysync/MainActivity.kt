@@ -2,9 +2,12 @@ package com.sougata.supplysync
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -43,14 +46,19 @@ class MainActivity : AppCompatActivity() {
         val currentUser = this.viewModel.currentUser
 
         if (currentUser == null) {
+
+//            Log.d("reason", "user not found")
+
             val bundle = Bundle().apply {
                 putString("reason", KeysAndMessages.USER_NOT_FOUND)
             }
 
             startActivity(Intent(this, LoginActivity::class.java), bundle)
-            finish()
+            finishAffinity()
 
         } else if (!currentUser.isEmailVerified) {
+
+//            Log.d("reason", "email not verified")
 
             val bundle = Bundle().apply {
                 putString("reason", KeysAndMessages.EMAIL_IS_NOT_VERIFIED)
@@ -61,7 +69,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             startActivity(intent)
-            finish()
+            finishAffinity()
         }
 
 

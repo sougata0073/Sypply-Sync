@@ -1,16 +1,18 @@
 package com.sougata.supplysync.home.fragments
 
+import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsetsController
+import androidx.core.content.ContextCompat
 import androidx.core.util.Pair
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
@@ -23,7 +25,6 @@ import com.sougata.supplysync.login.LoginActivity
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -78,7 +79,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun initializeUI() {
-
 
         this.binding.purchaseChartCalendarBtn.setOnClickListener {
             val dateRangePicker =
@@ -138,29 +138,29 @@ class HomeFragment : Fragment() {
 
             } else if (it.second == Status.SUCCESS) {
 
-                lifecycleScope.launch {
-                    binding.purchaseLineChart.apply {
+                binding.purchaseLineChart.apply {
 
-                        data = it.first
+                    data = it.first
 
-                        axisLeft.valueFormatter = object : IndexAxisValueFormatter() {
-                            // It is called everytime when the any axis needs to show a value
-                            // The parameter is the actual value and I am formatting it with my own formatter
-                            override fun getFormattedValue(value: Float): String? {
+                    axisLeft.valueFormatter = object : IndexAxisValueFormatter() {
+                        // It is called everytime when the any axis needs to show a value
+                        // The parameter is the actual value and I am formatting it with my own formatter
+                        override fun getFormattedValue(value: Float): String? {
 //                                Log.d("value", value.toString())
-                                return Converters.getShortedNumberString(value.toDouble())
-                            }
+                            return Converters.getShortedNumberString(value.toDouble())
                         }
                     }
-//                    Log.d("val", it.first?.dataSets.toString())
-                    binding.apply {
-                        purchaseLineChart.visibility = View.VISIBLE
-                        purchaseLineChart.animateY(1000)
-                        progressBarPurchaseChart.visibility = View.GONE
-                        purchaseChartDateRange.visibility = View.VISIBLE
-                    }
 
+                    setVisibleXRangeMaximum(15f)
                 }
+//                    Log.d("val", it.first?.dataSets.toString())
+                binding.apply {
+                    purchaseLineChart.visibility = View.VISIBLE
+                    purchaseLineChart.animateY(1000)
+                    progressBarPurchaseChart.visibility = View.GONE
+                    purchaseChartDateRange.visibility = View.VISIBLE
+                }
+
 
             } else if (it.second == Status.FAILED) {
 
@@ -231,5 +231,4 @@ class HomeFragment : Fragment() {
             Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()
         }
     }
-
 }

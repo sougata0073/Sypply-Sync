@@ -267,7 +267,7 @@ class AddEditOrderedItemFragment : Fragment() {
                 var month = 0
                 var myDate = 0
 
-                Converters.getYearMonthDateFromTimestamp(prevOrderedItem.timestamp).apply {
+                Converters.getDateFromTimestamp(prevOrderedItem.timestamp).apply {
                     year = first
                     month = second
                     myDate = third

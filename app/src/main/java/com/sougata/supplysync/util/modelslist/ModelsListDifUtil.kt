@@ -59,15 +59,14 @@ class ModelsListDifUtil(
             )
 
             Model.SUPPLIER_PAYMENT -> createComparator<SupplierPayment>(
-                SupplierPayment::amount, SupplierPayment::year, SupplierPayment::month,
-                SupplierPayment::date, SupplierPayment::hour, SupplierPayment::minute,
+                SupplierPayment::amount, SupplierPayment::paymentTimestamp,
                 SupplierPayment::note, SupplierPayment::supplierId, SupplierPayment::timestamp
             )
 
             Model.ORDERED_ITEM -> createComparator<OrderedItem>(
                 OrderedItem::itemId, OrderedItem::itemName, OrderedItem::quantity,
                 OrderedItem::amount, OrderedItem::supplierId, OrderedItem::supplierName,
-                OrderedItem::ordereTimestamp, OrderedItem::isReceived
+                OrderedItem::orderTimestamp, OrderedItem::isReceived
             )
 
             else -> throw IllegalArgumentException("Unknown model type")

@@ -9,7 +9,7 @@ import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.util.Inputs
 import com.sougata.supplysync.util.Status
 
-class AddEditSupplierViewModel : ViewModel() {
+class AddEditSupplierViewModel() : ViewModel() {
 
     val name = MutableLiveData("")
     val email = MutableLiveData("")
@@ -17,7 +17,6 @@ class AddEditSupplierViewModel : ViewModel() {
     val dueAmount = MutableLiveData("")
     val paymentDetails = MutableLiveData("")
     val note = MutableLiveData("")
-    val profileImageUrl = MutableLiveData("")
 
     private val supplierFirestoreRepository = SupplierFirestoreRepository()
 
@@ -35,12 +34,13 @@ class AddEditSupplierViewModel : ViewModel() {
 
         this.supplierAddedIndicator.postValue(Status.STARTED to "")
 
-        this.supplierFirestoreRepository.addUpdateSupplier(
+        supplierFirestoreRepository.addUpdateSupplier(
             supplier,
             SupplierFirestoreRepository.TO_ADD
         ) { status, message ->
-            this.supplierAddedIndicator.postValue(status to message)
+            supplierAddedIndicator.postValue(status to message)
         }
+
 
     }
 
@@ -70,7 +70,6 @@ class AddEditSupplierViewModel : ViewModel() {
         val dueAmountString = this.dueAmount.value.orEmpty()
         val paymentDetails = this.paymentDetails.value.orEmpty()
         val note = this.note.value.orEmpty()
-        val profileImageUrl = this.profileImageUrl.value.orEmpty()
 
         if (name.isEmpty()) {
             throw Exception("Name can't be empty")
@@ -93,8 +92,15 @@ class AddEditSupplierViewModel : ViewModel() {
             email,
             note,
             paymentDetails,
-            if (profileImageUrl.isEmpty()) Inputs.getRandomImageUrl() else profileImageUrl
+            Inputs.getRandomImageUrl()
         ).apply { id = supplierId.orEmpty() }
     }
 
+//    fun getImageExtension(uri: Uri): String? {
+//        val contentResolver = getApplication<Application>().contentResolver
+//        val mimeType = contentResolver.getType(uri)
+//
+//        return MimeTypeMap.getSingleton()
+//            .getExtensionFromMimeType(mimeType)
+//    }
 }

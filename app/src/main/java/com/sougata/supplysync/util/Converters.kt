@@ -96,7 +96,7 @@ object Converters {
         }
     }
 
-    fun getYearMonthDateFromTimestamp(timestamp: Timestamp): Triple<Int, Int, Int> {
+    fun getDateFromTimestamp(timestamp: Timestamp): Triple<Int, Int, Int> {
         val calendar = Calendar.getInstance()
         calendar.time = timestamp.toDate()
 
@@ -105,6 +105,16 @@ object Converters {
         val date = calendar.get(Calendar.DAY_OF_MONTH)
 
         return Triple(year, month, date)
+    }
+
+    fun getTimeFromTimestamp(timestamp: Timestamp): Pair<Int, Int> {
+        val calendar = Calendar.getInstance()
+        calendar.time = timestamp.toDate()
+
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+
+        return hour to minute
     }
 
     fun getTimestampFromDataTime(

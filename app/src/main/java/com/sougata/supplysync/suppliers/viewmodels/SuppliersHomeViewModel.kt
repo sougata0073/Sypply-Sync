@@ -20,6 +20,19 @@ class SuppliersHomeViewModel : ViewModel() {
     val dueAmountToSuppliers = MutableLiveData<Triple<Double, Int, String>>()
     val numberOfOrdersToReceive = MutableLiveData<Triple<Int, Int, String>>()
 
+    val allApiCallFinishedIndicator = MutableLiveData(false)
+
+    // Change the value according to the number of api calls
+    private val totalApiCalls = 3
+
+    private var apiCallFinishCount = 0
+        set(value) {
+            field = value
+            if (field == this.totalApiCalls) {
+                this.allApiCallFinishedIndicator.postValue(true)
+            }
+        }
+
     init {
         this.loadNumberOfSuppliers()
         this.loadDueAmountToSuppliers()
@@ -27,29 +40,29 @@ class SuppliersHomeViewModel : ViewModel() {
     }
 
     fun loadNumberOfSuppliers() {
-//        Log.d("api", "num supplier")
         this.numberOfSuppliers.postValue(Triple(0, Status.STARTED, ""))
 
         this.supplierFirestoreRepository.getNumberOfSuppliers { status, count, message ->
             this.numberOfSuppliers.postValue(Triple(count, status, message))
+            this.apiCallFinishCount++
         }
     }
 
     fun loadDueAmountToSuppliers() {
-//        Log.d("api", "due amount supplier")
         this.dueAmountToSuppliers.postValue(Triple(0.0, Status.STARTED, ""))
 
         this.supplierFirestoreRepository.getDueAmountToSuppliers { status, amount, message ->
             this.dueAmountToSuppliers.postValue(Triple(amount, status, message))
+            this.apiCallFinishCount++
         }
     }
 
     fun loadOrdersToReceive() {
-//        Log.d("api", "orders to receive")
         this.numberOfOrdersToReceive.postValue(Triple(0, Status.STARTED, ""))
 
         this.supplierFirestoreRepository.getOrdersToReceive { status, count, message ->
             this.numberOfOrdersToReceive.postValue(Triple(count, status, message))
+            this.apiCallFinishCount++
         }
     }
 

@@ -2,12 +2,10 @@ package com.sougata.supplysync.suppliers.fragments
 
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -39,10 +37,9 @@ class AddEditSupplierFragment : Fragment() {
 
     private val supplierFirestoreRepository = SupplierFirestoreRepository()
 
-    private val imageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) {
-        Log.d("img", it.toString())
-        Log.d("tagy", "Hello")
-    }
+//    private lateinit var pickImage: ActivityResultLauncher<PickVisualMediaRequest>
+
+//    private var profileImageUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,11 +72,23 @@ class AddEditSupplierFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
+
+
         this.viewModel = ViewModelProvider(this)[AddEditSupplierViewModel::class.java]
 
         this.binding.viewModel = this.viewModel
 
         this.binding.lifecycleOwner = this.viewLifecycleOwner
+
+//        this.pickImage = registerForActivityResult(PickVisualMedia()) {
+//            if (it != null) {
+//                Log.d("PhotoPicker", "Selected URI: $it")
+//                this.profileImageUri = it
+//            } else {
+//                Log.d("PhotoPicker", "No media selected")
+//            }
+//        }
 
         this.initializeUI()
 
@@ -119,14 +128,16 @@ class AddEditSupplierFragment : Fragment() {
 
     private fun initializeUI() {
 
-        this.binding.profileImage.setOnClickListener {
-            this.imageLauncher.launch("image/*")
-        }
+//        this.binding.profileImage.setOnClickListener {
+//            this.pickImage.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
+//        }
+        
 
         this.binding.saveBtn.setOnClickListener {
 
             if (this.toAdd) {
 
+//                this.viewModel.addSupplier(this.profileImageUri, this.binding.root)
                 this.viewModel.addSupplier(this.binding.root)
 
             } else if (this.toEdit) {
@@ -193,7 +204,6 @@ class AddEditSupplierFragment : Fragment() {
                 dueAmount.value = prevSupplier.dueAmount.toString()
                 paymentDetails.value = prevSupplier.paymentDetails.toString()
                 note.value = prevSupplier.note.toString()
-                profileImageUrl.value = prevSupplier.profileImageUrl.toString()
             }
 
         }

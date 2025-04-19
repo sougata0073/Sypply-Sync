@@ -118,15 +118,33 @@ class ModelsListFragmentHelper(
         model as SupplierPayment
 
         binding.apply {
+            var year = 0
+            var month = 0
+            var myDate = 0
+
+            Converters.getDateFromTimestamp(model.paymentTimestamp).apply {
+                year = first
+                month = second
+                myDate = third
+            }
+
+            var hour = 0
+            var minute = 0
+
+            Converters.getTimeFromTimestamp(model.paymentTimestamp).apply {
+                hour = first
+                minute = second
+            }
+
             val dateString = String.format(
                 Locale.getDefault(),
                 "On: %02d-%02d-%04d",
-                model.date, model.month, model.year
+                myDate, month, year
             )
             val timeString = String.format(
                 Locale.getDefault(),
                 "At: %02d:%02d",
-                model.hour, model.minute
+                hour, minute
             )
 
             name.text = "To: ${model.supplierName}"
@@ -168,7 +186,7 @@ class ModelsListFragmentHelper(
             var month = 0
             var myDate = 0
 
-            Converters.getYearMonthDateFromTimestamp(model.ordereTimestamp).apply {
+            Converters.getDateFromTimestamp(model.orderTimestamp).apply {
                 year = first
                 month = second
                 myDate = third

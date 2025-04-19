@@ -1,5 +1,6 @@
 package com.sougata.supplysync.cloud
 
+import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -7,6 +8,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.util.nextAlphanumericString
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.models.Supplier
@@ -19,6 +21,8 @@ import com.sougata.supplysync.util.Status
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.Calendar
+import kotlin.random.Random
 
 class SupplierFirestoreRepository {
 
@@ -30,6 +34,20 @@ class SupplierFirestoreRepository {
         const val TO_ADD = "To add"
         const val TO_UPDATE = "To update"
     }
+
+//    init {
+//        for (i in 1..100) {
+//            val rnd = Random(System.currentTimeMillis())
+//            val orderedItem = SupplierPayment(
+//                rnd.nextDouble() * 100000,
+//                Timestamp.now(),
+//                rnd.nextAlphanumericString(10),
+//                rnd.nextAlphanumericString(10),
+//                rnd.nextAlphanumericString(10)
+//            ).apply { id = "" }
+//            addUpdateSupplierPayment(orderedItem, TO_ADD) { a, b -> }
+//        }
+//    }
 
     fun insertUserToFirestore(user: User, onComplete: (Int, String) -> Unit) {
 
@@ -59,7 +77,7 @@ class SupplierFirestoreRepository {
     }
 
     fun getSupplierItemsList(
-        coroutineScope: CoroutineScope, lastDocumentSnapshot: DocumentSnapshot?,
+        coroutineScope: CoroutineScope, lastDocumentSnapshot: DocumentSnapshot?, limit: Long,
         onComplete: (Int, MutableList<Model>, DocumentSnapshot?, String) -> Unit
     ) {
 
@@ -75,13 +93,19 @@ class SupplierFirestoreRepository {
         }
 
         return getAnyModelsList(
-            "supplier_items", coroutineScope, lastDocumentSnapshot,
-            howToConvert, onComplete, "timestamp" to Query.Direction.ASCENDING
+            "supplier_items",
+            coroutineScope,
+            lastDocumentSnapshot,
+            "timestamp" to Query.Direction.ASCENDING,
+            limit,
+            howToConvert,
+            onComplete
         )
     }
 
     fun getSuppliersList(
         coroutineScope: CoroutineScope, lastDocumentSnapshot: DocumentSnapshot?,
+        limit: Long,
         onComplete: (Int, MutableList<Model>, DocumentSnapshot?, String) -> Unit
     ) {
 
@@ -102,14 +126,19 @@ class SupplierFirestoreRepository {
         }
 
         return getAnyModelsList(
-            "suppliers", coroutineScope, lastDocumentSnapshot,
-            howToConvert, onComplete, "timestamp" to Query.Direction.ASCENDING
+            "suppliers",
+            coroutineScope,
+            lastDocumentSnapshot,
+            "timestamp" to Query.Direction.ASCENDING,
+            limit,
+            howToConvert,
+            onComplete
         )
 
     }
 
     fun getOrderedItemsList(
-        coroutineScope: CoroutineScope, lastDocumentSnapshot: DocumentSnapshot?,
+        coroutineScope: CoroutineScope, lastDocumentSnapshot: DocumentSnapshot?, limit: Long,
         onComplete: (Int, MutableList<Model>, DocumentSnapshot?, String) -> Unit
     ) {
         val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
@@ -120,7 +149,7 @@ class SupplierFirestoreRepository {
                 amount = Converters.numberToDouble(map["amount"] as Number),
                 supplierId = map["supplier_id"] as String,
                 supplierName = map["supplier_name"] as String,
-                ordereTimestamp = map["order_timestamp"] as Timestamp,
+                orderTimestamp = map["order_timestamp"] as Timestamp,
                 isReceived = map["is_received"] as Boolean
             ).apply {
                 id = document.id
@@ -129,23 +158,24 @@ class SupplierFirestoreRepository {
         }
 
         return getAnyModelsList(
-            "ordered_items", coroutineScope, lastDocumentSnapshot,
-            howToConvert, onComplete, "timestamp" to Query.Direction.ASCENDING
+            "ordered_items",
+            coroutineScope,
+            lastDocumentSnapshot,
+            "timestamp" to Query.Direction.ASCENDING,
+            limit,
+            howToConvert,
+            onComplete
         )
     }
 
     fun getSupplierPaymentsList(
-        coroutineScope: CoroutineScope, lastDocumentSnapshot: DocumentSnapshot?,
+        coroutineScope: CoroutineScope, lastDocumentSnapshot: DocumentSnapshot?, limit: Long,
         onComplete: (Int, MutableList<Model>, DocumentSnapshot?, String) -> Unit
     ) {
         val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
             SupplierPayment(
                 amount = Converters.numberToDouble(map["amount"] as Number),
-                year = Converters.numberToInt(map["year"] as Number),
-                month = Converters.numberToInt(map["month"] as Number),
-                date = Converters.numberToInt(map["day"] as Number),
-                hour = Converters.numberToInt(map["hour"] as Number),
-                minute = Converters.numberToInt(map["minute"] as Number),
+                paymentTimestamp = map["payment_timestamp"] as Timestamp,
                 note = map["note"] as String,
                 supplierId = map["supplier_id"] as String,
                 supplierName = map["supplier_name"] as String
@@ -156,8 +186,13 @@ class SupplierFirestoreRepository {
         }
 
         return getAnyModelsList(
-            "supplier_payments", coroutineScope, lastDocumentSnapshot,
-            howToConvert, onComplete, "timestamp" to Query.Direction.ASCENDING
+            "supplier_payments",
+            coroutineScope,
+            lastDocumentSnapshot,
+            "timestamp" to Query.Direction.ASCENDING,
+            limit,
+            howToConvert,
+            onComplete
         )
     }
 
@@ -213,6 +248,7 @@ class SupplierFirestoreRepository {
         }.addOnCompleteListener {
             if (it.isSuccessful) {
                 onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+//                Log.d("list", "Supplier added successfully")
             } else {
 //                Log.d("list", it.exception?.message.toString())
                 onComplete(Status.FAILED, it.exception?.message.toString())
@@ -275,11 +311,7 @@ class SupplierFirestoreRepository {
 
         val supplierPaymentDoc = mutableMapOf<String, Any>(
             "amount" to supplierPayment.amount,
-            "year" to supplierPayment.year,
-            "month" to supplierPayment.month,
-            "day" to supplierPayment.date,
-            "hour" to supplierPayment.hour,
-            "minute" to supplierPayment.minute,
+            "payment_timestamp" to supplierPayment.paymentTimestamp,
             "note" to supplierPayment.note,
             "supplier_id" to supplierPayment.supplierId,
             "supplier_name" to supplierPayment.supplierName
@@ -323,7 +355,7 @@ class SupplierFirestoreRepository {
             "amount" to orderedItem.amount,
             "supplier_id" to orderedItem.supplierId,
             "supplier_name" to orderedItem.supplierName,
-            "order_timestamp" to orderedItem.ordereTimestamp,
+            "order_timestamp" to orderedItem.orderTimestamp,
             "is_received" to orderedItem.isReceived
         )
 
@@ -367,8 +399,6 @@ class SupplierFirestoreRepository {
             }
         }
     }
-
-
 
     fun getNumberOfSuppliers(onComplete: (Int, Int, String) -> Unit) {
 
@@ -434,8 +464,6 @@ class SupplierFirestoreRepository {
         }
     }
 
-
-
     fun deleteSupplier(supplier: Supplier, onComplete: (Int, String) -> Unit) {
 
         if (currentUser == null) {
@@ -473,7 +501,8 @@ class SupplierFirestoreRepository {
             return
         }
 
-        val supplierItemsCol = this.usersCol.document(this.currentUser.uid).collection("supplier_items")
+        val supplierItemsCol =
+            this.usersCol.document(this.currentUser.uid).collection("supplier_items")
         val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
 
         this.usersCol.firestore.runTransaction {
@@ -500,7 +529,8 @@ class SupplierFirestoreRepository {
             return
         }
 
-        val supplierPaymentsCol = this.usersCol.document(this.currentUser.uid).collection("supplier_payments")
+        val supplierPaymentsCol =
+            this.usersCol.document(this.currentUser.uid).collection("supplier_payments")
 
         this.usersCol.firestore.runTransaction {
             it.delete(supplierPaymentsCol.document(supplierPayment.id))
@@ -522,12 +552,13 @@ class SupplierFirestoreRepository {
             return
         }
 
-        val orderedItemsCol = this.usersCol.document(this.currentUser.uid).collection("ordered_items")
+        val orderedItemsCol =
+            this.usersCol.document(this.currentUser.uid).collection("ordered_items")
         val valuesCol = this.usersCol.document(this.currentUser.uid).collection("values")
 
         this.usersCol.firestore.runTransaction {
             it.delete(orderedItemsCol.document(orderedItem.id))
-            if(!orderedItem.isReceived) {
+            if (!orderedItem.isReceived) {
                 it.update(
                     valuesCol.document("orders_to_receive"),
                     mapOf("value" to FieldValue.increment(-1))
@@ -541,9 +572,6 @@ class SupplierFirestoreRepository {
             }
         }
     }
-
-
-
 
     fun getPurchaseAmountByRange(
         startTimestamp: Timestamp,
@@ -575,10 +603,10 @@ class SupplierFirestoreRepository {
 
                 coroutineScope.launch(Dispatchers.IO) {
 
-                    for (document in it.result.documents) {
-                        val data = document.data
+                    for (doc in it.result.documents) {
+                        val data = doc.data
 
-                        if (data != null && document.exists()) {
+                        if (doc.exists() && data != null) {
                             val amount = Converters.numberToDouble(data["amount"] as Number)
                             resultList.add(amount)
                         }
@@ -593,6 +621,145 @@ class SupplierFirestoreRepository {
 
             } else {
                 onComplete(Status.FAILED, mutableListOf(), it.exception?.message.toString())
+            }
+
+        }
+    }
+
+    fun getFrequencyOfOrderedItemsByRange(
+        startTimestamp: Timestamp,
+        endTimestamp: Timestamp,
+        coroutineScope: CoroutineScope,
+        onComplete: (Int, MutableList<Pair<String, Int>>, String) -> Unit
+    ) {
+        if (currentUser == null) {
+            onComplete(Status.FAILED, mutableListOf(), KeysAndMessages.USER_NOT_FOUND)
+            return
+        }
+
+        val orderedItemsCol =
+            this.usersCol.document(this.currentUser.uid).collection("ordered_items")
+
+        val query = orderedItemsCol
+            .whereGreaterThanOrEqualTo("order_timestamp", startTimestamp)
+            .whereLessThanOrEqualTo("order_timestamp", endTimestamp)
+            .orderBy("order_timestamp", Query.Direction.ASCENDING)
+
+        query.get().addOnCompleteListener {
+
+            if (it.isSuccessful) {
+
+                val map = hashMapOf<String, Int>()
+                val resultList = mutableListOf<Pair<String, Int>>()
+
+                coroutineScope.launch(Dispatchers.IO) {
+
+                    for (doc in it.result.documents) {
+                        val data = doc.data
+                        if (doc.exists() && data != null) {
+                            val itemName = data["item_name"] as String
+                            map[itemName] = map.getOrDefault(itemName, 0) + 1
+                        }
+                    }
+                    for (item in map) {
+                        resultList.add(Pair(item.key, item.value))
+                    }
+                    Log.d("item", resultList.toString())
+                    onComplete(
+                        Status.SUCCESS,
+                        resultList,
+                        KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                    )
+                }
+
+            } else {
+                onComplete(Status.FAILED, mutableListOf(), it.exception?.message.toString())
+            }
+
+        }
+    }
+
+    fun getSupplierPaymentsByRange(
+        startTimestamp: Timestamp,
+        endTimestamp: Timestamp,
+        coroutineScope: CoroutineScope,
+        onComplete: (Int, MutableList<SupplierPayment>, String) -> Unit
+    ) {
+        if (currentUser == null) {
+            onComplete(Status.FAILED, mutableListOf(), KeysAndMessages.USER_NOT_FOUND)
+            return
+        }
+
+        val supplierPaymentsCol =
+            this.usersCol.document(this.currentUser.uid).collection("supplier_payments")
+
+        val query = supplierPaymentsCol
+            .whereGreaterThanOrEqualTo("payment_timestamp", startTimestamp)
+            .whereLessThanOrEqualTo("payment_timestamp", endTimestamp)
+            .orderBy("payment_timestamp", Query.Direction.ASCENDING)
+
+        query.get().addOnCompleteListener {
+
+            if (it.isSuccessful) {
+
+                val resultList = mutableListOf<SupplierPayment>()
+
+                coroutineScope.launch(Dispatchers.IO) {
+
+                    for (doc in it.result.documents) {
+                        val data = doc.data
+
+                        if (doc.exists() && data != null) {
+                            val supplierPayment = SupplierPayment(
+                                amount = Converters.numberToDouble(data["amount"] as Number),
+                                paymentTimestamp = data["payment_timestamp"] as Timestamp,
+                                note = data["note"] as String,
+                                supplierId = data["supplier_id"] as String,
+                                supplierName = data["supplier_name"] as String
+                            ).apply {
+                                id = doc.id
+                                timestamp = data["timestamp"] as Timestamp
+                            }
+                            resultList.add(supplierPayment)
+                        }
+                    }
+
+                    onComplete(
+                        Status.SUCCESS,
+                        resultList,
+                        KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                    )
+                }
+
+            } else {
+                onComplete(Status.FAILED, mutableListOf(), it.exception?.message.toString())
+            }
+
+        }
+    }
+
+    fun getCurrentUserDetails(onComplete: (Int, User?, String) -> Unit) {
+        if (currentUser == null) {
+            onComplete(Status.FAILED, null, KeysAndMessages.USER_NOT_FOUND)
+            return
+        }
+
+        this.usersCol.document(this.currentUser.uid).get().addOnCompleteListener {
+
+            if (it.isSuccessful) {
+                val doc = it.result
+                val map = doc.data
+                if (map != null) {
+                    val user = User(
+                        map["name"] as String,
+                        map["email"] as String,
+                        map["phone"] as String,
+                        doc.id
+                    )
+                    onComplete(Status.SUCCESS, user, it.exception?.message.toString())
+                }
+            } else {
+                onComplete(Status.FAILED, null, it.exception?.message.toString())
             }
 
         }
@@ -633,9 +800,10 @@ class SupplierFirestoreRepository {
         firebaseCollectionName: String,
         coroutineScope: CoroutineScope,
         lastDocumentSnapshot: DocumentSnapshot?,
+        customSorting: Pair<String, Query.Direction>,
+        limit: Long,
         howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model,
         onComplete: (Int, MutableList<Model>, DocumentSnapshot?, String) -> Unit,
-        customSorting: Pair<String, Query.Direction>
     ) {
         if (currentUser == null) {
             onComplete(Status.FAILED, mutableListOf(), null, KeysAndMessages.USER_NOT_FOUND)
@@ -644,14 +812,20 @@ class SupplierFirestoreRepository {
 
         val col = this.usersCol.document(this.currentUser.uid).collection(firebaseCollectionName)
 
-        val query = if (lastDocumentSnapshot == null) {
+        var query = if (lastDocumentSnapshot == null) {
             col.orderBy(customSorting.first, customSorting.second)
         } else {
             col.orderBy(customSorting.first, customSorting.second)
                 .startAfter(lastDocumentSnapshot)
-        }.limit(10)
+        }
 
-        query.get().addOnCompleteListener {
+        val querySnapshot = if (limit == -1L) {
+            query.get()
+        } else {
+            query.limit(limit).get()
+        }
+
+        querySnapshot.addOnCompleteListener {
 
             if (it.isSuccessful) {
 

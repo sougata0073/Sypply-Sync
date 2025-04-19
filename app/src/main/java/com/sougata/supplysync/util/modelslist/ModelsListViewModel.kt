@@ -51,6 +51,7 @@ class ModelsListViewModel(private val modelName: String) :
 
             // Means if value != null return lastDocumentSnapshot if value == null return null
             value?.let { this.lastDocumentSnapshot },
+            10,
 
             // Here same as previous but if return result is also null
             // then elvis operator '?:' will return getLoadListItemOnCompleteWhenNull()

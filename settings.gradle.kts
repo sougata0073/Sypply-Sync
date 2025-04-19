@@ -18,7 +18,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url = URI("https://jitpack.io") }
+        maven {
+            url = URI("https://jitpack.io")
+        }
+        maven {
+            url = URI("https://repo.itextsupport.com/android")
+        }
     }
 }
 

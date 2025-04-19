@@ -2,7 +2,6 @@ package com.sougata.supplysync.suppliers.fragments
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,13 +9,12 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
-import com.sougata.supplysync.MainActivity
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentSuppliersHomeBinding
 import com.sougata.supplysync.login.LoginActivity
 import com.sougata.supplysync.suppliers.viewmodels.SuppliersHomeViewModel
-import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Converters
+import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 
 class SuppliersHomeFragment : Fragment() {
@@ -26,6 +24,7 @@ class SuppliersHomeFragment : Fragment() {
     private lateinit var viewModel: SuppliersHomeViewModel
 
     private var isDataAdded = false
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,7 +37,10 @@ class SuppliersHomeFragment : Fragment() {
             false
         )
 
-//        Log.d("FragmentsLog", "onCreateView() called")
+        this.binding.apply {
+            childLayout.visibility = View.GONE
+            mainProgressBar.visibility = View.VISIBLE
+        }
 
         return this.binding.root
     }
@@ -51,7 +53,6 @@ class SuppliersHomeFragment : Fragment() {
         this.binding.dueToSuppliersAmount.text = Converters.numberToMoneyString(0.00)
 
         this.binding.viewModel = this.viewModel
-
 
         this.registerSubscribers()
 
@@ -97,7 +98,6 @@ class SuppliersHomeFragment : Fragment() {
             if (it.second == Status.STARTED) {
 
             } else if (it.second == Status.SUCCESS) {
-
                 this.binding.dueToSuppliersAmount.text = Converters.numberToMoneyString(it.first)
 
             } else if (it.second == Status.FAILED) {
@@ -122,11 +122,18 @@ class SuppliersHomeFragment : Fragment() {
             }
         }
 
+        this.viewModel.allApiCallFinishedIndicator.observe(this.viewLifecycleOwner) {
+            if (it) {
+                this.binding.apply {
+                    mainProgressBar.visibility = View.GONE
+                    childLayout.visibility = View.VISIBLE
+                }
+            }
+        }
+
         this.parentFragmentManager.setFragmentResultListener(
             KeysAndMessages.RECENT_DATA_CHANGED_KEY, this.viewLifecycleOwner
         ) { requestKey, bundle ->
-
-//            Log.d("FragmentsLog", "listened")
 
             this.isDataAdded = bundle.getBoolean(KeysAndMessages.DATA_ADDED_KEY)
 

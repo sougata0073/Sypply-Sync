@@ -132,7 +132,7 @@ class AddEditOrderedItemViewModel : ViewModel() {
             amount = amount,
             supplierId = supplierId,
             supplierName = supplierName,
-            ordereTimestamp = Converters.getTimestampFromDate(year, month, date),
+            orderTimestamp = Converters.getTimestampFromDate(year, month, date),
             isReceived = isReceived
         ).apply { id = orderedItemId.orEmpty() }
     }

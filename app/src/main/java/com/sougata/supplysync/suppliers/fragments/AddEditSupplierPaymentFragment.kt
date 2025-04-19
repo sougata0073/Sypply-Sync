@@ -16,12 +16,13 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.sougata.supplysync.R
-import com.sougata.supplysync.databinding.FragmentAddEditSupplierPaymentBinding
 import com.sougata.supplysync.cloud.SupplierFirestoreRepository
+import com.sougata.supplysync.databinding.FragmentAddEditSupplierPaymentBinding
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.models.SupplierPayment
 import com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierPaymentViewModel
+import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 import com.sougata.supplysync.util.modelslist.ModelsListBottomSheetFragment
@@ -261,18 +262,32 @@ class AddEditSupplierPaymentFragment : Fragment() {
             this.viewModel.apply {
                 amount.value = prevSupplierPayment.amount.toString()
 
+                var year = 0
+                var month = 0
+                var myDate = 0
+
+                Converters.getDateFromTimestamp(prevSupplierPayment.timestamp).apply {
+                    year = first
+                    month = second
+                    myDate = third
+                }
+
                 val dateString = String.format(
                     Locale.getDefault(),
-                    "%02d-%02d-%04d",
-                    prevSupplierPayment.date,
-                    prevSupplierPayment.month,
-                    prevSupplierPayment.year
+                    "%02d-%02d-%04d", myDate, month, year
                 )
+
+                var hour = 0
+                var minute = 0
+
+                Converters.getTimeFromTimestamp(prevSupplierPayment.timestamp).apply {
+                    hour = first
+                    minute = second
+                }
+
                 val timeString = String.format(
                     Locale.getDefault(),
-                    "%02d:%02d",
-                    prevSupplierPayment.hour,
-                    prevSupplierPayment.minute
+                    "%02d:%02d", hour, minute
                 )
 
                 date.value = dateString

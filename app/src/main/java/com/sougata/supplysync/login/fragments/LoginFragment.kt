@@ -2,6 +2,7 @@ package com.sougata.supplysync.login.fragments
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentLoginBinding
 import com.sougata.supplysync.login.viewmodels.LoginViewModel
 import com.sougata.supplysync.util.Status
+import com.sougata.supplysync.util.ViewAnimator
 
 class LoginFragment : Fragment() {
 
@@ -57,7 +59,9 @@ class LoginFragment : Fragment() {
             } else if (it.first == Status.SUCCESS) {
 
                 startActivity(Intent(requireContext(), MainActivity::class.java))
-                requireActivity().finish()
+                requireActivity().finishAffinity()
+
+                Log.d("login", "Logged in")
 
             } else if (it.first == Status.FAILED) {
 
