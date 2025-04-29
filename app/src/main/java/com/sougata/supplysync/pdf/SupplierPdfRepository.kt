@@ -158,7 +158,7 @@ class SupplierPdfRepository {
         try {
             context.startActivity(intent)
         } catch (e: Exception) {
-            Log.d("err", e.message.toString())
+//            Log.d("err", e.message.toString())
         }
     }
 

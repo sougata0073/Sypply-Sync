@@ -2,6 +2,7 @@ package com.sougata.supplysync.suppliers.fragments
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -62,7 +63,7 @@ class SuppliersHomeFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-
+//        Log.d("FragmentsLog", isDataAdded.toString())
         val bundle = Bundle().apply {
             putBoolean(
                 KeysAndMessages.DATA_ADDED_KEY, isDataAdded

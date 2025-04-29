@@ -106,7 +106,7 @@ class AddEditSupplierPaymentFragment : Fragment() {
                 putBoolean(KeysAndMessages.DATA_ADDED_KEY, isSupplierPaymentAdded)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
                 bundle
             )
         }
@@ -116,7 +116,7 @@ class AddEditSupplierPaymentFragment : Fragment() {
                 putParcelable(KeysAndMessages.DATA_UPDATED_KEY, updatedSupplierPayment)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
                 bundle
             )
         }
@@ -127,7 +127,7 @@ class AddEditSupplierPaymentFragment : Fragment() {
             }
 
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
                 bundle
             )
         }

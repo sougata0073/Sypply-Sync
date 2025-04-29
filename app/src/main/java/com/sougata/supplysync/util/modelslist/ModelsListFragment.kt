@@ -1,20 +1,19 @@
 package com.sougata.supplysync.util.modelslist
 
 import android.content.Intent
-import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
-import com.sougata.supplysync.MainActivity
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentModelsListBinding
 import com.sougata.supplysync.login.LoginActivity
@@ -22,10 +21,6 @@ import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 import com.sougata.supplysync.util.ViewAnimator
-import jp.wasabeef.recyclerview.adapters.ScaleInAnimationAdapter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class ModelsListFragment : Fragment() {
 
@@ -38,10 +33,6 @@ class ModelsListFragment : Fragment() {
     private lateinit var modelName: String
 
     private lateinit var onBind: (ViewDataBinding, Model) -> Unit
-
-    private var isModelAdded = false
-    private var isModelUpdated = false
-    private var isModelRemoved = false
 
     private lateinit var helper: ModelsListFragmentHelper
 
@@ -76,6 +67,30 @@ class ModelsListFragment : Fragment() {
         this.viewModel =
             this.helper.getWhichViewModelToCreate()
 
+
+        this.initializeUI()
+
+        this.registerSubscribers()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        val bundle = Bundle().apply {
+            putBoolean(
+                KeysAndMessages.DATA_ADDED_KEY,
+                viewModel.isModelAdded || viewModel.isModelUpdated || viewModel.isModelRemoved
+            )
+        }
+        this.parentFragmentManager.setFragmentResult(
+            KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+            bundle
+        )
+
+    }
+
+    private fun initializeUI() {
+
         this.onBind = this.helper.getWhatToOnBind()
 
         this.recyclerViewAdapter =
@@ -88,32 +103,11 @@ class ModelsListFragment : Fragment() {
         this.binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
             adapter = recyclerViewAdapter
-//            adapter = ScaleInAnimationAdapter(recyclerViewAdapter).apply {
-//                setFirstOnly(false)
-//                setDuration(80)
-//            }
         }
 
         this.binding.fab.setOnClickListener {
             this.helper.getWhatToDoOnFabClick().invoke()
         }
-
-        this.registerSubscribers()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-
-        val bundle = Bundle().apply {
-            putBoolean(
-                KeysAndMessages.DATA_ADDED_KEY,
-                isModelAdded || isModelUpdated || isModelRemoved
-            )
-        }
-        this.parentFragmentManager.setFragmentResult(
-            KeysAndMessages.RECENT_DATA_CHANGED_KEY,
-            bundle
-        )
 
     }
 
@@ -125,7 +119,12 @@ class ModelsListFragment : Fragment() {
 
                 this.binding.apply {
                     nothingHereLbl.visibility = View.GONE
-                    progressBar.visibility = View.VISIBLE
+
+                    if (viewModel.isFirstTimeListLoaded) {
+                        progressBar.visibility = View.VISIBLE
+                        viewModel.isFirstTimeListLoaded = false
+                    }
+
                 }
 
             } else if (it.second == Status.SUCCESS) {
@@ -133,21 +132,23 @@ class ModelsListFragment : Fragment() {
                 if (it.third == KeysAndMessages.EMPTY_LIST) {
 
                     this.binding.apply {
-                        progressBar.visibility = View.GONE
+                        if (progressBar.isVisible) {
+                            progressBar.visibility = View.GONE
+                        }
                         nothingHereLbl.visibility = View.VISIBLE
                     }
 
                 } else {
-
+//                    Log.d("list", "registerSubscribers: ${it.first.toString()}")
                     this.binding.apply {
+                        if (progressBar.isVisible) {
+                            progressBar.visibility = View.GONE
+                        }
                         nothingHereLbl.visibility = View.GONE
-                        progressBar.visibility = View.GONE
                     }
-                    this.recyclerViewAdapter.setData(it.first)
-                    // Formula to convert dp to px
-                    // dp = 200 here
-//                    val px = (200 * Resources.getSystem().displayMetrics.density).toInt()
-//                    this.binding.recyclerView.smoothScrollBy(0, px)
+                    this.recyclerViewAdapter.setItems(it.first!!)
+
+//                    Log.d("loader", it.first.toString())
                 }
 
             } else if (it.second == Status.FAILED) {
@@ -159,10 +160,10 @@ class ModelsListFragment : Fragment() {
         }
 
         this.parentFragmentManager.setFragmentResultListener(
-            KeysAndMessages.RECENT_DATA_CHANGED_KEY, this.viewLifecycleOwner
+            KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT, this.viewLifecycleOwner
         ) { requestKey, bundle ->
 
-            this.isModelAdded = bundle.getBoolean(KeysAndMessages.DATA_ADDED_KEY)
+            this.viewModel.isModelAdded = bundle.getBoolean(KeysAndMessages.DATA_ADDED_KEY)
 
             val removedModel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 bundle.getParcelable(KeysAndMessages.DATA_REMOVED_KEY, Model::class.java)
@@ -178,15 +179,19 @@ class ModelsListFragment : Fragment() {
                 bundle.getParcelable(KeysAndMessages.DATA_UPDATED_KEY)
             }
 
-            if (this.isModelAdded) {
+            if (this.viewModel.isModelAdded) {
+//                Log.d("fragment", "model added")
                 this.onModelAdded()
             }
 
             if (updatedModel != null) {
+//                Log.d("fragment", "model updated")
                 this.onModelUpdated(updatedModel)
             }
 
             if (removedModel != null) {
+//                Log.d("fragment", "model removed")
+//                Log.d("loader", "registerSubscribers: ${removedModel.id}")
                 this.onModelDeleted(removedModel)
             }
 
@@ -194,18 +199,18 @@ class ModelsListFragment : Fragment() {
 
         this.binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
-            private val animator = ViewAnimator(binding.fab)
+            private val fabAnimator = ViewAnimator(binding.fab)
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
                 if (dy > 0) { // When scroll up
 
-                    this.animator.slideDownFadeForScroll()
+                    this.fabAnimator.slideDownFadeForScroll()
 
                 } else if (dy < 0) { // When scroll down
 
-                    this.animator.slideUpFadeForScroll()
+                    this.fabAnimator.slideUpFadeForScroll()
 
                 }
 
@@ -217,6 +222,8 @@ class ModelsListFragment : Fragment() {
 
                     if (lastItemPosition == itemCount - 1) {
                         viewModel.loadListItem()
+                    } else if (lastItemPosition == itemCount - 5) {
+                        recyclerViewAdapter.addLoadingAnimation()
                     }
                 }
 
@@ -224,7 +231,6 @@ class ModelsListFragment : Fragment() {
         })
 
     }
-
 
     private fun onFailedToLoadData(message: String) {
         if (message == KeysAndMessages.USER_NOT_FOUND) {
@@ -236,36 +242,17 @@ class ModelsListFragment : Fragment() {
     }
 
     private fun onModelAdded() {
-        this.isModelAdded = true
+        this.viewModel.isModelAdded = true
         this.viewModel.loadLastAddedData()
     }
 
-    private fun onModelUpdated(model: Model) {
-        this.isModelUpdated = true
-        lifecycleScope.launch(Dispatchers.IO) {
-
-            val list = viewModel.itemsList.value?.first ?: mutableListOf()
-
-            for (i in 0 until list.size) {
-                if (list[i].id == model.id) {
-                    list[i] = model
-                    withContext(Dispatchers.Main) {
-                        recyclerViewAdapter.updateItem(model, i)
-                    }
-                    break
-                }
-            }
-
-        }
+    private fun onModelUpdated(newModel: Model) {
+        this.viewModel.isModelUpdated = true
+        this.viewModel.updateModel(newModel)
     }
 
     private fun onModelDeleted(model: Model) {
-        this.isModelRemoved = true
-        this.viewModel.itemsList.value?.first?.remove(model)
-        this.recyclerViewAdapter.deleteItem(model)
-
-        if (recyclerViewAdapter.itemCount == 0) {
-            this.binding.nothingHereLbl.visibility = View.VISIBLE
-        }
+        this.viewModel.isModelRemoved = true
+        this.viewModel.deleteModel(model)
     }
 }

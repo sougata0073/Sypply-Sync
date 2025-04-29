@@ -6,8 +6,6 @@ import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
@@ -24,6 +22,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: MainActivityViewModel
 
     private lateinit var navController: NavController
+
+    private var isBottomNavHidden = false
 
     override fun onStart() {
         super.onStart()
@@ -101,16 +101,22 @@ class MainActivity : AppCompatActivity() {
         this.navController.addOnDestinationChangedListener { navController, destination, arguments ->
 
             when (destination.id) {
-                R.id.addEditSupplierFragment, R.id.addEditSupplierPaymentFragment,
-                R.id.addEditOrderedItemFragment -> {
-                    viewAnimator.slideDownFade()
+
+                R.id.homeFragment, R.id.staffsHomeFragment,
+                R.id.customersHomeFragment, R.id.suppliersHomeFragment -> {
+                    if (this.isBottomNavHidden) {
+                        viewAnimator.slideUpFade()
+                        this.isBottomNavHidden = false
+                    }
                 }
 
                 else -> {
-                    if (this.binding.bottomNav.alpha != 1f) {
-                        viewAnimator.slideUpFade()
+                    if (!this.isBottomNavHidden) {
+                        viewAnimator.slideDownFade()
+                        this.isBottomNavHidden = true
                     }
                 }
+
             }
 
         }

@@ -61,7 +61,7 @@ class LoginFragment : Fragment() {
                 startActivity(Intent(requireContext(), MainActivity::class.java))
                 requireActivity().finishAffinity()
 
-                Log.d("login", "Logged in")
+//                Log.d("login", "Logged in")
 
             } else if (it.first == Status.FAILED) {
 

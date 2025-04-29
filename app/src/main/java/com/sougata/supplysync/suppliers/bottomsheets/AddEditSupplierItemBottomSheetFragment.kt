@@ -105,7 +105,7 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
                 putBoolean(KeysAndMessages.DATA_ADDED_KEY, isSupplierItemAdded)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
                 bundle
             )
         }
@@ -114,7 +114,7 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
                 putParcelable(KeysAndMessages.DATA_UPDATED_KEY, updatedSupplierItem)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
                 bundle
             )
         }
@@ -123,7 +123,7 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
                 putParcelable(KeysAndMessages.DATA_REMOVED_KEY, prevSupplierItem)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY, bundle
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT, bundle
             )
         }
 

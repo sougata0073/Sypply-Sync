@@ -103,7 +103,7 @@ class AddEditSupplierFragment : Fragment() {
                 putBoolean(KeysAndMessages.DATA_ADDED_KEY, isSupplierAdded)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
                 bundle
             )
         }
@@ -112,7 +112,7 @@ class AddEditSupplierFragment : Fragment() {
                 putParcelable(KeysAndMessages.DATA_UPDATED_KEY, updatedSupplier)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
                 bundle
             )
         }
@@ -121,7 +121,7 @@ class AddEditSupplierFragment : Fragment() {
                 putParcelable(KeysAndMessages.DATA_REMOVED_KEY, prevSupplier)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY, bundle
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT, bundle
             )
         }
     }

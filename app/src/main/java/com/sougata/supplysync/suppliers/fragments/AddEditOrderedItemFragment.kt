@@ -103,7 +103,7 @@ class AddEditOrderedItemFragment : Fragment() {
                 putBoolean(KeysAndMessages.DATA_ADDED_KEY, isOrderedItemAdded)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
                 bundle
             )
         }
@@ -113,7 +113,7 @@ class AddEditOrderedItemFragment : Fragment() {
                 putParcelable(KeysAndMessages.DATA_UPDATED_KEY, updatedOrderedItem)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
                 bundle
             )
         }
@@ -124,7 +124,7 @@ class AddEditOrderedItemFragment : Fragment() {
             }
 
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
                 bundle
             )
         }

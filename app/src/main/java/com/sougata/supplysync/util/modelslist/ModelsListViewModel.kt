@@ -1,8 +1,8 @@
 package com.sougata.supplysync.util.modelslist
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.cloud.SupplierFirestoreRepository
 import com.sougata.supplysync.models.Model
@@ -13,17 +13,27 @@ class ModelsListViewModel(private val modelName: String) :
     ViewModel() {
 
     val supplierFirestoreRepository = SupplierFirestoreRepository()
-    val itemsList = MutableLiveData<Triple<MutableList<Model>, Int, String>>()
+    val itemsList = MutableLiveData<Triple<MutableList<Model>?, Int, String>>()
     var noMoreElementLeft = false
     var lastDocumentSnapshot: DocumentSnapshot? = null
 
+    var isFirstTimeListLoaded = true
+
+    var isModelAdded = false
+    var isModelUpdated = false
+    var isModelRemoved = false
+
     init {
         this.loadListItem()
+//        Log.d("list", "init")
     }
 
     fun loadListItem() {
-
-        this.itemsList.postValue(Triple(mutableListOf(), Status.STARTED, ""))
+        if (this.itemsList.value == null) {
+            this.itemsList.postValue(Triple(null, Status.STARTED, ""))
+        } else {
+            this.itemsList.postValue(Triple(this.itemsList.value?.first, Status.STARTED, ""))
+        }
 
         this.callListByModelName(this.itemsList.value)
     }
@@ -32,11 +42,10 @@ class ModelsListViewModel(private val modelName: String) :
         this.loadListItem()
     }
 
-
     private fun callListByModelName(
-        value: Triple<MutableList<Model>, Int, String>?
+        value: Triple<MutableList<Model>?, Int, String>?
     ) {
-        // The datatype will be equal to the parameters of the function
+        val limit: Long = 20
         val fetchList =
             when (this.modelName) {
                 Model.SUPPLIER -> supplierFirestoreRepository::getSuppliersList
@@ -46,53 +55,73 @@ class ModelsListViewModel(private val modelName: String) :
                 else -> return
             }
 
-        fetchList(
-            this.viewModelScope,
 
-            // Means if value != null return lastDocumentSnapshot if value == null return null
-            value?.let { this.lastDocumentSnapshot },
-            10,
-
-            // Here same as previous but if return result is also null
-            // then elvis operator '?:' will return getLoadListItemOnCompleteWhenNull()
-            value?.let { getLoadListItemOnCompleteWhenNotNull(it) }
-                ?: getLoadListItemOnCompleteWhenNull()
-        )
-    }
-
-
-    private fun getLoadListItemOnCompleteWhenNull(): (Int, MutableList<Model>, DocumentSnapshot?, String) -> Unit {
-        return { status, list, lastDocumentSnapshot, message ->
-            if (message == KeysAndMessages.EMPTY_LIST) {
-
-                this.itemsList.postValue(Triple(list, status, message))
-                this.noMoreElementLeft = true
-
-            } else {
-
-                this.itemsList.postValue(Triple(list, status, message))
-                this.lastDocumentSnapshot = lastDocumentSnapshot
-
+        if (value == null) { // Means its the first time the list is loading
+            fetchList(null, limit) { status, list, lastDocumentSnapshot, message ->
+//                Log.d("list", status.toString() + message + list.toString())
+                if (message == KeysAndMessages.EMPTY_LIST) {
+                    this.itemsList.postValue(Triple(null, status, message))
+                    this.noMoreElementLeft = true
+                } else {
+                    this.itemsList.postValue(Triple(list, status, message))
+                    this.lastDocumentSnapshot = lastDocumentSnapshot
+                }
+            }
+        } else { // Its not the first time the list is loading
+            fetchList(
+                this.lastDocumentSnapshot,
+                limit
+            ) { status, list, lastDocumentSnapshot, message ->
+                if (message == KeysAndMessages.EMPTY_LIST) {
+                    this.itemsList.postValue(Triple(value.first, status, message))
+                    this.noMoreElementLeft = true
+                } else {
+                    val newList = value.first?.apply { addAll(list!!) }
+                    this.itemsList.postValue(Triple(newList, status, message))
+                    this.lastDocumentSnapshot = lastDocumentSnapshot
+                }
             }
         }
     }
 
-    private fun getLoadListItemOnCompleteWhenNotNull(
-        value: Triple<MutableList<Model>, Int, String>
-    ): (Int, MutableList<Model>, DocumentSnapshot?, String) -> Unit {
-        return { status, list, lastDocumentSnapshot, message ->
-            if (message == KeysAndMessages.EMPTY_LIST) {
+    fun deleteModel(model: Model) {
+        val list = this.itemsList.value?.first
 
-                this.itemsList.postValue(Triple(value.first, status, ""))
-                this.noMoreElementLeft = true
+        if (list == null) {
+            return
+        }
 
-            } else {
-
-                val newList = value.first.apply { addAll(list) }
-                this.itemsList.postValue(Triple(newList, status, message))
-                this.lastDocumentSnapshot = lastDocumentSnapshot
-
+        for ((i, item) in list.withIndex()) {
+            if (item.id == model.id) {
+                list.removeAt(i)
+                this.itemsList.postValue(
+                    Triple(
+                        list,
+                        Status.SUCCESS,
+                        if (list.isEmpty()) KeysAndMessages.EMPTY_LIST else KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                    )
+                )
+                return
             }
         }
     }
+
+    fun updateModel(model: Model) {
+        val list = this.itemsList.value?.first
+
+        if (list == null) {
+            return
+        }
+
+        for ((i, item) in list.withIndex()) {
+            if (item.id == model.id) {
+                list[i] = model
+                this.itemsList.postValue(
+                    Triple(list, Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                )
+                return
+            }
+        }
+    }
+
 }

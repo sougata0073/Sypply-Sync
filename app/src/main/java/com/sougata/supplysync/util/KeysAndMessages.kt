@@ -10,6 +10,7 @@ object KeysAndMessages {
     const val EMAIL_IS_NOT_VERIFIED = "Email is not verified"
     const val SOMETHING_WENT_WRONG = "Something went wrong"
     const val RECENT_DATA_CHANGED_KEY = "Recent data changed"
+    const val RECENT_DATA_CHANGED_KEY_ADD_EDIT = "Recent data changed add edit"
     const val DATA_ADDED_KEY = "Data added"
     const val DATA_REMOVED_KEY = "Data removed"
     const val DATA_UPDATED_KEY = "Data updated"
@@ -17,5 +18,6 @@ object KeysAndMessages {
     const val MODEL_KEY = "Model"
     const val TO_ADD_KEY = "To add"
     const val TO_EDIT_KEY = "To edit"
+    const val DELETE = "Delete"
 
 }

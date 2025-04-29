@@ -8,7 +8,6 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.util.nextAlphanumericString
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.models.Supplier
@@ -21,8 +20,6 @@ import com.sougata.supplysync.util.Status
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.util.Calendar
-import kotlin.random.Random
 
 class SupplierFirestoreRepository {
 
@@ -34,20 +31,6 @@ class SupplierFirestoreRepository {
         const val TO_ADD = "To add"
         const val TO_UPDATE = "To update"
     }
-
-//    init {
-//        for (i in 1..100) {
-//            val rnd = Random(System.currentTimeMillis())
-//            val orderedItem = SupplierPayment(
-//                rnd.nextDouble() * 100000,
-//                Timestamp.now(),
-//                rnd.nextAlphanumericString(10),
-//                rnd.nextAlphanumericString(10),
-//                rnd.nextAlphanumericString(10)
-//            ).apply { id = "" }
-//            addUpdateSupplierPayment(orderedItem, TO_ADD) { a, b -> }
-//        }
-//    }
 
     fun insertUserToFirestore(user: User, onComplete: (Int, String) -> Unit) {
 
@@ -77,8 +60,9 @@ class SupplierFirestoreRepository {
     }
 
     fun getSupplierItemsList(
-        coroutineScope: CoroutineScope, lastDocumentSnapshot: DocumentSnapshot?, limit: Long,
-        onComplete: (Int, MutableList<Model>, DocumentSnapshot?, String) -> Unit
+        lastDocumentSnapshot: DocumentSnapshot?,
+        limit: Long,
+        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
 
         val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
@@ -93,20 +77,19 @@ class SupplierFirestoreRepository {
         }
 
         return getAnyModelsList(
-            "supplier_items",
-            coroutineScope,
-            lastDocumentSnapshot,
-            "timestamp" to Query.Direction.ASCENDING,
-            limit,
-            howToConvert,
-            onComplete
+            firebaseCollectionName = "supplier_items",
+            lastDocumentSnapshot = lastDocumentSnapshot,
+            customSorting = "timestamp" to Query.Direction.ASCENDING,
+            limit = limit,
+            howToConvert = howToConvert,
+            onComplete = onComplete
         )
     }
 
     fun getSuppliersList(
-        coroutineScope: CoroutineScope, lastDocumentSnapshot: DocumentSnapshot?,
+        lastDocumentSnapshot: DocumentSnapshot?,
         limit: Long,
-        onComplete: (Int, MutableList<Model>, DocumentSnapshot?, String) -> Unit
+        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
 
 
@@ -126,20 +109,20 @@ class SupplierFirestoreRepository {
         }
 
         return getAnyModelsList(
-            "suppliers",
-            coroutineScope,
-            lastDocumentSnapshot,
-            "timestamp" to Query.Direction.ASCENDING,
-            limit,
-            howToConvert,
-            onComplete
+            firebaseCollectionName = "suppliers",
+            lastDocumentSnapshot = lastDocumentSnapshot,
+            customSorting = "timestamp" to Query.Direction.ASCENDING,
+            limit = limit,
+            howToConvert = howToConvert,
+            onComplete = onComplete
         )
 
     }
 
     fun getOrderedItemsList(
-        coroutineScope: CoroutineScope, lastDocumentSnapshot: DocumentSnapshot?, limit: Long,
-        onComplete: (Int, MutableList<Model>, DocumentSnapshot?, String) -> Unit
+        lastDocumentSnapshot: DocumentSnapshot?,
+        limit: Long,
+        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
         val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
             OrderedItem(
@@ -158,19 +141,19 @@ class SupplierFirestoreRepository {
         }
 
         return getAnyModelsList(
-            "ordered_items",
-            coroutineScope,
-            lastDocumentSnapshot,
-            "timestamp" to Query.Direction.ASCENDING,
-            limit,
-            howToConvert,
-            onComplete
+            firebaseCollectionName = "ordered_items",
+            lastDocumentSnapshot = lastDocumentSnapshot,
+            customSorting = "timestamp" to Query.Direction.ASCENDING,
+            limit = limit,
+            howToConvert = howToConvert,
+            onComplete = onComplete
         )
     }
 
     fun getSupplierPaymentsList(
-        coroutineScope: CoroutineScope, lastDocumentSnapshot: DocumentSnapshot?, limit: Long,
-        onComplete: (Int, MutableList<Model>, DocumentSnapshot?, String) -> Unit
+        lastDocumentSnapshot: DocumentSnapshot?,
+        limit: Long,
+        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
         val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
             SupplierPayment(
@@ -186,13 +169,12 @@ class SupplierFirestoreRepository {
         }
 
         return getAnyModelsList(
-            "supplier_payments",
-            coroutineScope,
-            lastDocumentSnapshot,
-            "timestamp" to Query.Direction.ASCENDING,
-            limit,
-            howToConvert,
-            onComplete
+            firebaseCollectionName = "supplier_payments",
+            lastDocumentSnapshot = lastDocumentSnapshot,
+            customSorting = "timestamp" to Query.Direction.ASCENDING,
+            limit = limit,
+            howToConvert = howToConvert,
+            onComplete = onComplete
         )
     }
 
@@ -664,7 +646,7 @@ class SupplierFirestoreRepository {
                     for (item in map) {
                         resultList.add(Pair(item.key, item.value))
                     }
-                    Log.d("item", resultList.toString())
+//                    Log.d("item", resultList.toString())
                     onComplete(
                         Status.SUCCESS,
                         resultList,
@@ -798,25 +780,23 @@ class SupplierFirestoreRepository {
 
     private fun getAnyModelsList(
         firebaseCollectionName: String,
-        coroutineScope: CoroutineScope,
         lastDocumentSnapshot: DocumentSnapshot?,
         customSorting: Pair<String, Query.Direction>,
         limit: Long,
         howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model,
-        onComplete: (Int, MutableList<Model>, DocumentSnapshot?, String) -> Unit,
+        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit,
     ) {
         if (currentUser == null) {
-            onComplete(Status.FAILED, mutableListOf(), null, KeysAndMessages.USER_NOT_FOUND)
+            onComplete(Status.FAILED, null, null, KeysAndMessages.USER_NOT_FOUND)
             return
         }
-
+//        Log.d("repo", "getAnyModelsList called")
         val col = this.usersCol.document(this.currentUser.uid).collection(firebaseCollectionName)
 
         var query = if (lastDocumentSnapshot == null) {
             col.orderBy(customSorting.first, customSorting.second)
         } else {
-            col.orderBy(customSorting.first, customSorting.second)
-                .startAfter(lastDocumentSnapshot)
+            col.orderBy(customSorting.first, customSorting.second).startAfter(lastDocumentSnapshot)
         }
 
         val querySnapshot = if (limit == -1L) {
@@ -831,36 +811,38 @@ class SupplierFirestoreRepository {
 
                 val modelsList = mutableListOf<Model>()
 
-                coroutineScope.launch(Dispatchers.IO) {
 
-                    for (document in it.result.documents) {
+                for (document in it.result.documents) {
 
-                        val data = document.data
+                    val data = document.data
 
-                        if (data != null && document.exists()) {
-                            val model: Model = howToConvert(data, document)
-                            modelsList.add(model)
-                        }
+                    if (data != null && document.exists()) {
+                        val model: Model = howToConvert(data, document)
+                        modelsList.add(model)
                     }
+                }
 
-                    if (it.result.documents.isEmpty()) {
-                        // When no more data is there
-                        onComplete(Status.SUCCESS, modelsList, null, KeysAndMessages.EMPTY_LIST)
+//                    delay(2000)
+
+//                    Log.d("repo", modelsList.toString())
+
+                if (it.result.documents.isEmpty()) {
+                    // When no more data is there
+                    onComplete(Status.SUCCESS, modelsList, null, KeysAndMessages.EMPTY_LIST)
 //                        Log.d("doc", "empty")
-                    } else {
-                        onComplete(
-                            Status.SUCCESS,
-                            modelsList,
-                            it.result.documents.last(),
-                            KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
-                        )
+                } else {
+                    onComplete(
+                        Status.SUCCESS,
+                        modelsList,
+                        it.result.documents.last(),
+                        KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                    )
 //                        Log.d("doc", it.result.documents.last().toString())
-                    }
                 }
 
             } else {
 
-                onComplete(Status.FAILED, mutableListOf(), null, it.exception?.message.toString())
+                onComplete(Status.FAILED, null, null, it.exception?.message.toString())
 
             }
 
