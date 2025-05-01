@@ -1,19 +1,14 @@
 package com.sougata.supplysync.util.modelslist
 
-import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.cloud.SupplierFirestoreRepository
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
-class ModelsListViewModel(private val modelName: String) :
-    ViewModel() {
+class ModelSearchViewModel(private val modelName: String) : ViewModel() {
 
     val supplierFirestoreRepository = SupplierFirestoreRepository()
 
@@ -21,46 +16,76 @@ class ModelsListViewModel(private val modelName: String) :
     var noMoreElementLeft = false
     var lastDocumentSnapshot: DocumentSnapshot? = null
 
+    var prevSearchField = ""
+    var prevSearchQuery = ""
+    var prevQueryDataType = DataType.STRING
+
+    var isSearchActive = false
+
     var isFirstTimeListLoaded = true
 
-    var isModelAdded = false
-    var isModelUpdated = false
-    var isModelRemoved = false
+    fun loadItemsList(
+        searchField: String,
+        searchQuery: String,
+        queryDataType: DataType
+    ) {
 
-    init {
-        this.viewModelScope.launch {
-            delay(200)
-            loadItemsList()
+        if (searchQuery.isEmpty()) {
+            return
         }
-    }
 
-    fun loadItemsList() {
+        if (searchField != this.prevSearchField ||
+            searchQuery != this.prevSearchQuery ||
+            queryDataType != this.prevQueryDataType
+        ) {
+            this.itemsList.value = Triple(null, Status.NO_CHANGE, "")
+            this.noMoreElementLeft = false
+            this.lastDocumentSnapshot = null
+
+            this.prevSearchField = searchField
+            this.prevSearchQuery = searchQuery
+            this.prevQueryDataType = queryDataType
+        }
+
         if (this.itemsList.value?.first == null) {
             this.itemsList.value = Triple(null, Status.STARTED, "")
         } else {
-            this.itemsList.value = Triple(
-                this.itemsList.value?.first,
-                Status.STARTED,
-                ""
-            )
+            this.itemsList.value =
+                Triple(
+                    this.itemsList.value?.first,
+                    Status.STARTED,
+                    ""
+                )
         }
 
-        this.callListByModelName(this.itemsList.value)
+        this.callListByModelName(
+            searchField,
+            searchQuery,
+            queryDataType,
+            this.itemsList.value
+        )
     }
 
-    private fun callListByModelName(value: Triple<MutableList<Model>?, Int, String>?) {
+    private fun callListByModelName(
+        searchField: String,
+        searchQuery: String,
+        queryDataType: DataType,
+        value: Triple<MutableList<Model>?, Int, String>?
+    ) {
         val limit: Long = 20
         val fetchList =
             when (this.modelName) {
-                Model.SUPPLIER -> this.supplierFirestoreRepository::getSuppliersList
-                Model.SUPPLIERS_ITEM -> this.supplierFirestoreRepository::getSupplierItemsList
-                Model.SUPPLIER_PAYMENT -> this.supplierFirestoreRepository::getSupplierPaymentsList
-                Model.ORDERED_ITEM -> this.supplierFirestoreRepository::getOrderedItemsList
+                Model.Companion.SUPPLIER -> this.supplierFirestoreRepository::getSuppliersListFiltered
+                Model.Companion.SUPPLIERS_ITEM -> this.supplierFirestoreRepository::getSupplierItemsListFiltered
+                Model.Companion.SUPPLIER_PAYMENT -> this.supplierFirestoreRepository::getSupplierPaymentsListFiltered
+                Model.Companion.ORDERED_ITEM -> this.supplierFirestoreRepository::getOrderedItemsListFiltered
                 else -> return
             }
 
-        if (value?.first == null) { // Means its the first time the list is loading
-            fetchList(null, limit) { status, list, lastDocumentSnapshot, message ->
+        if (value?.first == null) {
+            fetchList(
+                searchField, searchQuery, queryDataType, null, limit
+            ) { status, list, lastDocumentSnapshot, message ->
                 if (message == KeysAndMessages.EMPTY_LIST) {
                     this.itemsList.value = Triple(null, status, message)
                     this.noMoreElementLeft = true
@@ -69,10 +94,9 @@ class ModelsListViewModel(private val modelName: String) :
                     this.lastDocumentSnapshot = lastDocumentSnapshot
                 }
             }
-        } else { // Its not the first time the list is loading
+        } else {
             fetchList(
-                this.lastDocumentSnapshot,
-                limit
+                searchField, searchQuery, queryDataType, this.lastDocumentSnapshot, limit
             ) { status, list, lastDocumentSnapshot, message ->
                 if (message == KeysAndMessages.EMPTY_LIST) {
                     this.itemsList.value = Triple(value.first, status, message)
@@ -83,11 +107,12 @@ class ModelsListViewModel(private val modelName: String) :
                     this.lastDocumentSnapshot = lastDocumentSnapshot
                 }
             }
+
         }
     }
 
     fun loadLastAddedData() {
-        this.loadItemsList()
+        this.loadItemsList(this.prevSearchField, this.prevSearchQuery, this.prevQueryDataType)
     }
 
     fun deleteModel(model: Model) {

@@ -5,11 +5,11 @@ import android.os.Bundle
 import androidx.core.net.toUri
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.sougata.supplysync.R
+import com.sougata.supplysync.cloud.FieldNamesRepository
 import com.sougata.supplysync.databinding.ItemOrderedItemsListBinding
 import com.sougata.supplysync.databinding.ItemSupplierItemsListBinding
 import com.sougata.supplysync.databinding.ItemSupplierPaymentsListBinding
@@ -33,16 +33,6 @@ class ModelsListFragmentHelper(
 
     private val context = this.fragment.requireContext()
     private val fragmentManager = this.fragment.parentFragmentManager
-
-    fun getWhichViewModelToCreate(): ModelsListViewModel {
-
-        val viewModelFactory = ModelsListViewModelFactory(this.modelName)
-
-        return ViewModelProvider(
-            this.fragment,
-            viewModelFactory
-        )[ModelsListViewModel::class.java]
-    }
 
     fun getWhatToOnBind(): (ViewDataBinding, Model) -> Unit {
 
@@ -274,6 +264,111 @@ class ModelsListFragmentHelper(
                     )
                 }
             }
+
+            else -> throw IllegalArgumentException("Unknown model type")
+        }
+    }
+
+    fun getSortableModelFieldNames(): Array<String> {
+
+        return when (this.modelName) {
+            Model.SUPPLIER -> arrayOf(Supplier::name.name, Supplier::dueAmount.name)
+            Model.SUPPLIERS_ITEM -> arrayOf(SupplierItem::name.name, SupplierItem::price.name)
+            Model.SUPPLIER_PAYMENT -> arrayOf(
+                SupplierPayment::amount.name, SupplierPayment::paymentTimestamp.name,
+                SupplierPayment::supplierName.name
+            )
+
+            Model.ORDERED_ITEM -> arrayOf(
+                OrderedItem::itemName.name,
+                OrderedItem::quantity.name,
+                OrderedItem::amount.name,
+                OrderedItem::supplierName.name,
+                OrderedItem::orderTimestamp.name
+            )
+
+            else -> throw IllegalArgumentException("Unknown model type")
+        }
+    }
+
+    fun getSearchableModelFieldPair(): Array<Triple<String, String, DataType>> {
+        return when (this.modelName) {
+            Model.SUPPLIER -> arrayOf(
+                Triple(
+                    FieldNamesRepository.SuppliersCollection.NAME,
+                    Supplier::name.name,
+                    DataType.STRING
+                ),
+                Triple(
+                    FieldNamesRepository.SuppliersCollection.DUE_AMOUNT,
+                    Supplier::dueAmount.name,
+                    DataType.NUMBER
+                ),
+                Triple(
+                    FieldNamesRepository.SuppliersCollection.EMAIL,
+                    Supplier::email.name,
+                    DataType.STRING
+                ),
+            )
+
+            Model.SUPPLIERS_ITEM -> arrayOf(
+                Triple(
+                    FieldNamesRepository.SupplierItemsCollection.NAME,
+                    SupplierItem::name.name,
+                    DataType.STRING
+                ),
+                Triple(
+                    FieldNamesRepository.SupplierItemsCollection.PRICE,
+                    SupplierItem::price.name,
+                    DataType.NUMBER
+                )
+            )
+
+            Model.SUPPLIER_PAYMENT -> arrayOf(
+                Triple(
+                    FieldNamesRepository.SupplierPaymentsCollection.AMOUNT,
+                    SupplierPayment::amount.name,
+                    DataType.NUMBER
+                ),
+                Triple(
+                    FieldNamesRepository.SupplierPaymentsCollection.PAYMENT_TIMESTAMP,
+                    SupplierPayment::paymentTimestamp.name,
+                    DataType.TIMESTAMP
+                ),
+                Triple(
+                    FieldNamesRepository.SupplierPaymentsCollection.SUPPLIER_NAME,
+                    SupplierPayment::supplierName.name,
+                    DataType.STRING
+                )
+            )
+
+            Model.ORDERED_ITEM -> arrayOf(
+                Triple(
+                    FieldNamesRepository.OrderedItemsCollection.ITEM_NAME,
+                    OrderedItem::itemName.name,
+                    DataType.STRING
+                ),
+                Triple(
+                    FieldNamesRepository.OrderedItemsCollection.QUANTITY,
+                    OrderedItem::quantity.name,
+                    DataType.NUMBER
+                ),
+                Triple(
+                    FieldNamesRepository.OrderedItemsCollection.AMOUNT,
+                    OrderedItem::amount.name,
+                    DataType.NUMBER
+                ),
+                Triple(
+                    FieldNamesRepository.OrderedItemsCollection.SUPPLIER_NAME,
+                    OrderedItem::supplierName.name,
+                    DataType.STRING
+                ),
+                Triple(
+                    FieldNamesRepository.OrderedItemsCollection.ORDER_TIMESTAMP,
+                    OrderedItem::orderTimestamp.name,
+                    DataType.TIMESTAMP
+                )
+            )
 
             else -> throw IllegalArgumentException("Unknown model type")
         }

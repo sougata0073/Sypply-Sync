@@ -6,6 +6,6 @@
     <color name="night_mode_background">#1A1D22</color>
     <color name="shimmer_base">#2A2A2A</color>
     <color name="shimmer_highlight">#444444</color>
-    <color name="bottom_nav_active_indicator">#444444</color>
+    <color name="active_non_active_button_color">#444444</color>
     <color name="fragment_bg">#FF000000</color>
 </resources>

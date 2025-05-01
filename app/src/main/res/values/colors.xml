@@ -14,5 +14,5 @@
     <color name="night_mode_background">#FFFFFFFF</color>
     <color name="shimmer_base">#E0E0E0</color>
     <color name="shimmer_highlight">#F5F5F5</color>
-    <color name="bottom_nav_active_indicator">#EBE9E9</color>
+    <color name="active_non_active_button_color">#EBE9E9</color>
 </resources>

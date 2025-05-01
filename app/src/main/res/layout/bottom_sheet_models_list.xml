@@ -29,6 +29,7 @@
             android:fontFamily="@font/acherus_feral_bold"
             android:text="Nothing here!"
             android:textSize="30sp"
+            android:visibility="gone"
             android:textColor="@color/bw"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

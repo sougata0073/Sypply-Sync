@@ -4,117 +4,115 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/fragment_bg"
         android:fitsSystemWindows="true"
         tools:context=".util.modelslist.ModelsListFragment">
 
-<!--        <androidx.appcompat.widget.SearchView-->
-<!--            android:id="@+id/searchBar"-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_margin="15dp"-->
-<!--            android:background="@drawable/curved_rectangular_bg_color_adaptive"-->
-<!--            app:iconifiedByDefault="false"-->
-<!--            app:layout_constraintEnd_toEndOf="parent"-->
-<!--            app:layout_constraintStart_toStartOf="parent"-->
-<!--            app:layout_constraintTop_toTopOf="parent" />-->
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/night_mode_background"
+            android:backgroundTint="@color/night_mode_background"
+            android:fitsSystemWindows="true"
+            app:liftOnScroll="true"
+            app:statusBarForeground="@color/night_mode_background">
 
-<!--        <HorizontalScrollView-->
-<!--            android:id="@+id/chipScrollView"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:scrollbars="none"-->
-<!--            app:layout_constraintEnd_toEndOf="@id/searchBar"-->
-<!--            app:layout_constraintStart_toStartOf="@id/searchBar"-->
-<!--            app:layout_constraintTop_toBottomOf="@id/searchBar">-->
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolBar"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="@color/night_mode_background"
+                android:minHeight="?attr/actionBarSize"
+                app:layout_scrollEffect="compress"
+                app:layout_scrollFlags="scroll|enterAlways|snap"
+                app:navigationIcon="@drawable/ic_back_arrow"
+                app:title="Home"
+                app:titleTextAppearance="@style/materialToolbarTitleStyle">
 
-<!--            <com.google.android.material.chip.ChipGroup-->
-<!--                android:id="@+id/chipGroup"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                app:singleLine="true">-->
-
-<!--                <com.google.android.material.chip.Chip-->
-<!--                    style="@style/Widget.Material3.Chip.Filter"-->
+<!--                <ImageView-->
+<!--                    android:id="@+id/searchBtn"-->
 <!--                    android:layout_width="wrap_content"-->
 <!--                    android:layout_height="wrap_content"-->
-<!--                    android:checked="true"-->
-<!--                    android:text="Filter 1" />-->
+<!--                    android:layout_gravity="end|center_vertical"-->
+<!--                    android:layout_marginEnd="15dp"-->
+<!--                    android:src="@drawable/ic_search" />-->
 
-<!--                <com.google.android.material.chip.Chip-->
-<!--                    style="@style/Widget.Material3.Chip.Filter"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Filter 1" />-->
+                <androidx.appcompat.widget.SearchView
+                    android:id="@+id/searchView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    app:searchIcon="@drawable/ic_search"/>
 
-<!--                <com.google.android.material.chip.Chip-->
-<!--                    style="@style/Widget.Material3.Chip.Filter"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Filter 1" />-->
+            </com.google.android.material.appbar.MaterialToolbar>
 
-<!--                <com.google.android.material.chip.Chip-->
-<!--                    style="@style/Widget.Material3.Chip.Filter"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Filter 1" />-->
+            <HorizontalScrollView
+                android:id="@+id/chipGroupHorizontalScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@color/night_mode_background"
+                android:paddingStart="15dp"
+                android:paddingEnd="15dp"
+                android:scrollbars="none"
+                app:layout_scrollEffect="compress"
+                app:layout_scrollFlags="scroll|enterAlways|snap">
 
-<!--                <com.google.android.material.chip.Chip-->
-<!--                    style="@style/Widget.Material3.Chip.Filter"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Filter 1" />-->
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroup"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    app:singleLine="true"
+                    app:singleSelection="true">
 
-<!--                <com.google.android.material.chip.Chip-->
-<!--                    style="@style/Widget.Material3.Chip.Filter"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:text="Filter 1" />-->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_marginEnd="7dp"
+                        android:fontFamily="@font/acherus_feral_bold"
+                        android:gravity="center_vertical"
+                        android:text="Search by"
+                        android:textColor="@color/bw" />
 
-<!--            </com.google.android.material.chip.ChipGroup>-->
-<!--        </HorizontalScrollView>-->
+                </com.google.android.material.chip.ChipGroup>
+
+            </HorizontalScrollView>
+        </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_height="match_parent"
+            android:background="@color/fragment_bg"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         <TextView
             android:id="@+id/nothingHereLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:fontFamily="@font/acherus_feral_bold"
             android:text="Nothing here!"
             android:textColor="@color/bw"
             android:textSize="30sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:visibility="gone" />
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:indeterminate="true"
             android:visibility="gone"
-            app:indicatorColor="@color/bw"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:indicatorColor="@color/bw" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
             android:backgroundTint="@color/primary_color"
@@ -123,10 +121,8 @@
             android:textSize="15sp"
             android:tooltipText="Add"
             app:elevation="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:tint="@color/white" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 </layout>

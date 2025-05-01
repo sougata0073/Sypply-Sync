@@ -7,6 +7,7 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
+        android:background="@color/night_mode_background"
         android:layout_height="match_parent"
         tools:context=".MainActivity">
 
@@ -28,7 +29,7 @@
             app:backgroundColor="@color/night_mode_background"
             app:iconTint="@color/bw"
             app:iconTintActive="@color/bw"
-            app:indicatorColor="@color/bottom_nav_active_indicator"
+            app:indicatorColor="@color/active_non_active_button_color"
             app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

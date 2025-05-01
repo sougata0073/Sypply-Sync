@@ -24,6 +24,8 @@ class ModelsListRecyclerViewAdapter(
 ) :
     RecyclerView.Adapter<ModelsListRecyclerViewAdapter.MyViewHolder>() {
 
+    private var oldNonFilteredList = mutableListOf<Model>()
+
     private val viewTypeLoading = 0
     private val viewTypeNormal = 1
 
@@ -83,37 +85,68 @@ class ModelsListRecyclerViewAdapter(
         return this.itemsList.size
     }
 
+    fun deleteItem(index: Int) {
+        this.itemsList.removeAt(index)
+        this.notifyItemRemoved(index)
+    }
+
     fun addLoadingAnimation() {
         if (this.itemsList.isNotEmpty() && this.itemsList.last() !is DummyModel) {
             val prevSize = this.itemsList.size
-
             this.itemsList.add(DummyModel())
-
             notifyItemInserted(prevSize)
-
-//            Log.d("loader", "Yes")
         }
     }
 
-    fun setItems(newItemsList: List<Model>) {
+    fun removeLoadingAnimation() {
         if (this.itemsList.isNotEmpty() && this.itemsList.last() is DummyModel) {
             this.deleteItem(this.itemsList.size - 1)
         }
+    }
+
+//    @Suppress("UNCHECKED_CAST")
+//    fun sortList(fieldName: String) {
+//
+//        this.oldNonFilteredList.clear()
+//        this.oldNonFilteredList.addAll(this.itemsList)
+//
+//        if (this.itemsList.isEmpty()) {
+//            return
+//        }
+//
+//        this.removeLoadingAnimation()
+//
+//        val field = this.itemsList.first().javaClass.getDeclaredField(fieldName).apply {
+//            isAccessible = true
+//        }
+//
+//        val newList = this.itemsList.sortedBy {
+//            field.get(it) as Comparable<Any>
+//        }
+//
+//        this.setItems(newList)
+//    }
+//
+//    fun clearSortFiltering() {
+//        this.setItems(this.oldNonFilteredList)
+//    }
+
+    fun removeAllItems() {
+
+        val prevSize = this.itemsList.size
+
+        this.itemsList.clear()
+
+        notifyItemRangeRemoved(0, prevSize)
+    }
+
+    fun setItems(newItemsList: List<Model>) {
+        this.removeLoadingAnimation()
+
         val diffUtil = ModelsListDifUtil(this.itemsList, newItemsList, this.modelName)
         val diffResult = DiffUtil.calculateDiff(diffUtil)
         this.itemsList = newItemsList.toMutableList()
         diffResult.dispatchUpdatesTo(this)
-    }
-
-    fun deleteItem(index: Int) {
-        this.itemsList.removeAt(index)
-        this.notifyItemRemoved(index)
-//        Log.d("loader", "Yes adapter delete")
-    }
-
-    fun updateItem(item: Model, index: Int) {
-        this.itemsList[index] = item
-        notifyItemChanged(index)
     }
 
     private fun getWhatToBind(
@@ -123,24 +156,17 @@ class ModelsListRecyclerViewAdapter(
     ): ViewDataBinding {
 
         return when (modelName) {
-            Model.SUPPLIER -> DataBindingUtil.inflate<ItemSuppliersListBinding>(
-                inflater, R.layout.item_suppliers_list, parent, false
-            )
 
-            Model.SUPPLIERS_ITEM -> DataBindingUtil.inflate<ItemSupplierItemsListBinding>(
-                inflater, R.layout.item_supplier_items_list, parent, false
+            Model.SUPPLIER -> ItemSuppliersListBinding.inflate(inflater, parent, false)
+            Model.SUPPLIERS_ITEM -> ItemSupplierItemsListBinding.inflate(inflater, parent, false)
+            Model.SUPPLIER_PAYMENT -> ItemSupplierPaymentsListBinding.inflate(
+                inflater,
+                parent,
+                false
             )
-
-            Model.SUPPLIER_PAYMENT -> DataBindingUtil.inflate<ItemSupplierPaymentsListBinding>(
-                inflater, R.layout.item_supplier_payments_list, parent, false
-            )
-
-            Model.ORDERED_ITEM -> DataBindingUtil.inflate<ItemOrderedItemsListBinding>(
-                inflater, R.layout.item_ordered_items_list, parent, false
-            )
+            Model.ORDERED_ITEM -> ItemOrderedItemsListBinding.inflate(inflater, parent, false)
 
             else -> throw Exception("Unknown model type")
         }
-
     }
 }

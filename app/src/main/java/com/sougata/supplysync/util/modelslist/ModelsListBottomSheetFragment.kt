@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -68,10 +69,12 @@ class ModelsListBottomSheetFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        this.helper = ModelsListFragmentHelper(this.modelName, this)
+        this.viewModel = ViewModelProvider(
+            this,
+            ModelsListViewModelFactory(this.modelName)
+        )[ModelsListViewModel::class.java]
 
-        this.viewModel =
-            this.helper.getWhichViewModelToCreate()
+        this.helper = ModelsListFragmentHelper(this.modelName, this)
 
         this.onBind = this.helper.getWhatToOnBind()
 
@@ -110,29 +113,30 @@ class ModelsListBottomSheetFragment : BottomSheetDialogFragment() {
 
             if (it.second == Status.STARTED) {
 
-                this.binding.apply {
-                    nothingHereLbl.visibility = View.GONE
-                    progressBar.visibility = View.VISIBLE
+                if (viewModel.isFirstTimeListLoaded) {
+                    this.binding.progressBar.visibility = View.VISIBLE
+                    viewModel.isFirstTimeListLoaded = false
                 }
 
             } else if (it.second == Status.SUCCESS) {
 
-                if (it.third == KeysAndMessages.EMPTY_LIST) {
+                val list = it.first
 
-                    this.binding.apply {
-                        progressBar.visibility = View.GONE
-                        nothingHereLbl.visibility = View.VISIBLE
+                if (list != null) {
+                    if (list.isNotEmpty()) {
+                        this.binding.progressBar.visibility = View.GONE
+                        this.binding.nothingHereLbl.visibility = View.GONE
+                        this.recyclerViewAdapter.removeLoadingAnimation()
+                    } else {
+                        this.binding.nothingHereLbl.visibility = View.VISIBLE
+                        this.binding.progressBar.visibility = View.GONE
+                        this.recyclerViewAdapter.removeLoadingAnimation()
                     }
-
+                    this.recyclerViewAdapter.setItems(list)
                 } else {
-
-                    this.binding.apply {
-                        nothingHereLbl.visibility = View.GONE
-                        progressBar.visibility = View.GONE
-                    }
-                    this.recyclerViewAdapter.setItems(it.first!!)
-//                    this.binding.recyclerView.smoothScrollBy(0, 300)
-
+                    this.binding.nothingHereLbl.visibility = View.VISIBLE
+                    this.binding.progressBar.visibility = View.GONE
+                    this.recyclerViewAdapter.removeLoadingAnimation()
                 }
 
             } else if (it.second == Status.FAILED) {
@@ -154,8 +158,8 @@ class ModelsListBottomSheetFragment : BottomSheetDialogFragment() {
                     val lastItemPosition = layoutManager.findLastCompletelyVisibleItemPosition()
 
                     if (lastItemPosition == itemCount - 1) {
-                        viewModel.loadListItem()
-                    }else if (lastItemPosition == itemCount - 5) {
+                        viewModel.loadItemsList()
+                    } else if (lastItemPosition == itemCount - 5) {
                         recyclerViewAdapter.addLoadingAnimation()
                     }
                 }

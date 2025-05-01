@@ -6,14 +6,6 @@ import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Locale
 
-
-//fun main() {
-//
-//
-//
-//}
-
-
 object Converters {
     fun numberToDouble(num: Number) = num.toDouble()
 
