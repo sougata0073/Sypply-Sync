@@ -20,7 +20,8 @@ import com.sougata.supplysync.util.Status
 
 class CreateAccountFragment : Fragment() {
 
-    private lateinit var binding: FragmentCreateAccountBinding
+    private var _binding: FragmentCreateAccountBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var viewModel: CreateAccountViewModel
 
@@ -28,7 +29,7 @@ class CreateAccountFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        this.binding =
+        this._binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_create_account, container, false)
 
         return this.binding.root
@@ -45,6 +46,12 @@ class CreateAccountFragment : Fragment() {
 
         this.registerSubscribers()
 
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        this._binding = null
     }
 
     private fun registerSubscribers() {

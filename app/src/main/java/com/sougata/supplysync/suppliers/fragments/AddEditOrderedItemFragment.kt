@@ -23,14 +23,15 @@ import com.sougata.supplysync.suppliers.viewmodels.AddEditOrderedItemViewModel
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
-import com.sougata.supplysync.util.modelslist.ModelsListBottomSheetFragment
+import com.sougata.supplysync.modelslist.ModelsListBottomSheetFragment
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class AddEditOrderedItemFragment : Fragment() {
 
-    private lateinit var binding: FragmentAddEditOrderedItemBinding
+    private var _binding: FragmentAddEditOrderedItemBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var viewModel: AddEditOrderedItemViewModel
 
@@ -72,7 +73,7 @@ class AddEditOrderedItemFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        this.binding = DataBindingUtil.inflate(
+        this._binding = DataBindingUtil.inflate(
             inflater,
             R.layout.fragment_add_edit_ordered_item,
             container,
@@ -128,6 +129,8 @@ class AddEditOrderedItemFragment : Fragment() {
                 bundle
             )
         }
+
+        this._binding = null
     }
 
     private fun initializeUI() {

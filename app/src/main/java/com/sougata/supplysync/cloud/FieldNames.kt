@@ -1,16 +1,16 @@
 package com.sougata.supplysync.cloud
 
-object FieldNamesRepository {
+object FieldNames {
 
-    object UsersCollection {
-        const val THIS_COLLECTION_NAME = "users"
+    object UsersCol {
+        const val SELF_NAME = "users"
         const val EMAIL = "email"
         const val NAME = "name"
         const val PHONE = "phone"
     }
 
-    object OrderedItemsCollection {
-        const val THIS_COLLECTION_NAME = "ordered_items"
+    object OrderedItemsCol {
+        const val SELF_NAME = "ordered_items"
         const val AMOUNT = "amount"
         const val IS_RECEIVED = "is_received"
         const val ITEM_ID = "item_id"
@@ -22,16 +22,16 @@ object FieldNamesRepository {
         const val TIMESTAMP = "timestamp"
     }
 
-    object SupplierItemsCollection {
-        const val THIS_COLLECTION_NAME = "supplier_items"
+    object SupplierItemsCol {
+        const val SELF_NAME = "supplier_items"
         const val DETAILS = "details"
         const val NAME = "name"
         const val PRICE = "price"
         const val TIMESTAMP = "timestamp"
     }
 
-    object SupplierPaymentsCollection {
-        const val THIS_COLLECTION_NAME = "supplier_payments"
+    object SupplierPaymentsCol {
+        const val SELF_NAME = "supplier_payments"
         const val AMOUNT = "amount"
         const val NOTE = "note"
         const val PAYMENT_TIMESTAMP = "payment_timestamp"
@@ -40,8 +40,8 @@ object FieldNamesRepository {
         const val TIMESTAMP = "timestamp"
     }
 
-    object SuppliersCollection {
-        const val THIS_COLLECTION_NAME = "suppliers"
+    object SuppliersCol {
+        const val SELF_NAME = "suppliers"
         const val DUE_AMOUNT = "due_amount"
         const val EMAIL = "email"
         const val NAME = "name"
@@ -52,26 +52,26 @@ object FieldNamesRepository {
         const val TIMESTAMP = "timestamp"
     }
 
-    object ValuesCollection {
-        const val THIS_COLLECTION_NAME = "values"
+    object ValuesCol {
+        const val SELF_NAME = "values"
 
-        object OrdersToReceiveDocument {
-            const val THIS_DOCUMENT_NAME = "orders_to_receive"
+        object OrdersToReceiveDoc {
+            const val SELF_NAME = "orders_to_receive"
             const val VALUE = "value"
         }
 
-        object SupplierItemsCountDocument {
-            const val THIS_DOCUMENT_NAME = "supplier_items_count"
+        object SupplierItemsCountDoc {
+            const val SELF_NAME = "supplier_items_count"
             const val VALUE = "value"
         }
 
-        object SuppliersCountDocument {
-            const val THIS_DOCUMENT_NAME = "suppliers_count"
+        object SuppliersCountDoc {
+            const val SELF_NAME = "suppliers_count"
             const val VALUE = "value"
         }
 
-        object SuppliersDueAmountDocument {
-            const val THIS_DOCUMENT_NAME = "suppliers_due_amount"
+        object SuppliersDueAmountDoc {
+            const val SELF_NAME = "suppliers_due_amount"
             const val VALUE = "value"
         }
     }

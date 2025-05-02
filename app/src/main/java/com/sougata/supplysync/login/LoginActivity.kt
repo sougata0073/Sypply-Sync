@@ -15,7 +15,8 @@ import com.sougata.supplysync.util.Status
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityLogInBinding
+    private var _binding: ActivityLogInBinding? = null
+    private val binding get() = _binding!!
 
     private var reasonToBeHere: String = ""
 
@@ -23,11 +24,17 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        this.binding = DataBindingUtil.setContentView(this, R.layout.activity_log_in)
+        this._binding = DataBindingUtil.setContentView(this, R.layout.activity_log_in)
 
-        this.reasonToBeHere = intent.getStringExtra("reason").toString()
+        this.reasonToBeHere = intent.getStringExtra(KeysAndMessages.REASON).toString()
 
         this.setupIfOnlyEmailIsNotVerified()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        this._binding = null
     }
 
     private fun setupIfOnlyEmailIsNotVerified() {

@@ -45,7 +45,7 @@
         tools:layout="@layout/fragment_add_edit_supplier"/>
     <fragment
         android:id="@+id/modelsListFragment"
-        android:name="com.sougata.supplysync.util.modelslist.ModelsListFragment"
+        android:name="com.sougata.supplysync.modelslist.ModelsListFragment"
         android:label="fragment_models_list"
         tools:layout="@layout/fragment_models_list"/>
     <fragment

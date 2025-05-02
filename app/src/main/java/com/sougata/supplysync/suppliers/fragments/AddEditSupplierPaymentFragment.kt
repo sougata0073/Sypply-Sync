@@ -25,14 +25,15 @@ import com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierPaymentViewMod
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
-import com.sougata.supplysync.util.modelslist.ModelsListBottomSheetFragment
+import com.sougata.supplysync.modelslist.ModelsListBottomSheetFragment
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class AddEditSupplierPaymentFragment : Fragment() {
 
-    private lateinit var binding: FragmentAddEditSupplierPaymentBinding
+    private var _binding: FragmentAddEditSupplierPaymentBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var viewModel: AddEditSupplierPaymentViewModel
 
@@ -73,7 +74,7 @@ class AddEditSupplierPaymentFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        this.binding =
+        this._binding =
             DataBindingUtil.inflate(
                 inflater,
                 R.layout.fragment_add_edit_supplier_payment,
@@ -131,6 +132,8 @@ class AddEditSupplierPaymentFragment : Fragment() {
                 bundle
             )
         }
+
+        this._binding = null
     }
 
     private fun initializeUI() {

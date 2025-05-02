@@ -1,0 +1,16 @@
+package com.sougata.supplysync.modelslist.helper
+
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.databinding.ViewDataBinding
+import com.sougata.supplysync.models.Model
+import com.sougata.supplysync.modelslist.DataType
+import kotlin.reflect.KProperty1
+
+interface HelperStructure {
+    fun getProperties(): Array<KProperty1<Model, *>>
+    fun getViewToInflate(inflater: LayoutInflater, parent: ViewGroup): ViewDataBinding
+    fun getFieldsPair(): Array<Triple<String, String, DataType>>
+    fun getFabClickHandler(): () -> Unit
+    fun bind(binding: ViewDataBinding, model: Model)
+}

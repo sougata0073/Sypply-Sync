@@ -1,10 +1,9 @@
-package com.sougata.supplysync.util.modelslist
+package com.sougata.supplysync.modelslist
 
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.text.InputType
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,14 +24,15 @@ import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentModelsListBinding
 import com.sougata.supplysync.login.LoginActivity
 import com.sougata.supplysync.models.Model
+import com.sougata.supplysync.modelslist.helper.ModelsListHelper
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 import com.sougata.supplysync.util.ViewAnimator
-import com.sougata.supplysync.util.modelslist.ModelSearchViewModel
 
 class ModelsListFragment : Fragment() {
 
-    private lateinit var binding: FragmentModelsListBinding
+    private var _binding: FragmentModelsListBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var regularViewModel: ModelsListViewModel
     private lateinit var searchViewModel: ModelSearchViewModel
@@ -41,7 +41,7 @@ class ModelsListFragment : Fragment() {
 
     private lateinit var modelName: String
 
-    private lateinit var helper: ModelsListFragmentHelper
+    private lateinit var helper: ModelsListHelper
 
     private lateinit var onBind: (ViewDataBinding, Model) -> Unit
 
@@ -62,7 +62,7 @@ class ModelsListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        this.binding =
+        this._binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_models_list, container, false)
 
         this.binding.chipGroupHorizontalScrollView.visibility = View.GONE
@@ -83,9 +83,9 @@ class ModelsListFragment : Fragment() {
             ModelsListViewModelFactory(this.modelName)
         )[ModelSearchViewModel::class.java]
 
-        this.helper = ModelsListFragmentHelper(this.modelName, this)
+        this.helper = ModelsListHelper(this.modelName, this)
 
-        this.onBind = this.helper.getWhatToOnBind()
+        this.onBind = this.helper.getWhatToDoOnBind()
 
         if (this.searchViewModel.isSearchActive) {
             this.loadChips()
@@ -111,6 +111,7 @@ class ModelsListFragment : Fragment() {
             bundle
         )
 
+        this._binding = null
     }
 
     private fun initializeUI() {
@@ -118,8 +119,7 @@ class ModelsListFragment : Fragment() {
         this.recyclerViewAdapter =
             ModelsListRecyclerViewAdapter(
                 mutableListOf(),
-                this.onBind,
-                this.modelName
+                this.helper
             )
 
         this.binding.recyclerView.apply {
@@ -179,7 +179,7 @@ class ModelsListFragment : Fragment() {
                 val list = regularViewModel.itemsList.value?.first
                 if (list != null) {
                     recyclerViewAdapter.setItems(list)
-                    if(list.isNotEmpty()) {
+                    if (list.isNotEmpty()) {
                         binding.nothingHereLbl.visibility = View.GONE
                     }
                 }
@@ -188,9 +188,7 @@ class ModelsListFragment : Fragment() {
 
                 false
             }
-
         }
-
     }
 
     private fun registerSubscribers() {

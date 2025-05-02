@@ -1,4 +1,4 @@
-package com.sougata.supplysync.util.modelslist
+package com.sougata.supplysync.modelslist
 
 import android.content.Intent
 import android.os.Bundle
@@ -17,12 +17,14 @@ import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.BottomSheetModelsListBinding
 import com.sougata.supplysync.login.LoginActivity
 import com.sougata.supplysync.models.Model
+import com.sougata.supplysync.modelslist.helper.ModelsListHelper
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 
 class ModelsListBottomSheetFragment : BottomSheetDialogFragment() {
 
-    private lateinit var binding: BottomSheetModelsListBinding
+    private var _binding: BottomSheetModelsListBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var viewModel: ModelsListViewModel
 
@@ -32,7 +34,7 @@ class ModelsListBottomSheetFragment : BottomSheetDialogFragment() {
 
     private lateinit var onBind: (ViewDataBinding, Model) -> Unit
 
-    private lateinit var helper: ModelsListFragmentHelper
+    private lateinit var helper: ModelsListHelper
 
     companion object {
 
@@ -59,7 +61,7 @@ class ModelsListBottomSheetFragment : BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        this.binding = DataBindingUtil.inflate(
+        this._binding = DataBindingUtil.inflate(
             inflater, R.layout.bottom_sheet_models_list, container, false
         )
 
@@ -74,15 +76,14 @@ class ModelsListBottomSheetFragment : BottomSheetDialogFragment() {
             ModelsListViewModelFactory(this.modelName)
         )[ModelsListViewModel::class.java]
 
-        this.helper = ModelsListFragmentHelper(this.modelName, this)
+        this.helper = ModelsListHelper(this.modelName, this)
 
-        this.onBind = this.helper.getWhatToOnBind()
+        this.onBind = this.helper.getWhatToDoOnBind()
 
         this.recyclerViewAdapter =
             ModelsListRecyclerViewAdapter(
                 mutableListOf(),
-                this.onBind,
-                this.modelName
+                this.helper
             ) { view, model ->
                 view.setOnClickListener {
                     val bundle = Bundle().apply {
@@ -105,6 +106,12 @@ class ModelsListBottomSheetFragment : BottomSheetDialogFragment() {
 
         this.registerSubscribers()
 
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        this._binding = null
     }
 
     private fun registerSubscribers() {

@@ -20,5 +20,6 @@ object KeysAndMessages {
     const val TO_EDIT_KEY = "To edit"
     const val DELETE = "Delete"
     const val MODEL_NAME_KEY = "Model name"
+    const val REASON = "Reason"
 
 }

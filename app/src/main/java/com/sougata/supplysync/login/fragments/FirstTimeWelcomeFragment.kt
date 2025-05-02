@@ -13,7 +13,8 @@ import com.sougata.supplysync.login.viewmodels.FirstTimeWelcomeViewModel
 
 class FirstTimeWelcomeFragment : Fragment() {
 
-    private lateinit var binding: FragmentFirstTimeWelcomeBinding
+    private var _binding: FragmentFirstTimeWelcomeBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var viewModel: FirstTimeWelcomeViewModel
 
@@ -22,7 +23,7 @@ class FirstTimeWelcomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        this.binding = DataBindingUtil.inflate(
+        this._binding = DataBindingUtil.inflate(
             inflater,
             R.layout.fragment_first_time_welcome,
             container,
@@ -41,6 +42,12 @@ class FirstTimeWelcomeFragment : Fragment() {
 
         this.binding.lifecycleOwner = this
 
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        this._binding = null
     }
 
 }

@@ -17,7 +17,8 @@ import com.sougata.supplysync.util.ViewAnimator
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
+    private var _binding: ActivityMainBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var viewModel: MainActivityViewModel
 
@@ -47,10 +48,8 @@ class MainActivity : AppCompatActivity() {
 
         if (currentUser == null) {
 
-//            Log.d("reason", "user not found")
-
             val bundle = Bundle().apply {
-                putString("reason", KeysAndMessages.USER_NOT_FOUND)
+                putString(KeysAndMessages.REASON, KeysAndMessages.USER_NOT_FOUND)
             }
 
             startActivity(Intent(this, LoginActivity::class.java), bundle)
@@ -58,10 +57,8 @@ class MainActivity : AppCompatActivity() {
 
         } else if (!currentUser.isEmailVerified) {
 
-//            Log.d("reason", "email not verified")
-
             val bundle = Bundle().apply {
-                putString("reason", KeysAndMessages.EMAIL_IS_NOT_VERIFIED)
+                putString(KeysAndMessages.REASON, KeysAndMessages.EMAIL_IS_NOT_VERIFIED)
             }
 
             val intent = Intent(this, LoginActivity::class.java).apply {
@@ -79,7 +76,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        this.binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+        this._binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         this.binding.lifecycleOwner = this
 
@@ -120,5 +117,11 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        this._binding = null
     }
 }

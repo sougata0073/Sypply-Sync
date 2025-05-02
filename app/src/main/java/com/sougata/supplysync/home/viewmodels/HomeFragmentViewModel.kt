@@ -22,21 +22,6 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 
     private val supplierFirestoreRepository = SupplierFirestoreRepository()
 
-//    fun getBarChartData(context: Context): BarData {
-//        val list = listOf(
-//            BarEntry(0f, 10f), BarEntry(1f, 20f), BarEntry(2f, 30f), BarEntry(3f, 40f),
-//            BarEntry(4f, 50f), BarEntry(5f, 60f), BarEntry(6f, 70f)
-//        )
-//
-//        val barDataSet = BarDataSet(list, "Amount").apply {
-//            color = context.getColor(R.color.primary_color)
-//            valueTextColor = context.getColor(R.color.bw)
-//            valueTextSize = 11f
-//        }
-//
-//        return BarData().apply { addDataSet(barDataSet) }
-//    }
-
     val purchaseChartRangeDate = MutableLiveData("")
 
     val purchaseChartData = MutableLiveData<Triple<LineData?, Int, String>>()

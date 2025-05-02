@@ -18,7 +18,8 @@ import com.sougata.supplysync.util.Inputs
 
 class SupplierProfileBottomSheetFragment : BottomSheetDialogFragment() {
 
-    private lateinit var binding: BottomSheetSupplierProfileBinding
+    private var _binding: BottomSheetSupplierProfileBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var supplier: Supplier
 
@@ -47,7 +48,7 @@ class SupplierProfileBottomSheetFragment : BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        this.binding = DataBindingUtil.inflate(
+        this._binding = DataBindingUtil.inflate(
             inflater,
             R.layout.bottom_sheet_supplier_profile,
             container,
@@ -64,6 +65,12 @@ class SupplierProfileBottomSheetFragment : BottomSheetDialogFragment() {
 
         this.initializeUI()
 
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        this._binding = null
     }
 
     private fun initializeUI() {

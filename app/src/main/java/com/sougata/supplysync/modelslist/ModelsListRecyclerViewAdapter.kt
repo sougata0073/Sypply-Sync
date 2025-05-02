@@ -1,4 +1,4 @@
-package com.sougata.supplysync.util.modelslist
+package com.sougata.supplysync.modelslist
 
 import android.view.LayoutInflater
 import android.view.View
@@ -9,22 +9,16 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ItemInfinityScrollProgressBarBinding
-import com.sougata.supplysync.databinding.ItemOrderedItemsListBinding
-import com.sougata.supplysync.databinding.ItemSupplierItemsListBinding
-import com.sougata.supplysync.databinding.ItemSupplierPaymentsListBinding
-import com.sougata.supplysync.databinding.ItemSuppliersListBinding
 import com.sougata.supplysync.models.DummyModel
 import com.sougata.supplysync.models.Model
+import com.sougata.supplysync.modelslist.helper.ModelsListHelper
 
 class ModelsListRecyclerViewAdapter(
     private var itemsList: MutableList<Model>,
-    private val onBind: (ViewDataBinding, Model) -> Unit,
-    private val modelName: String,
-    private val customCallback: ((View, Model) -> Unit)? = null
+    private var helper: ModelsListHelper,
+    private val extraCallback: ((View, Model) -> Unit)? = null
 ) :
     RecyclerView.Adapter<ModelsListRecyclerViewAdapter.MyViewHolder>() {
-
-    private var oldNonFilteredList = mutableListOf<Model>()
 
     private val viewTypeLoading = 0
     private val viewTypeNormal = 1
@@ -34,9 +28,10 @@ class ModelsListRecyclerViewAdapter(
 
         fun bind(model: Model) {
             if (model !is DummyModel) {
-                onBind(this.binding, model)
 
-                customCallback?.invoke(this.binding.root, model)
+                helper.getWhatToDoOnBind().invoke(this.binding, model)
+
+                extraCallback?.invoke(this.binding.root, model)
             }
 
         }
@@ -59,7 +54,7 @@ class ModelsListRecyclerViewAdapter(
 
         when (viewType) {
             viewTypeNormal -> {
-                val binding: ViewDataBinding = getWhatToBind(this.modelName, inflater, parent)
+                val binding: ViewDataBinding = this.helper.getWhichViewToInflate(inflater, parent)
                 return MyViewHolder(binding)
             }
 
@@ -104,33 +99,6 @@ class ModelsListRecyclerViewAdapter(
         }
     }
 
-//    @Suppress("UNCHECKED_CAST")
-//    fun sortList(fieldName: String) {
-//
-//        this.oldNonFilteredList.clear()
-//        this.oldNonFilteredList.addAll(this.itemsList)
-//
-//        if (this.itemsList.isEmpty()) {
-//            return
-//        }
-//
-//        this.removeLoadingAnimation()
-//
-//        val field = this.itemsList.first().javaClass.getDeclaredField(fieldName).apply {
-//            isAccessible = true
-//        }
-//
-//        val newList = this.itemsList.sortedBy {
-//            field.get(it) as Comparable<Any>
-//        }
-//
-//        this.setItems(newList)
-//    }
-//
-//    fun clearSortFiltering() {
-//        this.setItems(this.oldNonFilteredList)
-//    }
-
     fun removeAllItems() {
 
         val prevSize = this.itemsList.size
@@ -143,30 +111,9 @@ class ModelsListRecyclerViewAdapter(
     fun setItems(newItemsList: List<Model>) {
         this.removeLoadingAnimation()
 
-        val diffUtil = ModelsListDifUtil(this.itemsList, newItemsList, this.modelName)
+        val diffUtil = ModelsListDifUtil(this.itemsList, newItemsList, this.helper)
         val diffResult = DiffUtil.calculateDiff(diffUtil)
         this.itemsList = newItemsList.toMutableList()
         diffResult.dispatchUpdatesTo(this)
-    }
-
-    private fun getWhatToBind(
-        modelName: String,
-        inflater: LayoutInflater,
-        parent: ViewGroup
-    ): ViewDataBinding {
-
-        return when (modelName) {
-
-            Model.SUPPLIER -> ItemSuppliersListBinding.inflate(inflater, parent, false)
-            Model.SUPPLIERS_ITEM -> ItemSupplierItemsListBinding.inflate(inflater, parent, false)
-            Model.SUPPLIER_PAYMENT -> ItemSupplierPaymentsListBinding.inflate(
-                inflater,
-                parent,
-                false
-            )
-            Model.ORDERED_ITEM -> ItemOrderedItemsListBinding.inflate(inflater, parent, false)
-
-            else -> throw Exception("Unknown model type")
-        }
     }
 }

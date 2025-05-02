@@ -1,8 +1,7 @@
-package com.sougata.supplysync.util.modelslist
+package com.sougata.supplysync.modelslist
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.sougata.supplysync.util.modelslist.ModelSearchViewModel
 
 @Suppress("UNCHECKED_CAST")
 class ModelsListViewModelFactory(

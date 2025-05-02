@@ -19,7 +19,8 @@ import java.util.Locale
 
 class EmailVerificationFragment : Fragment() {
 
-    private lateinit var binding: FragmentEmailVerificationBinding
+    private var _binding: FragmentEmailVerificationBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var viewModel: EmailVerificationViewModel
 
@@ -33,7 +34,7 @@ class EmailVerificationFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        this.binding = DataBindingUtil.inflate(
+        this._binding = DataBindingUtil.inflate(
             inflater,
             R.layout.fragment_email_verification,
             container,
@@ -53,6 +54,12 @@ class EmailVerificationFragment : Fragment() {
         this.binding.lifecycleOwner = this.viewLifecycleOwner
 
         this.registerSubscribers()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        this._binding = null
     }
 
     private fun registerSubscribers() {

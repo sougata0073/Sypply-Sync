@@ -1,6 +1,5 @@
 package com.sougata.supplysync.cloud
 
-import android.util.Log
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
@@ -9,8 +8,7 @@ import com.google.firebase.ktx.Firebase
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
-import com.sougata.supplysync.util.modelslist.DataType
-import kotlin.math.ceil
+import com.sougata.supplysync.modelslist.DataType
 import kotlin.math.floor
 
 class FirestoreCommonRepository {
@@ -18,7 +16,7 @@ class FirestoreCommonRepository {
     private val currentUser = Firebase.auth.currentUser
     private val db = Firebase.firestore
     private val usersCol =
-        this.db.collection(FieldNamesRepository.UsersCollection.THIS_COLLECTION_NAME)
+        this.db.collection(FieldNames.UsersCol.SELF_NAME)
 
     fun getAnyModelsList(
         firebaseCollectionName: String,

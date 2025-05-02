@@ -20,7 +20,8 @@ import com.sougata.supplysync.util.Status
 
 class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
 
-    private lateinit var binding: BottomSheetAddEditSupplierItemBinding
+    private var _binding: BottomSheetAddEditSupplierItemBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var viewModel: AddEditSupplierItemViewModel
 
@@ -73,7 +74,7 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        this.binding = DataBindingUtil.inflate(
+        this._binding = DataBindingUtil.inflate(
             inflater,
             R.layout.bottom_sheet_add_edit_supplier_item,
             container,
@@ -127,7 +128,7 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
             )
         }
 
-
+        this._binding = null
     }
 
     private fun initializeUI() {

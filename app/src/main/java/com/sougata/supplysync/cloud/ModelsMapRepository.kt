@@ -19,50 +19,50 @@ class ModelsMapRepository {
 
         return when (modelName) {
             Model.SUPPLIER -> Supplier(
-                name = map[FieldNamesRepository.SuppliersCollection.NAME] as String,
-                dueAmount = Converters.numberToDouble(map[FieldNamesRepository.SuppliersCollection.DUE_AMOUNT] as Number),
-                phone = map[FieldNamesRepository.SuppliersCollection.PHONE] as String,
-                email = map[FieldNamesRepository.SuppliersCollection.EMAIL] as String,
-                note = map[FieldNamesRepository.SuppliersCollection.NOTE] as String,
-                paymentDetails = map[FieldNamesRepository.SuppliersCollection.PAYMENT_DETAILS] as String,
-                profileImageUrl = map[FieldNamesRepository.SuppliersCollection.PROFILE_IMAGE_URL] as String
+                name = map[FieldNames.SuppliersCol.NAME] as String,
+                dueAmount = Converters.numberToDouble(map[FieldNames.SuppliersCol.DUE_AMOUNT] as Number),
+                phone = map[FieldNames.SuppliersCol.PHONE] as String,
+                email = map[FieldNames.SuppliersCol.EMAIL] as String,
+                note = map[FieldNames.SuppliersCol.NOTE] as String,
+                paymentDetails = map[FieldNames.SuppliersCol.PAYMENT_DETAILS] as String,
+                profileImageUrl = map[FieldNames.SuppliersCol.PROFILE_IMAGE_URL] as String
             ).apply {
                 id = document.id
-                timestamp = map[FieldNamesRepository.SuppliersCollection.TIMESTAMP] as Timestamp
+                timestamp = map[FieldNames.SuppliersCol.TIMESTAMP] as Timestamp
             }
 
             Model.SUPPLIERS_ITEM -> SupplierItem(
-                name = map[FieldNamesRepository.SupplierItemsCollection.NAME] as String,
-                price = Converters.numberToDouble(map[FieldNamesRepository.SupplierItemsCollection.PRICE] as Number),
-                details = map[FieldNamesRepository.SupplierItemsCollection.DETAILS] as String
+                name = map[FieldNames.SupplierItemsCol.NAME] as String,
+                price = Converters.numberToDouble(map[FieldNames.SupplierItemsCol.PRICE] as Number),
+                details = map[FieldNames.SupplierItemsCol.DETAILS] as String
             ).apply {
                 id = document.id
-                timestamp = map[FieldNamesRepository.SupplierItemsCollection.TIMESTAMP] as Timestamp
+                timestamp = map[FieldNames.SupplierItemsCol.TIMESTAMP] as Timestamp
             }
 
             Model.SUPPLIER_PAYMENT -> SupplierPayment(
-                amount = Converters.numberToDouble(map[FieldNamesRepository.SupplierPaymentsCollection.AMOUNT] as Number),
-                paymentTimestamp = map[FieldNamesRepository.SupplierPaymentsCollection.PAYMENT_TIMESTAMP] as Timestamp,
-                note = map[FieldNamesRepository.SupplierPaymentsCollection.NOTE] as String,
-                supplierId = map[FieldNamesRepository.SupplierPaymentsCollection.SUPPLIER_ID] as String,
-                supplierName = map[FieldNamesRepository.SupplierPaymentsCollection.SUPPLIER_NAME] as String
+                amount = Converters.numberToDouble(map[FieldNames.SupplierPaymentsCol.AMOUNT] as Number),
+                paymentTimestamp = map[FieldNames.SupplierPaymentsCol.PAYMENT_TIMESTAMP] as Timestamp,
+                note = map[FieldNames.SupplierPaymentsCol.NOTE] as String,
+                supplierId = map[FieldNames.SupplierPaymentsCol.SUPPLIER_ID] as String,
+                supplierName = map[FieldNames.SupplierPaymentsCol.SUPPLIER_NAME] as String
             ).apply {
                 id = document.id
-                timestamp = map[FieldNamesRepository.SupplierPaymentsCollection.TIMESTAMP] as Timestamp
+                timestamp = map[FieldNames.SupplierPaymentsCol.TIMESTAMP] as Timestamp
             }
 
             Model.ORDERED_ITEM -> OrderedItem(
-                itemId = map[FieldNamesRepository.OrderedItemsCollection.ITEM_ID] as String,
-                itemName = map[FieldNamesRepository.OrderedItemsCollection.ITEM_NAME] as String,
-                quantity = Converters.numberToInt(map[FieldNamesRepository.OrderedItemsCollection.QUANTITY] as Number),
-                amount = Converters.numberToDouble(map[FieldNamesRepository.OrderedItemsCollection.AMOUNT] as Number),
-                supplierId = map[FieldNamesRepository.OrderedItemsCollection.SUPPLIER_ID] as String,
-                supplierName = map[FieldNamesRepository.OrderedItemsCollection.SUPPLIER_NAME] as String,
-                orderTimestamp = map[FieldNamesRepository.OrderedItemsCollection.ORDER_TIMESTAMP] as Timestamp,
-                isReceived = map[FieldNamesRepository.OrderedItemsCollection.IS_RECEIVED] as Boolean
+                itemId = map[FieldNames.OrderedItemsCol.ITEM_ID] as String,
+                itemName = map[FieldNames.OrderedItemsCol.ITEM_NAME] as String,
+                quantity = Converters.numberToInt(map[FieldNames.OrderedItemsCol.QUANTITY] as Number),
+                amount = Converters.numberToDouble(map[FieldNames.OrderedItemsCol.AMOUNT] as Number),
+                supplierId = map[FieldNames.OrderedItemsCol.SUPPLIER_ID] as String,
+                supplierName = map[FieldNames.OrderedItemsCol.SUPPLIER_NAME] as String,
+                orderTimestamp = map[FieldNames.OrderedItemsCol.ORDER_TIMESTAMP] as Timestamp,
+                isReceived = map[FieldNames.OrderedItemsCol.IS_RECEIVED] as Boolean
             ).apply {
                 id = document.id
-                timestamp = map[FieldNamesRepository.OrderedItemsCollection.TIMESTAMP] as Timestamp
+                timestamp = map[FieldNames.OrderedItemsCol.TIMESTAMP] as Timestamp
             }
 
             else -> throw Exception("Invalid model name")

@@ -20,7 +20,8 @@ import com.sougata.supplysync.util.Status
 
 class SuppliersHomeFragment : Fragment() {
 
-    private lateinit var binding: FragmentSuppliersHomeBinding
+    private var _binding: FragmentSuppliersHomeBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var viewModel: SuppliersHomeViewModel
 
@@ -31,7 +32,7 @@ class SuppliersHomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        this.binding = DataBindingUtil.inflate(
+        this._binding = DataBindingUtil.inflate(
             inflater,
             R.layout.fragment_suppliers_home,
             container,
@@ -56,14 +57,11 @@ class SuppliersHomeFragment : Fragment() {
         this.binding.viewModel = this.viewModel
 
         this.registerSubscribers()
-
-//        Log.d("FragmentsLog", "onViewCreated() called")
-
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-//        Log.d("FragmentsLog", isDataAdded.toString())
+
         val bundle = Bundle().apply {
             putBoolean(
                 KeysAndMessages.DATA_ADDED_KEY, isDataAdded
@@ -73,6 +71,8 @@ class SuppliersHomeFragment : Fragment() {
             KeysAndMessages.RECENT_DATA_CHANGED_KEY,
             bundle
         )
+
+        this._binding = null
     }
 
 

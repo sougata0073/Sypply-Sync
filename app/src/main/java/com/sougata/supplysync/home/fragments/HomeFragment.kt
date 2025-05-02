@@ -31,7 +31,8 @@ import java.util.Locale
 
 class HomeFragment : Fragment() {
 
-    private lateinit var binding: FragmentHomeBinding
+    private var _binding: FragmentHomeBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var viewModel: HomeFragmentViewModel
 
@@ -41,7 +42,7 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        this.binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false)
+        this._binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false)
 
         return this.binding.root
     }
@@ -65,8 +66,6 @@ class HomeFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
 
-//        Log.d("FragmentsLog", "onDestroyView() called home")
-
         val bundle = Bundle().apply {
             putBoolean(
                 KeysAndMessages.DATA_ADDED_KEY, isDataAdded
@@ -76,6 +75,8 @@ class HomeFragment : Fragment() {
             KeysAndMessages.RECENT_DATA_CHANGED_KEY,
             bundle
         )
+
+        this._binding = null
     }
 
     private fun initializeUI() {

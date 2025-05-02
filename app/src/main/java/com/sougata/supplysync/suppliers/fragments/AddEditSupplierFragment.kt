@@ -22,7 +22,8 @@ import com.sougata.supplysync.util.Status
 
 class AddEditSupplierFragment : Fragment() {
 
-    private lateinit var binding: FragmentAddEditSupplierBinding
+    private var _binding: FragmentAddEditSupplierBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var viewModel: AddEditSupplierViewModel
 
@@ -63,7 +64,7 @@ class AddEditSupplierFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        this.binding =
+        this._binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_add_edit_supplier, container, false)
 
         return this.binding.root
@@ -71,9 +72,6 @@ class AddEditSupplierFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-
-
 
         this.viewModel = ViewModelProvider(this)[AddEditSupplierViewModel::class.java]
 
@@ -124,6 +122,8 @@ class AddEditSupplierFragment : Fragment() {
                 KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT, bundle
             )
         }
+
+        this._binding = null
     }
 
     private fun initializeUI() {

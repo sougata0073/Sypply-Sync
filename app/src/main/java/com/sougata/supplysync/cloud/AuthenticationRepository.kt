@@ -34,7 +34,6 @@ class AuthenticationRepository {
                                     onComplete(status, message)
                                 }
                             } else if (status == Status.FAILED) {
-//                                Log.d("auth", message)
                                 onComplete(status, message)
                             }
 
@@ -60,7 +59,7 @@ class AuthenticationRepository {
                 onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
 
             } else {
-//                Log.d("auth", emailSendTask.exception?.message.toString())
+
                 onComplete(Status.FAILED, emailSendTask.exception?.message.toString())
 
             }

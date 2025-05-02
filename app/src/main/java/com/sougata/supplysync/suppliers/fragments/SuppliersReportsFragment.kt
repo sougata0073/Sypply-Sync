@@ -26,7 +26,8 @@ import java.util.Locale
 
 class SuppliersReportsFragment : Fragment() {
 
-    private lateinit var binding: FragmentSuppliersReportsBinding
+    private var _binding: FragmentSuppliersReportsBinding? = null
+    private val binding get() = _binding!!
 
     private lateinit var viewModel: SupplierReportsViewModel
 
@@ -34,7 +35,7 @@ class SuppliersReportsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        this.binding =
+        this._binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_suppliers_reports, container, false)
 
         return this.binding.root
@@ -54,6 +55,12 @@ class SuppliersReportsFragment : Fragment() {
         this.initializeUI()
 
         this.registerListeners()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        this._binding = null
     }
 
     private fun initializeUI() {

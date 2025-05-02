@@ -1,4 +1,4 @@
-package com.sougata.supplysync.util.modelslist
+package com.sougata.supplysync.modelslist
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

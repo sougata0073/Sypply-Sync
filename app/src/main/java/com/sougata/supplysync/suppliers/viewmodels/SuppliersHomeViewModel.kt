@@ -11,7 +11,6 @@ import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.util.Inputs
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
-import com.sougata.supplysync.util.modelslist.ModelsListFragment
 
 class SuppliersHomeViewModel : ViewModel() {
 
