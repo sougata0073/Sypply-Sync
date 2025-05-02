@@ -4,7 +4,7 @@ import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
-import com.sougata.supplysync.cloud.SupplierFirestoreRepository
+import com.sougata.supplysync.remote.SupplierFirestoreRepository
 import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.Status
@@ -15,8 +15,8 @@ class AddEditOrderedItemViewModel : ViewModel() {
     val quantity = MutableLiveData("")
     val date = MutableLiveData("")
     val isReceived = MutableLiveData<Boolean>()
-    val itemName = MutableLiveData("")
-    val supplierName = MutableLiveData("")
+    val itemName = MutableLiveData("No item selected")
+    val supplierName = MutableLiveData("No supplier selected")
 
     private val supplierFirestoreRepository = SupplierFirestoreRepository()
 

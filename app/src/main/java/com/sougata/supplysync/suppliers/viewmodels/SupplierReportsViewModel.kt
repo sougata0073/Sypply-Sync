@@ -1,7 +1,6 @@
 package com.sougata.supplysync.suppliers.viewmodels
 
 import android.app.Application
-import android.util.Log
 import androidx.core.util.Pair
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
@@ -12,7 +11,7 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.firebase.Timestamp
 import com.sougata.supplysync.R
-import com.sougata.supplysync.cloud.SupplierFirestoreRepository
+import com.sougata.supplysync.remote.SupplierFirestoreRepository
 import com.sougata.supplysync.pdf.SupplierPdfRepository
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.Status

@@ -9,7 +9,11 @@ import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.models.SupplierPayment
-import com.sougata.supplysync.modelslist.DataType
+import com.sougata.supplysync.util.DataType
+import com.sougata.supplysync.modelslist.helper.modelhelpers.OrderedItemHelper
+import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierHelper
+import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierItemHelper
+import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierPaymentHelper
 
 class ModelsListHelper(
     private val modelName: String,
@@ -27,10 +31,10 @@ class ModelsListHelper(
 
     fun getWhatToDoOnBind(): (ViewDataBinding, Model) -> Unit {
         return when (this.modelName) {
-            Model.Companion.SUPPLIER -> this.supplierHelper::bind
-            Model.Companion.SUPPLIERS_ITEM -> this.supplierItemHelper::bind
-            Model.Companion.SUPPLIER_PAYMENT -> this.supplierPaymentHelper::bind
-            Model.Companion.ORDERED_ITEM -> this.orderedItemHelper::bind
+            Model.SUPPLIER -> this.supplierHelper::bind
+            Model.SUPPLIERS_ITEM -> this.supplierItemHelper::bind
+            Model.SUPPLIER_PAYMENT -> this.supplierPaymentHelper::bind
+            Model.ORDERED_ITEM -> this.orderedItemHelper::bind
 
             else -> throw IllegalArgumentException("Unknown model type")
         }
@@ -38,10 +42,10 @@ class ModelsListHelper(
 
     fun getWhatToDoOnFabClick(): () -> Unit {
         return when (this.modelName) {
-            Model.Companion.SUPPLIER -> this.supplierHelper.getFabClickHandler()
-            Model.Companion.SUPPLIERS_ITEM -> this.supplierItemHelper.getFabClickHandler()
-            Model.Companion.SUPPLIER_PAYMENT -> this.supplierPaymentHelper.getFabClickHandler()
-            Model.Companion.ORDERED_ITEM -> this.orderedItemHelper.getFabClickHandler()
+            Model.SUPPLIER -> this.supplierHelper.getFabClickHandler()
+            Model.SUPPLIERS_ITEM -> this.supplierItemHelper.getFabClickHandler()
+            Model.SUPPLIER_PAYMENT -> this.supplierPaymentHelper.getFabClickHandler()
+            Model.ORDERED_ITEM -> this.orderedItemHelper.getFabClickHandler()
 
             else -> throw IllegalArgumentException("Unknown model type")
         }
@@ -49,10 +53,10 @@ class ModelsListHelper(
 
     fun getSearchableModelFieldPair(): Array<Triple<String, String, DataType>> {
         return when (this.modelName) {
-            Model.Companion.SUPPLIER -> this.supplierHelper.getFieldsPair()
-            Model.Companion.SUPPLIERS_ITEM -> this.supplierItemHelper.getFieldsPair()
-            Model.Companion.SUPPLIER_PAYMENT -> this.supplierPaymentHelper.getFieldsPair()
-            Model.Companion.ORDERED_ITEM -> this.orderedItemHelper.getFieldsPair()
+            Model.SUPPLIER -> this.supplierHelper.getFieldsPair()
+            Model.SUPPLIERS_ITEM -> this.supplierItemHelper.getFieldsPair()
+            Model.SUPPLIER_PAYMENT -> this.supplierPaymentHelper.getFieldsPair()
+            Model.ORDERED_ITEM -> this.orderedItemHelper.getFieldsPair()
 
             else -> throw IllegalArgumentException("Unknown model type")
         }
@@ -64,18 +68,18 @@ class ModelsListHelper(
     ): ViewDataBinding {
 
         return when (this.modelName) {
-            Model.Companion.SUPPLIER -> this.supplierHelper.getViewToInflate(inflater, parent)
-            Model.Companion.SUPPLIERS_ITEM -> this.supplierItemHelper.getViewToInflate(
+            Model.SUPPLIER -> this.supplierHelper.getViewToInflate(inflater, parent)
+            Model.SUPPLIERS_ITEM -> this.supplierItemHelper.getViewToInflate(
                 inflater,
                 parent
             )
 
-            Model.Companion.SUPPLIER_PAYMENT -> this.supplierPaymentHelper.getViewToInflate(
+            Model.SUPPLIER_PAYMENT -> this.supplierPaymentHelper.getViewToInflate(
                 inflater,
                 parent
             )
 
-            Model.Companion.ORDERED_ITEM -> this.orderedItemHelper.getViewToInflate(
+            Model.ORDERED_ITEM -> this.orderedItemHelper.getViewToInflate(
                 inflater,
                 parent
             )
@@ -86,21 +90,32 @@ class ModelsListHelper(
 
     fun getContentComparator(): (List<Model>, List<Model>, Int, Int) -> Boolean {
         return when (this.modelName) {
-            Model.Companion.SUPPLIER -> createComparator<Supplier>(
+            Model.SUPPLIER -> createComparator<Supplier>(
                 *this.supplierHelper.getProperties()
             )
 
-            Model.Companion.SUPPLIERS_ITEM -> createComparator<SupplierItem>(
+            Model.SUPPLIERS_ITEM -> createComparator<SupplierItem>(
                 *this.supplierItemHelper.getProperties()
             )
 
-            Model.Companion.SUPPLIER_PAYMENT -> createComparator<SupplierPayment>(
+            Model.SUPPLIER_PAYMENT -> createComparator<SupplierPayment>(
                 *this.supplierPaymentHelper.getProperties()
             )
 
-            Model.Companion.ORDERED_ITEM -> createComparator<OrderedItem>(
+            Model.ORDERED_ITEM -> createComparator<OrderedItem>(
                 *this.orderedItemHelper.getProperties()
             )
+
+            else -> throw IllegalArgumentException("Unknown model type")
+        }
+    }
+
+    fun getHeading(): String {
+        return when (this.modelName) {
+            Model.SUPPLIER -> this.supplierHelper.listHeading
+            Model.SUPPLIERS_ITEM -> this.supplierItemHelper.listHeading
+            Model.SUPPLIER_PAYMENT -> this.supplierPaymentHelper.listHeading
+            Model.ORDERED_ITEM -> this.orderedItemHelper.listHeading
 
             else -> throw IllegalArgumentException("Unknown model type")
         }

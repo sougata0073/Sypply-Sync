@@ -30,13 +30,6 @@ object Inputs {
         return "https://picsum.photos/id/$num/$width/$height"
     }
 
-    fun getFragmentAnimations() = NavOptions.Builder()
-        .setEnterAnim(R.anim.slide_in_right)
-        .setExitAnim(R.anim.slide_out_left)
-        .setPopEnterAnim(R.anim.slide_in_left)
-        .setPopExitAnim(R.anim.slide_out_right)
-        .build()
-
     fun getCurrentDateString(): String {
         val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
 

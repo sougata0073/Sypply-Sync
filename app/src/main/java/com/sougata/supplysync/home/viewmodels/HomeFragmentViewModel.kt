@@ -10,7 +10,7 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.google.firebase.Timestamp
 import com.sougata.supplysync.R
-import com.sougata.supplysync.cloud.SupplierFirestoreRepository
+import com.sougata.supplysync.remote.SupplierFirestoreRepository
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.Status
 import kotlinx.coroutines.Dispatchers

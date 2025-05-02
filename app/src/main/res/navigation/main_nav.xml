@@ -7,12 +7,12 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.sougata.supplysync.home.fragments.HomeFragment"
+        android:name="com.sougata.supplysync.home.ui.HomeFragment"
         android:label="fragment_home"
         tools:layout="@layout/fragment_home" />
     <fragment
         android:id="@+id/suppliersHomeFragment"
-        android:name="com.sougata.supplysync.suppliers.fragments.SuppliersHomeFragment"
+        android:name="com.sougata.supplysync.suppliers.ui.SuppliersHomeFragment"
         android:label="fragment_suppliers_home"
         tools:layout="@layout/fragment_suppliers_home" >
         <action
@@ -25,37 +25,37 @@
     </fragment>
     <fragment
         android:id="@+id/customersHomeFragment"
-        android:name="com.sougata.supplysync.customers.fragments.CustomersHomeFragment"
+        android:name="com.sougata.supplysync.customers.ui.CustomersHomeFragment"
         android:label="fragment_customers_home"
         tools:layout="@layout/fragment_customers_home" />
     <fragment
         android:id="@+id/staffsHomeFragment"
-        android:name="com.sougata.supplysync.staffs.fragments.StaffsHomeFragment"
+        android:name="com.sougata.supplysync.staffs.fragments.ui.StaffsHomeFragment"
         android:label="fragment_staffs_home"
         tools:layout="@layout/fragment_staffs_home" />
     <fragment
         android:id="@+id/suppliersReportsFragment"
-        android:name="com.sougata.supplysync.suppliers.fragments.SuppliersReportsFragment"
+        android:name="com.sougata.supplysync.suppliers.ui.SuppliersReportsFragment"
         android:label="fragment_suppliers_reports"
         tools:layout="@layout/fragment_suppliers_reports" />
     <fragment
         android:id="@+id/addEditSupplierFragment"
-        android:name="com.sougata.supplysync.suppliers.fragments.AddEditSupplierFragment"
+        android:name="com.sougata.supplysync.suppliers.ui.AddEditSupplierFragment"
         android:label="fragment_add_supplier"
         tools:layout="@layout/fragment_add_edit_supplier"/>
     <fragment
         android:id="@+id/modelsListFragment"
-        android:name="com.sougata.supplysync.modelslist.ModelsListFragment"
+        android:name="com.sougata.supplysync.modelslist.ui.ModelsListFragment"
         android:label="fragment_models_list"
         tools:layout="@layout/fragment_models_list"/>
     <fragment
         android:id="@+id/addEditSupplierPaymentFragment"
-        android:name="com.sougata.supplysync.suppliers.fragments.AddEditSupplierPaymentFragment"
+        android:name="com.sougata.supplysync.suppliers.ui.AddEditSupplierPaymentFragment"
         android:label="fragment_add_edit_supplier_payment"
         tools:layout="@layout/fragment_add_edit_supplier_payment"/>
     <fragment
         android:id="@+id/addEditOrderedItemFragment"
-        android:name="com.sougata.supplysync.suppliers.fragments.AddEditOrderedItemFragment"
+        android:name="com.sougata.supplysync.suppliers.ui.AddEditOrderedItemFragment"
         android:label="fragment_add_edit_ordered_item"
         tools:layout="@layout/fragment_add_edit_ordered_item"/>
 </navigation>

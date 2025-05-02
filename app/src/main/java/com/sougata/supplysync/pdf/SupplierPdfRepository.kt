@@ -2,7 +2,6 @@ package com.sougata.supplysync.pdf
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.core.content.FileProvider
 import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.kernel.font.PdfFontFactory
@@ -15,7 +14,7 @@ import com.itextpdf.layout.element.Text
 import com.itextpdf.layout.properties.HorizontalAlignment
 import com.itextpdf.layout.properties.TextAlignment
 import com.itextpdf.layout.properties.UnitValue
-import com.sougata.supplysync.cloud.SupplierFirestoreRepository
+import com.sougata.supplysync.remote.SupplierFirestoreRepository
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.SupplierPayment
 import com.sougata.supplysync.util.Converters

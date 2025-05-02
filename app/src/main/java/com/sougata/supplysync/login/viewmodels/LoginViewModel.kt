@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.findNavController
 import com.sougata.supplysync.R
-import com.sougata.supplysync.cloud.AuthenticationRepository
+import com.sougata.supplysync.remote.AuthenticationRepository
 import com.sougata.supplysync.util.Status
 import com.sougata.supplysync.util.Validations
 

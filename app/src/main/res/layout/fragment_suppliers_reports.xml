@@ -17,7 +17,7 @@
         android:layout_height="match_parent"
         android:background="@color/fragment_bg"
         android:fitsSystemWindows="true"
-        tools:context=".suppliers.fragments.SuppliersReportsFragment">
+        tools:context=".suppliers.ui.SuppliersReportsFragment">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

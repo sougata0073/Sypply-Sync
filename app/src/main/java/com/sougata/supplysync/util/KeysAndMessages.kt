@@ -21,5 +21,6 @@ object KeysAndMessages {
     const val DELETE = "Delete"
     const val MODEL_NAME_KEY = "Model name"
     const val REASON = "Reason"
+    const val IS_SELECT_ONLY_KEY = "Is select only key"
 
 }

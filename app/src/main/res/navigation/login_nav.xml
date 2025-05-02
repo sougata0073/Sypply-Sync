@@ -6,7 +6,7 @@
     app:startDestination="@id/firstTimeWelcomeFragment">
     <fragment
         android:id="@+id/firstTimeWelcomeFragment"
-        android:name="com.sougata.supplysync.login.fragments.FirstTimeWelcomeFragment"
+        android:name="com.sougata.supplysync.login.ui.FirstTimeWelcomeFragment"
         android:label="fragment_first_time_welcome"
         tools:layout="@layout/fragment_first_time_welcome">
         <action
@@ -33,7 +33,7 @@
     </fragment>
     <fragment
         android:id="@+id/createAccountFragment"
-        android:name="com.sougata.supplysync.login.fragments.CreateAccountFragment"
+        android:name="com.sougata.supplysync.login.ui.CreateAccountFragment"
         android:label="fragment_create_account"
         tools:layout="@layout/fragment_create_account" >
         <action
@@ -53,7 +53,7 @@
     </fragment>
     <fragment
         android:id="@+id/loginFragment"
-        android:name="com.sougata.supplysync.login.fragments.LoginFragment"
+        android:name="com.sougata.supplysync.login.ui.LoginFragment"
         android:label="fragment_login"
         tools:layout="@layout/fragment_login">
         <action
@@ -66,7 +66,7 @@
     </fragment>
     <fragment
         android:id="@+id/emailVerificationFragment"
-        android:name="com.sougata.supplysync.login.fragments.EmailVerificationFragment"
+        android:name="com.sougata.supplysync.login.ui.EmailVerificationFragment"
         android:label="fragment_email_verification"
         tools:layout="@layout/fragment_email_verification"/>
 </navigation>

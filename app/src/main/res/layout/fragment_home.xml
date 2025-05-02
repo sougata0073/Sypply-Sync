@@ -18,7 +18,7 @@
         android:layout_height="match_parent"
         android:background="@color/night_mode_background"
         android:fitsSystemWindows="true"
-        tools:context=".home.fragments.HomeFragment">
+        tools:context=".home.ui.HomeFragment">
 
         <LinearLayout
             android:id="@+id/childLayout"

@@ -14,28 +14,24 @@
 
     </data>
 
-    <ScrollView
-        android:id="@+id/parentLayout"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/white"
+        android:background="@color/primary_color"
         android:fitsSystemWindows="true"
-        tools:context=".suppliers.fragments.AddEditSupplierPaymentFragment">
+        tools:context=".suppliers.ui.AddEditSupplierPaymentFragment">
 
-
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <ScrollView
+            android:id="@+id/parentLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/primary_color">
+            android:layout_height="match_parent"
+            android:background="@color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:background="@color/primary_color"
+                android:orientation="vertical">
 
                 <ImageView
                     android:id="@+id/moneyImage"
@@ -51,12 +47,12 @@
                     android:layout_width="25dp"
                     android:layout_height="25dp"
                     android:layout_gravity="end"
-                    android:tooltipText="Delete"
                     android:layout_marginEnd="20dp"
                     android:layout_marginBottom="20dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_delete"
+                    android:tooltipText="Delete"
                     app:layout_constraintTop_toTopOf="@id/editBtn"
                     app:tint="@color/white" />
 
@@ -148,11 +144,11 @@
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:scaleType="fitCenter"
                         android:src="@drawable/ic_calendar"
-                        app:tint="@color/black"
                         app:layout_constraintBottom_toBottomOf="@id/dateLyt"
                         app:layout_constraintEnd_toEndOf="@id/amountLyt"
                         app:layout_constraintStart_toEndOf="@id/dateLyt"
-                        app:layout_constraintTop_toTopOf="@id/dateLyt" />
+                        app:layout_constraintTop_toTopOf="@id/dateLyt"
+                        app:tint="@color/black" />
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/timeLyt"
@@ -251,20 +247,19 @@
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
             </LinearLayout>
+        </ScrollView>
 
-            <com.google.android.material.progressindicator.CircularProgressIndicator
-                android:id="@+id/progressBar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:indeterminate="true"
-                android:visibility="gone"
-                app:indicatorColor="@color/black"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:indicatorColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </ScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

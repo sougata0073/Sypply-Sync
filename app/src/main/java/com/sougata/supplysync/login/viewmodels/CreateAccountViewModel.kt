@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
-import com.sougata.supplysync.cloud.AuthenticationRepository
+import com.sougata.supplysync.remote.AuthenticationRepository
 import com.sougata.supplysync.models.User
 import com.sougata.supplysync.util.Status
 import com.sougata.supplysync.util.Validations

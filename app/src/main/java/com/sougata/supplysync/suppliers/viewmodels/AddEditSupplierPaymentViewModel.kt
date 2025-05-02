@@ -4,7 +4,7 @@ import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
-import com.sougata.supplysync.cloud.SupplierFirestoreRepository
+import com.sougata.supplysync.remote.SupplierFirestoreRepository
 import com.sougata.supplysync.models.SupplierPayment
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.Status
@@ -15,7 +15,7 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
     val date = MutableLiveData("")
     val time = MutableLiveData("")
     val note = MutableLiveData("")
-    val supplierName = MutableLiveData("")
+    val supplierName = MutableLiveData("No supplier selected")
 
     private val supplierFirestoreRepository = SupplierFirestoreRepository()
 

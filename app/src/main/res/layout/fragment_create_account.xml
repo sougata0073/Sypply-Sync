@@ -17,7 +17,7 @@
         android:layout_height="match_parent"
         android:background="@color/primary_color"
         android:fitsSystemWindows="true"
-        tools:context=".login.fragments.CreateAccountFragment">
+        tools:context=".login.ui.CreateAccountFragment">
 
         <ScrollView
             android:id="@+id/parentLayout"

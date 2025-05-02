@@ -2,7 +2,6 @@ package com.sougata.supplysync
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
@@ -13,7 +12,7 @@ import androidx.navigation.fragment.NavHostFragment
 import com.sougata.supplysync.databinding.ActivityMainBinding
 import com.sougata.supplysync.login.LoginActivity
 import com.sougata.supplysync.util.KeysAndMessages
-import com.sougata.supplysync.util.ViewAnimator
+import com.sougata.supplysync.util.AnimationProvider
 
 class MainActivity : AppCompatActivity() {
 
@@ -93,7 +92,7 @@ class MainActivity : AppCompatActivity() {
         val menu = popupMenu.menu
         this.binding.bottomNav.setupWithNavController(menu, this.navController)
 
-        val viewAnimator = ViewAnimator(this.binding.bottomNav)
+        val animationProvider = AnimationProvider(this.binding.bottomNav)
 
         this.navController.addOnDestinationChangedListener { navController, destination, arguments ->
 
@@ -102,14 +101,14 @@ class MainActivity : AppCompatActivity() {
                 R.id.homeFragment, R.id.staffsHomeFragment,
                 R.id.customersHomeFragment, R.id.suppliersHomeFragment -> {
                     if (this.isBottomNavHidden) {
-                        viewAnimator.slideUpFade()
+                        animationProvider.slideUpFade()
                         this.isBottomNavHidden = false
                     }
                 }
 
                 else -> {
                     if (!this.isBottomNavHidden) {
-                        viewAnimator.slideDownFade()
+                        animationProvider.slideDownFade()
                         this.isBottomNavHidden = true
                     }
                 }

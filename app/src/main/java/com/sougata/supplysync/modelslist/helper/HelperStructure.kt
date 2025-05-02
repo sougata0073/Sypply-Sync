@@ -4,10 +4,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import com.sougata.supplysync.models.Model
-import com.sougata.supplysync.modelslist.DataType
+import com.sougata.supplysync.util.DataType
 import kotlin.reflect.KProperty1
 
 interface HelperStructure {
+    val listHeading: String
     fun getProperties(): Array<KProperty1<Model, *>>
     fun getViewToInflate(inflater: LayoutInflater, parent: ViewGroup): ViewDataBinding
     fun getFieldsPair(): Array<Triple<String, String, DataType>>

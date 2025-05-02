@@ -6,9 +6,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.findNavController
 import com.sougata.supplysync.R
-import com.sougata.supplysync.cloud.SupplierFirestoreRepository
+import com.sougata.supplysync.remote.SupplierFirestoreRepository
 import com.sougata.supplysync.models.Model
-import com.sougata.supplysync.util.Inputs
+import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 
@@ -73,7 +73,7 @@ class SuppliersHomeViewModel : ViewModel() {
         }
 
         view.findNavController()
-            .navigate(R.id.modelsListFragment, bundle, Inputs.getFragmentAnimations())
+            .navigate(R.id.modelsListFragment, bundle, AnimationProvider.fragmentAnimationSlideRightLeft())
     }
 
     fun onItemsListClick(view: View) {
@@ -86,7 +86,7 @@ class SuppliersHomeViewModel : ViewModel() {
             .navigate(
                 R.id.modelsListFragment,
                 bundle,
-                Inputs.getFragmentAnimations()
+                AnimationProvider.fragmentAnimationSlideRightLeft()
             )
     }
 
@@ -100,7 +100,7 @@ class SuppliersHomeViewModel : ViewModel() {
             .navigate(
                 R.id.modelsListFragment,
                 bundle,
-                Inputs.getFragmentAnimations()
+                AnimationProvider.fragmentAnimationSlideRightLeft()
             )
     }
 
@@ -111,7 +111,7 @@ class SuppliersHomeViewModel : ViewModel() {
 
         view.findNavController()
             .navigate(
-                R.id.modelsListFragment, bundle, Inputs.getFragmentAnimations()
+                R.id.modelsListFragment, bundle, AnimationProvider.fragmentAnimationSlideRightLeft()
             )
     }
 
