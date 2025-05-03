@@ -34,8 +34,8 @@
 
         <ImageView
             android:id="@+id/appImage"
-            android:layout_width="0dp"
-            android:layout_height="@android:dimen/thumbnail_height"
+            android:layout_width="288dp"
+            android:layout_height="288dp"
             android:src="@drawable/ic_app"
             app:layout_constraintBottom_toTopOf="@+id/buttonsLayout"
             app:layout_constraintEnd_toEndOf="@id/heading"
@@ -51,18 +51,17 @@
             app:layout_constraintStart_toStartOf="@id/appImage"
             app:layout_constraintTop_toBottomOf="@+id/appImage">
 
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/createAccountBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/yellow"
                 android:fontFamily="@font/acherus_feral_bold"
+                android:onClick="@{viewModel::onCreateAccountClick}"
                 android:padding="12dp"
                 android:text="Create Account"
                 android:textColor="@color/black"
                 android:textSize="18sp"
-                android:onClick="@{viewModel::onCreateAccountClick}"
                 app:cornerRadius="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

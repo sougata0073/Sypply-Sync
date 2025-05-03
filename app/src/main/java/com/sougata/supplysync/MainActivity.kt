@@ -25,52 +25,6 @@ class MainActivity : AppCompatActivity() {
 
     private var isBottomNavHidden = false
 
-    override fun onStart() {
-        super.onStart()
-
-//        Firebase.auth.addAuthStateListener { auth ->
-//            val currentUser = auth.currentUser
-//
-//            if(currentUser != null) {
-//                Log.d("auth", "User is logged in")
-//            } else {
-//                Log.d("auth", "User is not logged in")
-//                startActivity(Intent(this, LoginActivity::class.java))
-//                finish()
-//            }
-//        }
-
-
-        this.viewModel = ViewModelProvider(this)[MainActivityViewModel::class.java]
-
-        val currentUser = this.viewModel.currentUser
-
-        if (currentUser == null) {
-
-            val bundle = Bundle().apply {
-                putString(KeysAndMessages.REASON, KeysAndMessages.USER_NOT_FOUND)
-            }
-
-            startActivity(Intent(this, LoginActivity::class.java), bundle)
-            finishAffinity()
-
-        } else if (!currentUser.isEmailVerified) {
-
-            val bundle = Bundle().apply {
-                putString(KeysAndMessages.REASON, KeysAndMessages.EMAIL_IS_NOT_VERIFIED)
-            }
-
-            val intent = Intent(this, LoginActivity::class.java).apply {
-                putExtras(bundle)
-            }
-
-            startActivity(intent)
-            finishAffinity()
-        }
-
-
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

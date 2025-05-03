@@ -104,4 +104,7 @@ dependencies {
     // IText PDF maker
     implementation(libs.iText)
 
+    // Splash screen
+    implementation(libs.androidx.core.splashscreen)
+
 }
