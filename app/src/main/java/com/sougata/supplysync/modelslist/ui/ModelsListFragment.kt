@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.InputType
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,7 +13,6 @@ import android.widget.EditText
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.SearchView
 import androidx.databinding.DataBindingUtil
-import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -21,16 +21,17 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
+import com.sougata.supplysync.MainActivity
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentModelsListBinding
 import com.sougata.supplysync.login.LoginActivity
 import com.sougata.supplysync.models.Model
-import com.sougata.supplysync.util.DataType
+import com.sougata.supplysync.modelslist.helper.ModelsListHelper
 import com.sougata.supplysync.modelslist.viewmodels.ModelSearchViewModel
 import com.sougata.supplysync.modelslist.viewmodels.ModelsListViewModel
 import com.sougata.supplysync.modelslist.viewmodels.ModelsListViewModelFactory
-import com.sougata.supplysync.modelslist.helper.ModelsListHelper
 import com.sougata.supplysync.util.AnimationProvider
+import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 
@@ -39,23 +40,53 @@ class ModelsListFragment : Fragment() {
     private var _binding: FragmentModelsListBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var regularViewModel: ModelsListViewModel
-    private lateinit var searchViewModel: ModelSearchViewModel
+    private val viewModelFactory by lazy { ModelsListViewModelFactory(this.modelName) }
 
-    private lateinit var recyclerViewAdapter: ModelsListRecyclerViewAdapter
+    private val regularViewModel by lazy {
+        ViewModelProvider(
+            this,
+            this.viewModelFactory
+        )[ModelsListViewModel::class.java]
+    }
+    private val searchViewModel by lazy {
+        ViewModelProvider(
+            this,
+            this.viewModelFactory
+        )[ModelSearchViewModel::class.java]
+    }
+
+    private val recyclerViewExtraCallBack = { view: View, model: Model ->
+        if (this.isSelectOnly) {
+            view.setOnClickListener {
+                val bundle = Bundle().apply {
+                    putParcelable(KeysAndMessages.MODEL_KEY, model as Parcelable)
+                }
+                this.parentFragmentManager.setFragmentResult(
+                    KeysAndMessages.ITEM_SELECTED_KEY,
+                    bundle
+                )
+                this.findNavController().popBackStack()
+            }
+        }
+    }
+
+    private val recyclerViewAdapter by lazy {
+        ModelsListRecyclerViewAdapter(
+            mutableListOf(),
+            this.helper,
+            this.recyclerViewExtraCallBack
+        )
+    }
 
     private lateinit var modelName: String
-
     private var isSelectOnly = false
 
     private lateinit var helper: ModelsListHelper
 
-    private lateinit var onBind: (ViewDataBinding, Model) -> Unit
-
     private lateinit var searchViewEditText: EditText
 
     private var searchField: String? = null
-    private var currentQueryDataType: DataType? = null
+    private var currentQueryDataType: FirestoreFieldDataType? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,23 +112,11 @@ class ModelsListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        this.regularViewModel = ViewModelProvider(
-            this,
-            ModelsListViewModelFactory(this.modelName)
-        )[ModelsListViewModel::class.java]
-
-        this.searchViewModel = ViewModelProvider(
-            this,
-            ModelsListViewModelFactory(this.modelName)
-        )[ModelSearchViewModel::class.java]
-
         this.helper = ModelsListHelper(this.modelName, this)
 
-        this.onBind = this.helper.getWhatToDoOnBind()
-
-        if (this.searchViewModel.isSearchActive) {
+        if (this.searchViewModel.isSearchClicked) {
             this.loadChips()
-            binding.chipGroupHorizontalScrollView.visibility = View.VISIBLE
+            this.binding.chipGroupHorizontalScrollView.visibility = View.VISIBLE
         }
 
         this.initializeUI()
@@ -122,106 +141,22 @@ class ModelsListFragment : Fragment() {
         this._binding = null
     }
 
+
     private fun initializeUI() {
 
-        this.binding.toolBar.title = this.helper.getHeading()
+        this.setUpToolBar()
 
-        this.recyclerViewAdapter =
-            ModelsListRecyclerViewAdapter(
-                mutableListOf(),
-                this.helper
-            ) { view, model ->
-                if (this.isSelectOnly) {
-                    view.setOnClickListener {
-                        val bundle = Bundle().apply {
-                            putParcelable(KeysAndMessages.MODEL_KEY, model as Parcelable)
-                        }
-                        this.parentFragmentManager.setFragmentResult(
-                            KeysAndMessages.ITEM_SELECTED_KEY,
-                            bundle
-                        )
-                        this.findNavController().popBackStack()
-                    }
-                }
-            }
+        this.setUpRecyclerView()
 
-        this.binding.recyclerView.apply {
-            layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
-            adapter = recyclerViewAdapter
-        }
+        this.setUpFab()
 
-        if (this.isSelectOnly) {
-            this.binding.fab.visibility = View.GONE
-        } else {
-            this.binding.fab.setOnClickListener {
-                this.helper.getWhatToDoOnFabClick().invoke()
-            }
-        }
-
-        this.binding.toolBar.setNavigationOnClickListener {
-            this.findNavController().popBackStack()
-        }
-
-        this.binding.searchView.apply {
-
-            searchViewEditText = findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
-
-            searchViewEditText.setTextColor(requireContext().getColor(R.color.bw))
-
-            setOnSearchClickListener {
-                loadChips()
-                binding.chipGroupHorizontalScrollView.visibility = View.VISIBLE
-                searchViewModel.isSearchActive = true
-            }
-
-            setOnQueryTextListener(
-                object : SearchView.OnQueryTextListener {
-                    override fun onQueryTextSubmit(query: String?): Boolean {
-                        val field = searchField
-                        val dataType = currentQueryDataType
-                        if (field != null && dataType != null) {
-                            searchViewModel.loadItemsList(field, query.orEmpty(), dataType)
-                        } else {
-                            Snackbar.make(
-                                requireView(),
-                                "Select a field to search",
-                                Snackbar.LENGTH_LONG
-                            ).show()
-                        }
-                        return true
-                    }
-
-                    override fun onQueryTextChange(newText: String?): Boolean {
-                        return false
-                    }
-                }
-            )
-
-            setOnCloseListener {
-                searchViewModel.isSearchActive = false
-                searchField = null
-                currentQueryDataType = null
-                binding.chipGroupHorizontalScrollView.visibility = View.GONE
-
-                val list = regularViewModel.itemsList.value?.first
-                if (list != null) {
-                    recyclerViewAdapter.setItems(list)
-                    if (list.isNotEmpty()) {
-                        binding.nothingHereLbl.visibility = View.GONE
-                    }
-                }
-
-                binding.chipGroup.removeViews(1, helper.getSearchableModelFieldPair().size)
-
-                false
-            }
-        }
+        this.setUpSearchView()
     }
 
     private fun registerSubscribers() {
 
         this.binding.appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, _ ->
-            if (!searchViewModel.isSearchActive) {
+            if (this.binding.chipGroup.childCount < 2) {
                 this.binding.chipGroupHorizontalScrollView.visibility = View.GONE
             }
         })
@@ -239,14 +174,9 @@ class ModelsListFragment : Fragment() {
                 val list = it.first
 
                 if (list != null && list.isNotEmpty()) {
-                    this.binding.progressBar.visibility = View.GONE
-                    this.binding.nothingHereLbl.visibility = View.GONE
-                    this.recyclerViewAdapter.removeLoadingAnimation()
-                    this.recyclerViewAdapter.setItems(list)
+                    onSuccessfulListReceived(list)
                 } else {
-                    this.binding.nothingHereLbl.visibility = View.VISIBLE
-                    this.binding.progressBar.visibility = View.GONE
-                    this.recyclerViewAdapter.removeLoadingAnimation()
+                    onEmptyOrNullListReceived()
                 }
 
             } else if (it.second == Status.FAILED) {
@@ -268,14 +198,9 @@ class ModelsListFragment : Fragment() {
                 val list = it.first
 
                 if (list != null && list.isNotEmpty()) {
-                    this.binding.nothingHereLbl.visibility = View.GONE
-                    this.binding.progressBar.visibility = View.GONE
-                    this.recyclerViewAdapter.removeLoadingAnimation()
-                    this.recyclerViewAdapter.setItems(list)
+                    onSuccessfulListReceived(list)
                 } else {
-                    this.binding.nothingHereLbl.visibility = View.VISIBLE
-                    this.binding.progressBar.visibility = View.GONE
-                    this.recyclerViewAdapter.removeLoadingAnimation()
+                    onEmptyOrNullListReceived()
                     this.recyclerViewAdapter.removeAllItems()
                 }
 
@@ -284,6 +209,112 @@ class ModelsListFragment : Fragment() {
             }
         }
 
+        this.registerFragmentResultListener()
+        this.registerScrollListener()
+
+    }
+
+    private fun setUpToolBar() {
+        this.binding.toolBar.apply {
+            title = helper.getHeading()
+            setNavigationOnClickListener {
+                this@ModelsListFragment.findNavController().popBackStack()
+            }
+        }
+    }
+
+    private fun setUpRecyclerView() {
+        this.binding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
+            adapter = recyclerViewAdapter
+        }
+    }
+
+    private fun setUpFab() {
+        if (this.isSelectOnly) {
+            this.binding.fab.visibility = View.GONE
+        } else {
+            this.binding.fab.setOnClickListener {
+                this.helper.getWhatToDoOnFabClick().invoke()
+            }
+        }
+    }
+
+    private fun setUpSearchView() {
+        this.binding.searchView.apply {
+
+            searchViewEditText = findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
+
+            searchViewEditText.setTextColor(requireContext().getColor(R.color.bw))
+
+            setOnSearchClickListener {
+                loadChips()
+                binding.chipGroupHorizontalScrollView.visibility = View.VISIBLE
+                searchViewModel.isSearchClicked = true
+            }
+
+            setOnQueryTextListener(
+                object : SearchView.OnQueryTextListener {
+                    override fun onQueryTextSubmit(query: String?): Boolean {
+                        val field = searchField
+                        val dataType = currentQueryDataType
+                        if (field != null && dataType != null) {
+                            searchViewModel.loadItemsList(field, query.orEmpty(), dataType)
+                        } else {
+                            Snackbar.make(
+                                requireView(),
+                                "Select a field to search",
+                                Snackbar.LENGTH_LONG
+                            ).show()
+                        }
+                        return true
+                    }
+
+                    override fun onQueryTextChange(newText: String?): Boolean {
+                        if (!newText.isNullOrEmpty()) {
+                            searchViewModel.isSearchActive = true
+                        }
+                        return false
+                    }
+                }
+            )
+
+            setOnCloseListener {
+                searchViewModel.isSearchActive = false
+                searchViewModel.isSearchClicked = false
+                searchField = null
+                currentQueryDataType = null
+                binding.chipGroupHorizontalScrollView.visibility = View.GONE
+
+                val list = regularViewModel.itemsList.value?.first
+                if (list != null) {
+                    recyclerViewAdapter.setItems(list)
+                    if (list.isNotEmpty()) {
+                        binding.nothingHereLbl.visibility = View.GONE
+                    }
+                }
+
+                binding.chipGroup.removeViews(1, helper.getSearchableModelFieldPair().size)
+
+                false
+            }
+        }
+    }
+
+    private fun onSuccessfulListReceived(list: List<Model>) {
+        this.binding.nothingHereLbl.visibility = View.GONE
+        this.binding.progressBar.visibility = View.GONE
+        this.recyclerViewAdapter.removeLoadingAnimation()
+        this.recyclerViewAdapter.setItems(list)
+    }
+
+    private fun onEmptyOrNullListReceived() {
+        this.binding.nothingHereLbl.visibility = View.VISIBLE
+        this.binding.progressBar.visibility = View.GONE
+        this.recyclerViewAdapter.removeLoadingAnimation()
+    }
+
+    private fun registerFragmentResultListener() {
         this.parentFragmentManager.setFragmentResultListener(
             KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT, this.viewLifecycleOwner
         ) { requestKey, bundle ->
@@ -317,7 +348,9 @@ class ModelsListFragment : Fragment() {
             }
 
         }
+    }
 
+    private fun registerScrollListener() {
         this.binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
             private val fabAnimator = AnimationProvider(binding.fab)
@@ -336,8 +369,7 @@ class ModelsListFragment : Fragment() {
 
                     }
                 }
-
-                val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                val layoutManager = binding.recyclerView.layoutManager as LinearLayoutManager
                 val itemCount = layoutManager.itemCount
                 val lastItemPosition = layoutManager.findLastCompletelyVisibleItemPosition()
 
@@ -440,7 +472,7 @@ class ModelsListFragment : Fragment() {
                         searchField = pair.first
                         currentQueryDataType = pair.third
                         searchViewEditText.text.clear()
-                        if (currentQueryDataType == DataType.NUMBER) {
+                        if (currentQueryDataType == FirestoreFieldDataType.NUMBER) {
                             searchViewEditText.inputType = InputType.TYPE_CLASS_NUMBER
                         } else {
                             searchViewEditText.inputType = InputType.TYPE_CLASS_TEXT

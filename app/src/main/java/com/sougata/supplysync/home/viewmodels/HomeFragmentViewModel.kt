@@ -10,7 +10,7 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.google.firebase.Timestamp
 import com.sougata.supplysync.R
-import com.sougata.supplysync.remote.SupplierFirestoreRepository
+import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.Status
 import kotlinx.coroutines.Dispatchers
@@ -20,12 +20,12 @@ import java.util.Locale
 
 class HomeFragmentViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val supplierFirestoreRepository = SupplierFirestoreRepository()
+    private val supplierRepository = SupplierRepository()
 
     val purchaseChartRangeDate = MutableLiveData("")
 
     val purchaseChartData = MutableLiveData<Triple<LineData?, Int, String>>()
-    val numberOfOrdersToReceive = MutableLiveData<Triple<Int, Int, String>>()
+    val numberOfOrdersToReceive = MutableLiveData<Triple<Number, Int, String>>()
 
     init {
         this.loadThisMonthsPurchaseChart()
@@ -66,7 +66,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 //        Log.d("api", "orders to receive")
         this.numberOfOrdersToReceive.postValue(Triple(0, Status.STARTED, ""))
 
-        this.supplierFirestoreRepository.getOrdersToReceive { status, count, message ->
+        this.supplierRepository.getOrdersToReceive { status, count, message ->
             this.numberOfOrdersToReceive.postValue(Triple(count, status, message))
         }
     }
@@ -104,7 +104,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 
         this.purchaseChartData.postValue(Triple(null, Status.STARTED, ""))
 
-        this.supplierFirestoreRepository.getPurchaseAmountByRange(
+        this.supplierRepository.getPurchaseAmountByRange(
             startTimestamp,
             endTimestamp,
             viewModelScope

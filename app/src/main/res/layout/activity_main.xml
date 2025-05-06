@@ -7,33 +7,55 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/main"
         android:layout_width="match_parent"
-        android:background="@color/night_mode_background"
         android:layout_height="match_parent"
+        android:background="@color/night_mode_background"
+        android:fitsSystemWindows="true"
         tools:context=".MainActivity">
 
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/navHostMain"
-            android:name="androidx.navigation.fragment.NavHostFragment"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:defaultNavHost="true"
-            app:navGraph="@navigation/main_nav" />
+            android:orientation="vertical"
+            android:layout_height="match_parent">
+
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolBar"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                app:titleTextColor="@color/toolbar_title_color"
+                android:background="@color/night_mode_background"
+                app:titleTextAppearance="@style/materialToolbarTitleStyle"
+                tools:title="Home" />
+
+            <androidx.fragment.app.FragmentContainerView
+                android:id="@+id/navHostMain"
+                android:name="androidx.navigation.fragment.NavHostFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:defaultNavHost="true"
+                app:navGraph="@navigation/main_nav" />
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/bottomNavBorder"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="70dp"
+            android:background="@color/bottom_nav_border_color"
+            android:layout_width="match_parent"
+            app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
+            android:layout_height="1dp"/>
 
         <me.ibrahimsn.lib.SmoothBottomBar
             android:id="@+id/bottomNav"
             android:layout_width="match_parent"
             android:layout_height="70dp"
             android:layout_gravity="bottom"
-            android:elevation="5dp"
-            app:indicatorRadius="8dp"
             app:backgroundColor="@color/night_mode_background"
             app:iconTint="@color/bw"
             app:iconTintActive="@color/bw"
             app:indicatorColor="@color/active_non_active_button_color"
+            app:indicatorRadius="8dp"
             app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:menu="@menu/bottom_nav_menu"
             app:textColor="@color/bw" />
 

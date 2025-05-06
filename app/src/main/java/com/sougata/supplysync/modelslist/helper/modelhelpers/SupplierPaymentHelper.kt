@@ -8,11 +8,11 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.sougata.supplysync.R
-import com.sougata.supplysync.remote.FirestoreFieldNames
+import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.databinding.ItemSupplierPaymentsListBinding
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.SupplierPayment
-import com.sougata.supplysync.util.DataType
+import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.modelslist.helper.HelperStructure
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
@@ -46,22 +46,22 @@ class SupplierPaymentHelper(private val fragment: Fragment) :
         )
     }
 
-    override fun getFieldsPair(): Array<Triple<String, String, DataType>> {
+    override fun getFieldsPair(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
-                FirestoreFieldNames.SupplierPaymentsCol.AMOUNT,
+                FieldNames.SupplierPaymentsCol.AMOUNT,
                 SupplierPayment::amount.name,
-                DataType.NUMBER
+                FirestoreFieldDataType.NUMBER
             ),
             Triple(
-                FirestoreFieldNames.SupplierPaymentsCol.PAYMENT_TIMESTAMP,
+                FieldNames.SupplierPaymentsCol.PAYMENT_TIMESTAMP,
                 SupplierPayment::paymentTimestamp.name,
-                DataType.TIMESTAMP
+                FirestoreFieldDataType.TIMESTAMP
             ),
             Triple(
-                FirestoreFieldNames.SupplierPaymentsCol.SUPPLIER_NAME,
+                FieldNames.SupplierPaymentsCol.SUPPLIER_NAME,
                 SupplierPayment::supplierName.name,
-                DataType.STRING
+                FirestoreFieldDataType.STRING
             )
         )
     }
@@ -72,7 +72,7 @@ class SupplierPaymentHelper(private val fragment: Fragment) :
                 putBoolean(KeysAndMessages.TO_ADD_KEY, true)
             }
             this.fragment.findNavController().navigate(
-                R.id.addEditSupplierPaymentFragment, bundle, AnimationProvider.fragmentAnimationSlideRightLeft()
+                R.id.addEditSupplierPaymentFragment, bundle, AnimationProvider.slideRightLeftNavOptions()
             )
         }
     }
@@ -89,7 +89,7 @@ class SupplierPaymentHelper(private val fragment: Fragment) :
             var month = 0
             var myDate = 0
 
-            Converters.getDateFromTimestamp(model.paymentTimestamp).apply {
+            Converters.getYearMonthDateFromTimestamp(model.paymentTimestamp).apply {
                 year = first
                 month = second
                 myDate = third
@@ -98,7 +98,7 @@ class SupplierPaymentHelper(private val fragment: Fragment) :
             var hour = 0
             var minute = 0
 
-            Converters.getTimeFromTimestamp(model.paymentTimestamp).apply {
+            Converters.getHourMinuteFromTimestamp(model.paymentTimestamp).apply {
                 hour = first
                 minute = second
             }
@@ -136,7 +136,7 @@ class SupplierPaymentHelper(private val fragment: Fragment) :
                             .navigate(
                                 R.id.addEditSupplierPaymentFragment,
                                 bundle,
-                                AnimationProvider.fragmentAnimationSlideRightLeft()
+                                AnimationProvider.slideRightLeftNavOptions()
                             )
                     }.show()
             }

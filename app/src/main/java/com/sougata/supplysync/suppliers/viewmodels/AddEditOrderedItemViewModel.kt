@@ -4,7 +4,7 @@ import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
-import com.sougata.supplysync.remote.SupplierFirestoreRepository
+import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.Status
@@ -18,7 +18,7 @@ class AddEditOrderedItemViewModel : ViewModel() {
     val itemName = MutableLiveData("No item selected")
     val supplierName = MutableLiveData("No supplier selected")
 
-    private val supplierFirestoreRepository = SupplierFirestoreRepository()
+    private val supplierRepository = SupplierRepository()
 
     val orderedItemAddedIndicator = MutableLiveData<Pair<Int, String>>()
     val orderedItemEditedIndicator = MutableLiveData<Pair<Int, String>>()
@@ -40,9 +40,9 @@ class AddEditOrderedItemViewModel : ViewModel() {
 
         this.orderedItemAddedIndicator.postValue(Status.STARTED to "")
 
-        this.supplierFirestoreRepository.addUpdateOrderedItem(
+        this.supplierRepository.addUpdateOrderedItem(
             orderedItem,
-            SupplierFirestoreRepository.TO_ADD
+            SupplierRepository.TO_ADD
         ) { status, message ->
             this.orderedItemAddedIndicator.postValue(status to message)
         }
@@ -66,9 +66,9 @@ class AddEditOrderedItemViewModel : ViewModel() {
 
         this.orderedItemEditedIndicator.postValue(Status.STARTED to "")
 
-        this.supplierFirestoreRepository.addUpdateOrderedItem(
+        this.supplierRepository.addUpdateOrderedItem(
             orderedItem,
-            SupplierFirestoreRepository.TO_UPDATE
+            SupplierRepository.TO_UPDATE
         ) { status, message ->
             this.orderedItemEditedIndicator.postValue(status to message)
         }

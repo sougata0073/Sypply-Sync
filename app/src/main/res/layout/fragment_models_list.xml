@@ -7,7 +7,6 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fitsSystemWindows="true"
         tools:context=".modelslist.ui.ModelsListFragment">
 
         <com.google.android.material.appbar.AppBarLayout
@@ -16,7 +15,7 @@
             android:layout_height="wrap_content"
             android:background="@color/night_mode_background"
             android:backgroundTint="@color/night_mode_background"
-            android:fitsSystemWindows="true"
+
             app:liftOnScroll="true"
             app:statusBarForeground="@color/night_mode_background">
 
@@ -27,6 +26,8 @@
                 android:background="@color/night_mode_background"
                 android:minHeight="?attr/actionBarSize"
                 app:layout_scrollEffect="compress"
+                app:titleTextColor="@color/toolbar_title_color"
+                tools:title="Suppliers"
                 app:layout_scrollFlags="scroll|enterAlways|snap"
                 app:navigationIcon="@drawable/ic_back_arrow"
                 app:titleTextAppearance="@style/materialToolbarTitleStyle">

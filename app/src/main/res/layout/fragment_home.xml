@@ -16,270 +16,239 @@
         android:id="@+id/parentLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/night_mode_background"
-        android:fitsSystemWindows="true"
+        android:background="@color/fragment_bg"
         tools:context=".home.ui.HomeFragment">
 
-        <LinearLayout
-            android:id="@+id/childLayout"
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/fragment_bg"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
-            <androidx.cardview.widget.CardView
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                app:cardBackgroundColor="@color/night_mode_background"
-                app:cardElevation="2dp">
+                android:layout_height="wrap_content"
+                android:padding="15dp">
 
                 <TextView
-                    android:id="@+id/heading"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_gravity="start"
-                    android:layout_marginStart="15dp"
-                    android:layout_marginEnd="15dp"
-                    android:fontFamily="@font/acherus_feral_bold"
-                    android:gravity="center_vertical"
-                    android:text="Home"
-                    android:textColor="@color/bw"
-                    android:textSize="20sp" />
-
-            </androidx.cardview.widget.CardView>
-
-            <androidx.core.widget.NestedScrollView
-                android:id="@+id/scrollView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
+                    android:id="@+id/monthlySaleLbl"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:padding="15dp">
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Monthly Sale"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                    <TextView
-                        android:id="@+id/monthlySaleLbl"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="Monthly Sale"
-                        android:textColor="@color/bw"
-                        android:textSize="20sp"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
+                <TextView
+                    android:id="@+id/monthlySaleAmount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="₹0"
+                    android:textColor="@color/bw"
+                    android:textSize="35sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="@+id/monthlySaleLbl"
+                    app:layout_constraintStart_toStartOf="@id/monthlySaleLbl"
+                    app:layout_constraintTop_toBottomOf="@id/monthlySaleLbl" />
 
-                    <TextView
-                        android:id="@+id/monthlySaleAmount"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="₹0"
-                        android:textColor="@color/bw"
-                        android:textSize="35sp"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="@+id/monthlySaleLbl"
-                        app:layout_constraintStart_toStartOf="@id/monthlySaleLbl"
-                        app:layout_constraintTop_toBottomOf="@id/monthlySaleLbl" />
+                <TextView
+                    android:id="@+id/monthlyPurchaseLbl"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Monthly Purchase"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toEndOf="@+id/monthlySaleAmount"
+                    app:layout_constraintStart_toStartOf="@id/monthlySaleAmount"
+                    app:layout_constraintTop_toBottomOf="@id/monthlySaleAmount" />
 
-                    <TextView
-                        android:id="@+id/monthlyPurchaseLbl"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="Monthly Purchase"
-                        android:textColor="@color/bw"
-                        android:textSize="20sp"
-                        app:layout_constraintEnd_toEndOf="@+id/monthlySaleAmount"
-                        app:layout_constraintStart_toStartOf="@id/monthlySaleAmount"
-                        app:layout_constraintTop_toBottomOf="@id/monthlySaleAmount" />
+                <TextView
+                    android:id="@+id/monthlyPurchaseAmount"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="₹0"
+                    android:textColor="@color/bw"
+                    android:textSize="35sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="@+id/monthlyPurchaseLbl"
+                    app:layout_constraintStart_toStartOf="@id/monthlyPurchaseLbl"
+                    app:layout_constraintTop_toBottomOf="@id/monthlyPurchaseLbl" />
 
-                    <TextView
-                        android:id="@+id/monthlyPurchaseAmount"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="₹0"
-                        android:textColor="@color/bw"
-                        android:textSize="35sp"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="@+id/monthlyPurchaseLbl"
-                        app:layout_constraintStart_toStartOf="@id/monthlyPurchaseLbl"
-                        app:layout_constraintTop_toBottomOf="@id/monthlyPurchaseLbl" />
+                <TextView
+                    android:id="@+id/ordersToReceiveLbl"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Orders To Receive"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toStartOf="@id/ordersToReceiveNumber"
+                    app:layout_constraintStart_toStartOf="@id/monthlyPurchaseAmount"
+                    app:layout_constraintTop_toBottomOf="@id/monthlyPurchaseAmount" />
 
-                    <TextView
-                        android:id="@+id/ordersToReceiveLbl"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="Orders To Receive"
-                        android:textColor="@color/bw"
-                        android:textSize="20sp"
-                        app:layout_constraintEnd_toStartOf="@id/ordersToReceiveNumber"
-                        app:layout_constraintStart_toStartOf="@id/monthlyPurchaseAmount"
-                        app:layout_constraintTop_toBottomOf="@id/monthlyPurchaseAmount" />
+                <TextView
+                    android:id="@+id/ordersToReceiveNumber"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxWidth="100dp"
+                    android:maxLines="1"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/ordersToReceiveLbl"
+                    app:layout_constraintEnd_toEndOf="@+id/monthlyPurchaseAmount"
+                    app:layout_constraintStart_toEndOf="@id/ordersToReceiveLbl"
+                    app:layout_constraintTop_toTopOf="@id/ordersToReceiveLbl"
+                    tools:text="0" />
 
-                    <TextView
-                        android:id="@+id/ordersToReceiveNumber"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:maxWidth="100dp"
-                        android:maxLines="1"
-                        tools:text="0"
-                        android:textColor="@color/bw"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="@id/ordersToReceiveLbl"
-                        app:layout_constraintEnd_toEndOf="@+id/monthlyPurchaseAmount"
-                        app:layout_constraintStart_toEndOf="@id/ordersToReceiveLbl"
-                        app:layout_constraintTop_toTopOf="@id/ordersToReceiveLbl" />
+                <TextView
+                    android:id="@+id/ordersToShipLbl"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Orders To Ship"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toStartOf="@id/ordersToShipNumber"
+                    app:layout_constraintStart_toStartOf="@id/ordersToReceiveLbl"
+                    app:layout_constraintTop_toBottomOf="@id/ordersToReceiveLbl" />
 
-                    <TextView
-                        android:id="@+id/ordersToShipLbl"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="Orders To Ship"
-                        android:textColor="@color/bw"
-                        android:textSize="20sp"
-                        app:layout_constraintEnd_toStartOf="@id/ordersToShipNumber"
-                        app:layout_constraintStart_toStartOf="@id/ordersToReceiveLbl"
-                        app:layout_constraintTop_toBottomOf="@id/ordersToReceiveLbl" />
+                <TextView
+                    android:id="@+id/ordersToShipNumber"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxWidth="100dp"
+                    android:maxLines="1"
+                    android:text="0"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="@id/ordersToShipLbl"
+                    app:layout_constraintEnd_toEndOf="@+id/ordersToReceiveNumber"
+                    app:layout_constraintStart_toEndOf="@id/ordersToShipLbl"
+                    app:layout_constraintTop_toTopOf="@id/ordersToShipLbl" />
 
-                    <TextView
-                        android:id="@+id/ordersToShipNumber"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:ellipsize="end"
-                        android:maxWidth="100dp"
-                        android:maxLines="1"
-                        android:text="0"
-                        android:textColor="@color/bw"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="@id/ordersToShipLbl"
-                        app:layout_constraintEnd_toEndOf="@+id/ordersToReceiveNumber"
-                        app:layout_constraintStart_toEndOf="@id/ordersToShipLbl"
-                        app:layout_constraintTop_toTopOf="@id/ordersToShipLbl" />
+                <TextView
+                    android:id="@+id/yearsSalesChartLbl"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Sales Chart"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toEndOf="@+id/ordersToShipNumber"
+                    app:layout_constraintStart_toStartOf="@id/ordersToShipLbl"
+                    app:layout_constraintTop_toBottomOf="@id/ordersToShipLbl" />
 
-                    <TextView
-                        android:id="@+id/yearsSalesChartLbl"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="Sales Chart"
-                        android:textColor="@color/bw"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toEndOf="@+id/ordersToShipNumber"
-                        app:layout_constraintStart_toStartOf="@id/ordersToShipLbl"
-                        app:layout_constraintTop_toBottomOf="@id/ordersToShipLbl" />
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/salesLineChart"
+                    android:layout_width="0dp"
+                    android:layout_height="300dp"
+                    app:layout_constraintEnd_toEndOf="@+id/yearsSalesChartLbl"
+                    app:layout_constraintStart_toStartOf="@+id/yearsSalesChartLbl"
+                    app:layout_constraintTop_toBottomOf="@id/yearsSalesChartLbl" />
 
-                    <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/salesLineChart"
-                        android:layout_width="0dp"
-                        android:layout_height="300dp"
-                        app:layout_constraintEnd_toEndOf="@+id/yearsSalesChartLbl"
-                        app:layout_constraintStart_toStartOf="@+id/yearsSalesChartLbl"
-                        app:layout_constraintTop_toBottomOf="@id/yearsSalesChartLbl" />
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/progressBarSalesChart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"
+                    android:visibility="gone"
+                    app:indicatorColor="@color/bw"
+                    app:layout_constraintBottom_toBottomOf="@+id/salesLineChart"
+                    app:layout_constraintEnd_toEndOf="@+id/salesLineChart"
+                    app:layout_constraintStart_toStartOf="@+id/salesLineChart"
+                    app:layout_constraintTop_toTopOf="@+id/salesLineChart" />
 
-                    <com.google.android.material.progressindicator.CircularProgressIndicator
-                        android:id="@+id/progressBarSalesChart"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:indeterminate="true"
-                        android:visibility="gone"
-                        app:indicatorColor="@color/bw"
-                        app:layout_constraintBottom_toBottomOf="@+id/salesLineChart"
-                        app:layout_constraintEnd_toEndOf="@+id/salesLineChart"
-                        app:layout_constraintStart_toStartOf="@+id/salesLineChart"
-                        app:layout_constraintTop_toTopOf="@+id/salesLineChart" />
+                <TextView
+                    android:id="@+id/purchaseChartLbl"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="30dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Purchase Chart"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    app:layout_constraintEnd_toStartOf="@id/purchaseChartCalendarBtn"
+                    app:layout_constraintHorizontal_chainStyle="packed"
+                    app:layout_constraintStart_toStartOf="@id/salesLineChart"
+                    app:layout_constraintTop_toBottomOf="@id/salesLineChart" />
 
-                    <TextView
-                        android:id="@+id/purchaseChartLbl"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="30dp"
-                        android:ellipsize="end"
-                        android:maxLines="1"
-                        android:text="Purchase Chart"
-                        android:textColor="@color/bw"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        app:layout_constraintEnd_toStartOf="@id/purchaseChartCalendarBtn"
-                        app:layout_constraintHorizontal_chainStyle="packed"
-                        app:layout_constraintStart_toStartOf="@id/salesLineChart"
-                        app:layout_constraintTop_toBottomOf="@id/salesLineChart" />
+                <TextView
+                    android:id="@+id/purchaseChartDateRange"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="@={viewModel.purchaseChartRangeDate}"
+                    android:textColor="@color/grey"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="@id/purchaseChartCalendarBtn"
+                    app:layout_constraintStart_toStartOf="@id/purchaseChartLbl"
+                    app:layout_constraintTop_toBottomOf="@+id/purchaseChartLbl"
+                    tools:text="From: 01-04-2025 To: 01-05-2025" />
 
-                    <TextView
-                        android:id="@+id/purchaseChartDateRange"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:ellipsize="end"
-                        android:maxLines="2"
-                        android:text="@={viewModel.purchaseChartRangeDate}"
-                        android:textColor="@color/grey"
-                        android:textSize="14sp"
-                        android:visibility="gone"
-                        app:layout_constraintEnd_toEndOf="@id/purchaseChartCalendarBtn"
-                        app:layout_constraintStart_toStartOf="@id/purchaseChartLbl"
-                        app:layout_constraintTop_toBottomOf="@+id/purchaseChartLbl"
-                        tools:text="From: 01-04-2025 To: 01-05-2025" />
+                <ImageButton
+                    android:id="@+id/purchaseChartCalendarBtn"
+                    android:layout_width="25dp"
+                    android:layout_height="0dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_calendar"
+                    app:layout_constraintBottom_toBottomOf="@+id/purchaseChartDateRange"
+                    app:layout_constraintEnd_toEndOf="@+id/salesLineChart"
+                    app:layout_constraintTop_toTopOf="@id/purchaseChartLbl"
+                    app:tint="@color/bw" />
 
-                    <ImageButton
-                        android:id="@+id/purchaseChartCalendarBtn"
-                        android:layout_width="25dp"
-                        android:layout_height="0dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:scaleType="fitCenter"
-                        android:src="@drawable/ic_calendar"
-                        app:layout_constraintBottom_toBottomOf="@+id/purchaseChartDateRange"
-                        app:layout_constraintEnd_toEndOf="@+id/salesLineChart"
-                        app:layout_constraintTop_toTopOf="@id/purchaseChartLbl"
-                        app:tint="@color/bw" />
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/purchaseLineChart"
+                    android:layout_width="0dp"
+                    android:layout_height="300dp"
+                    android:layout_marginBottom="20dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/purchaseChartCalendarBtn"
+                    app:layout_constraintStart_toStartOf="@+id/purchaseChartLbl"
+                    app:layout_constraintTop_toBottomOf="@id/purchaseChartDateRange" />
 
-                    <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/purchaseLineChart"
-                        android:layout_width="0dp"
-                        android:layout_height="300dp"
-                        android:layout_marginBottom="20dp"
-                        android:visibility="invisible"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="@+id/purchaseChartCalendarBtn"
-                        app:layout_constraintStart_toStartOf="@+id/purchaseChartLbl"
-                        app:layout_constraintTop_toBottomOf="@id/purchaseChartDateRange" />
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/progressBarPurchaseChart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"
+                    android:visibility="gone"
+                    app:indicatorColor="@color/bw"
+                    app:layout_constraintBottom_toBottomOf="@+id/purchaseLineChart"
+                    app:layout_constraintEnd_toEndOf="@+id/purchaseLineChart"
+                    app:layout_constraintStart_toStartOf="@+id/purchaseLineChart"
+                    app:layout_constraintTop_toTopOf="@+id/purchaseLineChart" />
 
-                    <com.google.android.material.progressindicator.CircularProgressIndicator
-                        android:id="@+id/progressBarPurchaseChart"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:indeterminate="true"
-                        android:visibility="gone"
-                        app:indicatorColor="@color/bw"
-                        app:layout_constraintBottom_toBottomOf="@+id/purchaseLineChart"
-                        app:layout_constraintEnd_toEndOf="@+id/purchaseLineChart"
-                        app:layout_constraintStart_toStartOf="@+id/purchaseLineChart"
-                        app:layout_constraintTop_toTopOf="@+id/purchaseLineChart" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </androidx.core.widget.NestedScrollView>
-        </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:id="@+id/mainProgressBar"

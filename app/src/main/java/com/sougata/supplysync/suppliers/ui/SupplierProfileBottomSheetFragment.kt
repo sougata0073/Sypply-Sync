@@ -92,7 +92,7 @@ class SupplierProfileBottomSheetFragment : BottomSheetDialogFragment() {
 
             findNavController().navigate(
                 R.id.addEditSupplierFragment,
-                bundle, AnimationProvider.fragmentAnimationSlideRightLeft()
+                bundle, AnimationProvider.slideRightLeftNavOptions()
             )
 
             this.dismiss()

@@ -3,15 +3,15 @@ package com.sougata.supplysync.modelslist.viewmodels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.DocumentSnapshot
-import com.sougata.supplysync.remote.SupplierFirestoreRepository
 import com.sougata.supplysync.models.Model
-import com.sougata.supplysync.util.DataType
+import com.sougata.supplysync.firestore.SupplierRepository
+import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 
 class ModelSearchViewModel(private val modelName: String) : ViewModel() {
 
-    val supplierFirestoreRepository = SupplierFirestoreRepository()
+    val supplierRepository = SupplierRepository()
 
     val itemsList = MutableLiveData<Triple<MutableList<Model>?, Int, String>>()
     var noMoreElementLeft = false
@@ -19,16 +19,17 @@ class ModelSearchViewModel(private val modelName: String) : ViewModel() {
 
     var prevSearchField = ""
     var prevSearchQuery = ""
-    var prevQueryDataType = DataType.STRING
+    var prevQueryDataType = FirestoreFieldDataType.STRING
 
     var isSearchActive = false
+    var isSearchClicked = false
 
     var isFirstTimeListLoaded = true
 
     fun loadItemsList(
         searchField: String,
         searchQuery: String,
-        queryDataType: DataType
+        queryDataType: FirestoreFieldDataType
     ) {
 
         if (searchQuery.isEmpty()) {
@@ -70,16 +71,16 @@ class ModelSearchViewModel(private val modelName: String) : ViewModel() {
     private fun callListByModelName(
         searchField: String,
         searchQuery: String,
-        queryDataType: DataType,
+        queryDataType: FirestoreFieldDataType,
         value: Triple<MutableList<Model>?, Int, String>?
     ) {
         val limit: Long = 20
         val fetchList =
             when (this.modelName) {
-                Model.Companion.SUPPLIER -> this.supplierFirestoreRepository::getSuppliersListFiltered
-                Model.Companion.SUPPLIERS_ITEM -> this.supplierFirestoreRepository::getSupplierItemsListFiltered
-                Model.Companion.SUPPLIER_PAYMENT -> this.supplierFirestoreRepository::getSupplierPaymentsListFiltered
-                Model.Companion.ORDERED_ITEM -> this.supplierFirestoreRepository::getOrderedItemsListFiltered
+                Model.Companion.SUPPLIER -> this.supplierRepository::getSuppliersListFiltered
+                Model.Companion.SUPPLIERS_ITEM -> this.supplierRepository::getSupplierItemsListFiltered
+                Model.Companion.SUPPLIER_PAYMENT -> this.supplierRepository::getSupplierPaymentsListFiltered
+                Model.Companion.ORDERED_ITEM -> this.supplierRepository::getOrderedItemsListFiltered
                 else -> return
             }
 
@@ -131,19 +132,19 @@ class ModelSearchViewModel(private val modelName: String) : ViewModel() {
         for ((i, item) in list.withIndex()) {
             if (item.id == model.id) {
                 list.removeAt(i)
-                this.itemsList.postValue(
+                this.itemsList.value =
                     Triple(
                         list,
                         Status.SUCCESS,
                         if (list.isEmpty()) KeysAndMessages.EMPTY_LIST else KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
                     )
-                )
-                if (list.isEmpty()) {
-                    this.lastDocumentSnapshot = null
-                    this.noMoreElementLeft = true
-                }
-                return
+                break
             }
+        }
+
+        if (list.isEmpty()) {
+            this.lastDocumentSnapshot = null
+            this.noMoreElementLeft = true
         }
     }
 

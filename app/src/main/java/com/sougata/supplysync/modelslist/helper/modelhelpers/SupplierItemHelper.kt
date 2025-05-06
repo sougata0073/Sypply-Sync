@@ -8,11 +8,11 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.sougata.supplysync.R
-import com.sougata.supplysync.remote.FirestoreFieldNames
+import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.databinding.ItemSupplierItemsListBinding
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.SupplierItem
-import com.sougata.supplysync.util.DataType
+import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.modelslist.helper.HelperStructure
 import com.sougata.supplysync.suppliers.ui.AddEditSupplierItemBottomSheetFragment
 import com.sougata.supplysync.util.AnimationProvider
@@ -45,17 +45,17 @@ class SupplierItemHelper(private val fragment: Fragment) :
         return ItemSupplierItemsListBinding.inflate(inflater, parent, false)
     }
 
-    override fun getFieldsPair(): Array<Triple<String, String, DataType>> {
+    override fun getFieldsPair(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
-                FirestoreFieldNames.SupplierItemsCol.NAME,
+                FieldNames.SupplierItemsCol.NAME,
                 SupplierItem::name.name,
-                DataType.STRING
+                FirestoreFieldDataType.STRING
             ),
             Triple(
-                FirestoreFieldNames.SupplierItemsCol.PRICE,
+                FieldNames.SupplierItemsCol.PRICE,
                 SupplierItem::price.name,
-                DataType.NUMBER
+                FirestoreFieldDataType.NUMBER
             )
         )
     }
@@ -66,7 +66,7 @@ class SupplierItemHelper(private val fragment: Fragment) :
                 putBoolean(KeysAndMessages.TO_ADD_KEY, true)
             }
             this.fragment.findNavController().navigate(
-                R.id.addEditSupplierPaymentFragment, bundle, AnimationProvider.fragmentAnimationSlideRightLeft()
+                R.id.addEditSupplierPaymentFragment, bundle, AnimationProvider.slideRightLeftNavOptions()
             )
         }
     }

@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.findNavController
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
-import com.sougata.supplysync.remote.AuthenticationRepository
+import com.sougata.supplysync.firestore.AuthRepository
 import com.sougata.supplysync.models.User
 import com.sougata.supplysync.util.Status
 import com.sougata.supplysync.util.Validations
@@ -61,7 +61,7 @@ class CreateAccountViewModel : ViewModel() {
         // When all validation is passed
         this.accountCreationIndicator.postValue(Triple(user, Status.STARTED, ""))
 
-        val authRepository = AuthenticationRepository()
+        val authRepository = AuthRepository()
 
         authRepository.createAccount(user, password) { status, message ->
             this.accountCreationIndicator.postValue(Triple(user, status, message))

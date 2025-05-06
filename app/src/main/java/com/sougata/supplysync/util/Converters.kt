@@ -13,15 +13,21 @@ object Converters {
 
     fun numberToInt(number: Number) = number.toInt()
 
-
     fun numberToMoneyString(value: Number): String {
-
-//        Log.d("ConvertersLog", value.toString())
 
         val currencyFormat = NumberFormat.getCurrencyInstance(Locale.getDefault())
 
         return currencyFormat.format(value)
+    }
 
+    fun getShortedNumberString(num: Double): String {
+        val df = DecimalFormat("#.##")
+        return when {
+            num >= 1_00_00_000 -> "${df.format(num / 1_00_00_000.0)} Cr"
+            num >= 1_00_000 -> "${df.format(num / 1_00_000.0)} L"
+            num >= 1_000 -> "${df.format(num / 1_000.0)} K"
+            else -> num.toString()
+        }
     }
 
     fun getYearMonthDateFromDateString(dateString: String): Triple<Int, Int, Int> {
@@ -78,17 +84,7 @@ object Converters {
         return hour to minute
     }
 
-    fun getShortedNumberString(num: Double): String {
-        val df = DecimalFormat("#.##")
-        return when {
-            num >= 1_00_00_000 -> "${df.format(num / 1_00_00_000.0)} Cr"
-            num >= 1_00_000 -> "${df.format(num / 1_00_000.0)} L"
-            num >= 1_000 -> "${df.format(num / 1_000.0)} K"
-            else -> num.toString()
-        }
-    }
-
-    fun getDateFromTimestamp(timestamp: Timestamp): Triple<Int, Int, Int> {
+    fun getYearMonthDateFromTimestamp(timestamp: Timestamp): Triple<Int, Int, Int> {
         val calendar = Calendar.getInstance()
         calendar.time = timestamp.toDate()
 
@@ -99,7 +95,7 @@ object Converters {
         return Triple(year, month, date)
     }
 
-    fun getTimeFromTimestamp(timestamp: Timestamp): Pair<Int, Int> {
+    fun getHourMinuteFromTimestamp(timestamp: Timestamp): Pair<Int, Int> {
         val calendar = Calendar.getInstance()
         calendar.time = timestamp.toDate()
 
@@ -136,8 +132,27 @@ object Converters {
 
         return Timestamp(calendar.time)
     }
-}
 
-//fun main() {
-//    print(getShortedNumberString(100000001.0))
-//}
+    fun getTimestampFromDateString(dateString: String): Timestamp {
+        val res = getYearMonthDateFromDateString(dateString)
+        return getTimestampFromDate(res.first, res.second, res.third)
+    }
+
+    fun getDateStringFromTimestamp(timestamp: Timestamp): String {
+        val date = getYearMonthDateFromTimestamp(timestamp)
+
+        return String.format(
+            Locale.getDefault(),
+            "%02d-%02d-%04d", date.second, date.third, date.first
+        )
+    }
+
+    fun getTimeStringFromTimestamp(timestamp: Timestamp): String {
+        val time = getHourMinuteFromTimestamp(timestamp)
+
+        return String.format(
+            Locale.getDefault(),
+            "%02d:%02d", time.first, time.second
+        )
+    }
+}

@@ -6,7 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.findNavController
 import com.sougata.supplysync.R
-import com.sougata.supplysync.remote.SupplierFirestoreRepository
+import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.KeysAndMessages
@@ -14,11 +14,11 @@ import com.sougata.supplysync.util.Status
 
 class SuppliersHomeViewModel : ViewModel() {
 
-    val supplierFirestoreRepository = SupplierFirestoreRepository()
+    val supplierRepository = SupplierRepository()
 
-    val numberOfSuppliers = MutableLiveData<Triple<Int, Int, String>>()
-    val dueAmountToSuppliers = MutableLiveData<Triple<Double, Int, String>>()
-    val numberOfOrdersToReceive = MutableLiveData<Triple<Int, Int, String>>()
+    val numberOfSuppliers = MutableLiveData<Triple<Number, Int, String>>()
+    val dueAmountToSuppliers = MutableLiveData<Triple<Number, Int, String>>()
+    val numberOfOrdersToReceive = MutableLiveData<Triple<Number, Int, String>>()
 
     val allApiCallFinishedIndicator = MutableLiveData(false)
 
@@ -42,7 +42,7 @@ class SuppliersHomeViewModel : ViewModel() {
     fun loadNumberOfSuppliers() {
         this.numberOfSuppliers.postValue(Triple(0, Status.STARTED, ""))
 
-        this.supplierFirestoreRepository.getNumberOfSuppliers { status, count, message ->
+        this.supplierRepository.getNumberOfSuppliers { status, count, message ->
             this.numberOfSuppliers.postValue(Triple(count, status, message))
             this.apiCallFinishCount++
         }
@@ -51,7 +51,7 @@ class SuppliersHomeViewModel : ViewModel() {
     fun loadDueAmountToSuppliers() {
         this.dueAmountToSuppliers.postValue(Triple(0.0, Status.STARTED, ""))
 
-        this.supplierFirestoreRepository.getDueAmountToSuppliers { status, amount, message ->
+        this.supplierRepository.getDueAmountToSuppliers { status, amount, message ->
             this.dueAmountToSuppliers.postValue(Triple(amount, status, message))
             this.apiCallFinishCount++
         }
@@ -60,7 +60,7 @@ class SuppliersHomeViewModel : ViewModel() {
     fun loadOrdersToReceive() {
         this.numberOfOrdersToReceive.postValue(Triple(0, Status.STARTED, ""))
 
-        this.supplierFirestoreRepository.getOrdersToReceive { status, count, message ->
+        this.supplierRepository.getOrdersToReceive { status, count, message ->
             this.numberOfOrdersToReceive.postValue(Triple(count, status, message))
             this.apiCallFinishCount++
         }
@@ -73,7 +73,7 @@ class SuppliersHomeViewModel : ViewModel() {
         }
 
         view.findNavController()
-            .navigate(R.id.modelsListFragment, bundle, AnimationProvider.fragmentAnimationSlideRightLeft())
+            .navigate(R.id.modelsListFragment, bundle, AnimationProvider.slideRightLeftNavOptions())
     }
 
     fun onItemsListClick(view: View) {
@@ -86,7 +86,7 @@ class SuppliersHomeViewModel : ViewModel() {
             .navigate(
                 R.id.modelsListFragment,
                 bundle,
-                AnimationProvider.fragmentAnimationSlideRightLeft()
+                AnimationProvider.slideRightLeftNavOptions()
             )
     }
 
@@ -100,7 +100,7 @@ class SuppliersHomeViewModel : ViewModel() {
             .navigate(
                 R.id.modelsListFragment,
                 bundle,
-                AnimationProvider.fragmentAnimationSlideRightLeft()
+                AnimationProvider.slideRightLeftNavOptions()
             )
     }
 
@@ -111,7 +111,7 @@ class SuppliersHomeViewModel : ViewModel() {
 
         view.findNavController()
             .navigate(
-                R.id.modelsListFragment, bundle, AnimationProvider.fragmentAnimationSlideRightLeft()
+                R.id.modelsListFragment, bundle, AnimationProvider.slideRightLeftNavOptions()
             )
     }
 

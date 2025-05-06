@@ -8,11 +8,11 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.sougata.supplysync.R
-import com.sougata.supplysync.remote.FirestoreFieldNames
+import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.databinding.ItemOrderedItemsListBinding
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.OrderedItem
-import com.sougata.supplysync.util.DataType
+import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.modelslist.helper.HelperStructure
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
@@ -42,32 +42,32 @@ class OrderedItemHelper(private val fragment: Fragment): HelperStructure {
         return ItemOrderedItemsListBinding.inflate(inflater, parent, false)
     }
 
-    override fun getFieldsPair(): Array<Triple<String, String, DataType>> {
+    override fun getFieldsPair(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
-                FirestoreFieldNames.OrderedItemsCol.ITEM_NAME,
+                FieldNames.OrderedItemsCol.ITEM_NAME,
                 OrderedItem::itemName.name,
-                DataType.STRING
+                FirestoreFieldDataType.STRING
             ),
             Triple(
-                FirestoreFieldNames.OrderedItemsCol.QUANTITY,
+                FieldNames.OrderedItemsCol.QUANTITY,
                 OrderedItem::quantity.name,
-                DataType.NUMBER
+                FirestoreFieldDataType.NUMBER
             ),
             Triple(
-                FirestoreFieldNames.OrderedItemsCol.AMOUNT,
+                FieldNames.OrderedItemsCol.AMOUNT,
                 OrderedItem::amount.name,
-                DataType.NUMBER
+                FirestoreFieldDataType.NUMBER
             ),
             Triple(
-                FirestoreFieldNames.OrderedItemsCol.SUPPLIER_NAME,
+                FieldNames.OrderedItemsCol.SUPPLIER_NAME,
                 OrderedItem::supplierName.name,
-                DataType.STRING
+                FirestoreFieldDataType.STRING
             ),
             Triple(
-                FirestoreFieldNames.OrderedItemsCol.ORDER_TIMESTAMP,
+                FieldNames.OrderedItemsCol.ORDER_TIMESTAMP,
                 OrderedItem::orderTimestamp.name,
-                DataType.TIMESTAMP
+                FirestoreFieldDataType.TIMESTAMP
             )
         )
     }
@@ -78,7 +78,7 @@ class OrderedItemHelper(private val fragment: Fragment): HelperStructure {
                 putBoolean(KeysAndMessages.TO_ADD_KEY, true)
             }
             this.fragment.findNavController().navigate(
-                R.id.addEditOrderedItemFragment, bundle, AnimationProvider.fragmentAnimationSlideRightLeft()
+                R.id.addEditOrderedItemFragment, bundle, AnimationProvider.slideRightLeftNavOptions()
             )
         }
     }
@@ -93,7 +93,7 @@ class OrderedItemHelper(private val fragment: Fragment): HelperStructure {
             var month = 0
             var myDate = 0
 
-            Converters.getDateFromTimestamp(model.orderTimestamp).apply {
+            Converters.getYearMonthDateFromTimestamp(model.orderTimestamp).apply {
                 year = first
                 month = second
                 myDate = third
@@ -129,7 +129,7 @@ class OrderedItemHelper(private val fragment: Fragment): HelperStructure {
                             .navigate(
                                 R.id.addEditOrderedItemFragment,
                                 bundle,
-                                AnimationProvider.fragmentAnimationSlideRightLeft()
+                                AnimationProvider.slideRightLeftNavOptions()
                             )
                     }.show()
             }

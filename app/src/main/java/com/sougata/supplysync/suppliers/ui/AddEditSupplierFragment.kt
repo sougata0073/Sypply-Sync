@@ -12,7 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
-import com.sougata.supplysync.remote.SupplierFirestoreRepository
+import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.databinding.FragmentAddEditSupplierBinding
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierViewModel
@@ -35,7 +35,7 @@ class AddEditSupplierFragment : Fragment() {
     private var isSupplierUpdated = false
     private var isSupplierDeleted = false
 
-    private val supplierFirestoreRepository = SupplierFirestoreRepository()
+    private val supplierRepository = SupplierRepository()
 
 //    private lateinit var pickImage: ActivityResultLauncher<PickVisualMediaRequest>
 
@@ -164,7 +164,7 @@ class AddEditSupplierFragment : Fragment() {
                     this.binding.parentLayout.alpha = 0.5f
                     this.binding.progressBar.visibility = View.VISIBLE
 
-                    this.supplierFirestoreRepository.deleteSupplier(this.prevSupplier) { status, message ->
+                    this.supplierRepository.deleteSupplier(this.prevSupplier) { status, message ->
 
                         Snackbar.make(
                             requireParentFragment().requireView(),

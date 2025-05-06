@@ -1,14 +1,19 @@
 package com.sougata.supplysync.suppliers.ui
 
+import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.core.util.Pair
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
@@ -16,10 +21,11 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentSuppliersReportsBinding
-import com.sougata.supplysync.login.LoginActivity
 import com.sougata.supplysync.suppliers.viewmodels.SupplierReportsViewModel
+import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -30,6 +36,10 @@ class SuppliersReportsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var viewModel: SupplierReportsViewModel
+
+    private val fileLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { saveFile(it) }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -65,83 +75,75 @@ class SuppliersReportsFragment : Fragment() {
 
     private fun initializeUI() {
 
+        this.binding.supplierPayment.apply {
 
-        this.binding.supplierPaymentsBtn.setOnClickListener {
-            val dateRangePicker =
-                MaterialDatePicker.Builder.dateRangePicker()
-                    .setSelection(
-                        Pair(
-                            MaterialDatePicker.thisMonthInUtcMilliseconds(),
-                            MaterialDatePicker.todayInUtcMilliseconds()
-                        )
-                    )
-                    .setInputMode(MaterialDatePicker.INPUT_MODE_TEXT)
-                    .setTitleText("Select dates")
-                    .build()
-
-            dateRangePicker.addOnPositiveButtonClickListener {
-                val startDateMillis = it.first
-                val endDateMillis = it.second
-
-                val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-                val formatedStartDate = dateFormat.format(Date(startDateMillis))
-                val formatedEndDate = dateFormat.format(Date(endDateMillis))
-                this.viewModel.generateSupplierPaymentsPdf(formatedStartDate, formatedEndDate)
-                this.viewModel.purchasedItemsCompChartRangeDate.postValue("From: $formatedStartDate To: $formatedEndDate")
+            this.mainImage.setImageResource(R.drawable.ic_money)
+            this.heading.text = "Payments to suppliers"
+            this.createBtn.setOnClickListener {
+                this.actionButtonsLayout.visibility = View.GONE
+                openDateRangePicker { startDateString, endDateString ->
+                    viewModel.generateSupplierPaymentsPdf(startDateString, endDateString)
+                }
             }
+            this.open.setOnClickListener {
+                val byteArray = viewModel.supplierPaymentsListPdf.value?.second
 
-            dateRangePicker.show(this.parentFragmentManager, "dateRangePicker")
+                onOpenClick(byteArray)
+            }
+            this.saveLocally.setOnClickListener {
+                val byteArray =
+                    viewModel.supplierPaymentsListPdf.value?.second ?: byteArrayOf()
+
+                onSaveLocallyClick("Payments to suppliers.pdf", byteArray)
+            }
+            this.send.setOnClickListener {
+                val byteArray =
+                    viewModel.supplierPaymentsListPdf.value?.second ?: byteArrayOf()
+                onSendClick("Payments to suppliers.pdf", byteArray)
+            }
+        }
+        this.binding.purchasedItem.apply {
+
+            this.mainImage.setImageResource(R.drawable.ic_item)
+            this.heading.text = "Items purchased"
+            this.createBtn.setOnClickListener {
+                this.actionButtonsLayout.visibility = View.GONE
+                openDateRangePicker { startDateString, endDateString ->
+                    viewModel.generateOrderedItemsPdf(startDateString, endDateString)
+                }
+            }
+            this.open.setOnClickListener {
+                val byteArray = viewModel.orderedItemsListPdf.value?.second
+                onOpenClick(byteArray)
+            }
+            this.saveLocally.setOnClickListener {
+                val byteArray = viewModel.orderedItemsListPdf.value?.second ?: byteArrayOf()
+                onSaveLocallyClick("Items purchased.pdf", byteArray)
+            }
+            this.send.setOnClickListener {
+                val byteArray = viewModel?.orderedItemsListPdf?.value?.second ?: byteArrayOf()
+                onSendClick("Items purchased.pdf", byteArray)
+            }
         }
 
         this.binding.purchasedItemsChartCompCalendarBtn.setOnClickListener {
-            val dateRangePicker =
-                MaterialDatePicker.Builder.dateRangePicker()
-                    .setSelection(
-                        Pair(
-                            MaterialDatePicker.thisMonthInUtcMilliseconds(),
-                            MaterialDatePicker.todayInUtcMilliseconds()
-                        )
-                    )
-                    .setInputMode(MaterialDatePicker.INPUT_MODE_TEXT)
-                    .setTitleText("Select dates")
-                    .build()
-
-            dateRangePicker.addOnPositiveButtonClickListener {
-
-                val startDateMillis = it.first
-                val endDateMillis = it.second
-
-                val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-                val formatedStartDate = dateFormat.format(Date(startDateMillis))
-                val formatedEndDate = dateFormat.format(Date(endDateMillis))
-//                Log.d("date", "$formatedStartDate\t$formatedEndDate")
-                this.viewModel.loadPurchasedItemsCompBarChartData(
-                    formatedStartDate,
-                    formatedEndDate
+            openDateRangePicker { startDateString, endDateString ->
+                this.viewModel.loadPurchasedItemsCompChartData(
+                    startDateString,
+                    endDateString
                 )
-                this.viewModel.purchasedItemsCompChartRangeDate.postValue("From: $formatedStartDate To: $formatedEndDate")
-
             }
-
-            dateRangePicker.show(this.parentFragmentManager, "dateRangePicker")
         }
     }
 
     private fun registerListeners() {
 
-        this.viewModel.supplierPaymentsListPdfIndicator.observe(this.viewLifecycleOwner) {
+        this.viewModel.supplierPaymentsListPdf.observe(this.viewLifecycleOwner) {
+            pdfCreationListener(it, this.binding.supplierPayment.actionButtonsLayout)
+        }
 
-            if(it.first == Status.STARTED) {
-                this.binding.supplierPaymentsBtn.text = "Generating..."
-            } else if (it.first == Status.SUCCESS) {
-
-                this.binding.supplierPaymentsBtn.text = "Payments To Suppliers"
-
-            }else if (it.first == Status.FAILED) {
-                this.binding.supplierPaymentsBtn.text = "Payments To Suppliers"
-                this.onFailedToLoadData(it.second)
-            }
-
+        this.viewModel.orderedItemsListPdf.observe(this.viewLifecycleOwner) {
+            pdfCreationListener(it, this.binding.purchasedItem.actionButtonsLayout)
         }
 
         this.viewModel.purchasedItemsCompChartData.observe(this.viewLifecycleOwner) {
@@ -171,9 +173,7 @@ class SuppliersReportsFragment : Fragment() {
                 }
 
             } else if (it.second == Status.FAILED) {
-
-                this.onFailedToLoadData(it.third)
-
+                Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
             }
         }
 
@@ -211,14 +211,142 @@ class SuppliersReportsFragment : Fragment() {
         }
     }
 
-    private fun onFailedToLoadData(message: String) {
-        if (message == KeysAndMessages.USER_NOT_FOUND) {
-            startActivity(Intent(requireActivity(), LoginActivity::class.java))
-            requireActivity().finish()
-        } else {
-//            Log.d("err", message)
-            Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()
+    private fun openDateRangePicker(onPositiveButtonClick: (String, String) -> Unit) {
+        val datePicker = MaterialDatePicker.Builder.dateRangePicker()
+            .setSelection(
+                Pair(
+                    MaterialDatePicker.thisMonthInUtcMilliseconds(),
+                    MaterialDatePicker.todayInUtcMilliseconds()
+                )
+            )
+            .setInputMode(MaterialDatePicker.INPUT_MODE_TEXT)
+            .setTitleText("Select dates")
+            .build()
+
+        datePicker.addOnPositiveButtonClickListener {
+            val startDateMillis = it.first
+            val endDateMillis = it.second
+
+            val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+            val formatedStartDate = dateFormat.format(Date(startDateMillis))
+            val formatedEndDate = dateFormat.format(Date(endDateMillis))
+
+            onPositiveButtonClick(formatedStartDate, formatedEndDate)
         }
+        datePicker.show(this.parentFragmentManager, "dateRangePicker")
+    }
+
+    private fun onOpenClick(byteArray: ByteArray?) {
+        val bundle = Bundle().apply {
+            putByteArray(KeysAndMessages.BYTE_ARRAY_KEY, byteArray)
+        }
+
+        this.findNavController()
+            .navigate(
+                R.id.pdfViewerFragment,
+                bundle,
+                AnimationProvider.popUpNavOptions()
+            )
+    }
+
+    private fun onSaveLocallyClick(fileName: String, byteArray: ByteArray) {
+
+        val intent = Intent().apply {
+            action = Intent.ACTION_CREATE_DOCUMENT
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "application/pdf"
+            putExtra(Intent.EXTRA_TITLE, fileName)
+        }
+        this.viewModel.pdfByteArray = byteArray
+        this.fileLauncher.launch(intent)
+    }
+
+    private fun onSendClick(fileName: String, byteArray: ByteArray) {
+        val pdfFile = File(requireContext().cacheDir, fileName)
+
+        // use{} block auto closes the resources
+        pdfFile.outputStream().use {
+            it.write(byteArray)
+        }
+
+        val pdfFileUri =
+            FileProvider.getUriForFile(
+                requireContext(),
+                "${requireContext().packageName}.fileprovider",
+                pdfFile
+            )
+
+        val shareIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_STREAM, pdfFileUri)
+            type = "application/pdf"
+        }
+        startActivity(Intent.createChooser(shareIntent, null))
+    }
+
+    private fun saveFile(result: ActivityResult) {
+        if (result.resultCode == RESULT_OK) {
+            val filePathUri = result.data?.data
+            if (filePathUri != null) {
+                try {
+                    val outputStream =
+                        this.requireContext().contentResolver.openOutputStream(filePathUri)
+
+                    if (outputStream != null) {
+                        outputStream.write(this.viewModel.pdfByteArray)
+                        outputStream.close()
+
+                        Snackbar.make(
+                            requireView(),
+                            "File saved successfully",
+                            Snackbar.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        Snackbar.make(requireView(), "Failed to save file", Snackbar.LENGTH_SHORT)
+                            .show()
+                    }
+                } catch (_: Exception) {
+                    Snackbar.make(requireView(), "Failed to save file", Snackbar.LENGTH_SHORT)
+                        .show()
+                }
+            }
+        }
+    }
+
+    private fun pdfCreationListener(value: Triple<Int, ByteArray?, String>, view: View) {
+        if (value.first == Status.STARTED) {
+            this.onPdfCreationStarted()
+        } else if (value.first == Status.SUCCESS) {
+            onPdfCreationFinished(view)
+        } else if (value.first == Status.FAILED) {
+            onPdfCreationFailed(value.third)
+        }
+    }
+
+    private fun onPdfCreationStarted() {
+        this.binding.apply {
+            touchBlocker.visibility = View.VISIBLE
+            root.alpha = 0.7f
+            mainProgressBar.visibility = View.VISIBLE
+        }
+    }
+
+    private fun onPdfCreationFinished(view: View) {
+        this.binding.apply {
+            root.alpha = 1f
+            mainProgressBar.visibility = View.GONE
+            view.visibility = View.VISIBLE
+            touchBlocker.visibility = View.GONE
+        }
+    }
+
+    private fun onPdfCreationFailed(message: String) {
+        this.binding.apply {
+            root.alpha = 1f
+            mainProgressBar.visibility = View.GONE
+            touchBlocker.visibility = View.GONE
+        }
+        Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()
     }
 }
 

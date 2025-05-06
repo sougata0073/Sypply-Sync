@@ -1,4 +1,4 @@
-package com.sougata.supplysync.remote
+package com.sougata.supplysync.firestore
 
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.ktx.auth
@@ -7,7 +7,7 @@ import com.sougata.supplysync.models.User
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 
-class AuthenticationRepository {
+class AuthRepository {
 
     private val auth = Firebase.auth
 
@@ -25,9 +25,9 @@ class AuthenticationRepository {
 
                         user.uid = currentUser.uid
 
-                        val supplierFirestoreRepository = SupplierFirestoreRepository()
+                        val supplierRepository = SupplierRepository()
 
-                        supplierFirestoreRepository.insertUserToFirestore(user) { status, message ->
+                        supplierRepository.insertUserToFirestore(user) { status, message ->
 
                             if (status == Status.SUCCESS) {
                                 this.sendEmailVerificationLink { status, message ->

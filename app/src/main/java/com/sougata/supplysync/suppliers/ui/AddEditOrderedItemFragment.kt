@@ -13,7 +13,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
-import com.sougata.supplysync.remote.SupplierFirestoreRepository
+import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.databinding.FragmentAddEditOrderedItemBinding
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.OrderedItem
@@ -47,7 +47,7 @@ class AddEditOrderedItemFragment : Fragment() {
     private var isOrderedItemUpdated = false
     private var isOrderedItemDeleted = false
 
-    private val supplierFirestoreRepository = SupplierFirestoreRepository()
+    private val supplierRepository = SupplierRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -192,7 +192,7 @@ class AddEditOrderedItemFragment : Fragment() {
             findNavController().navigate(
                 R.id.modelsListFragment,
                 bundle,
-                AnimationProvider.fragmentAnimationSlideUpDown()
+                AnimationProvider.slideUpDownNavOptions()
             )
 
         }
@@ -207,7 +207,7 @@ class AddEditOrderedItemFragment : Fragment() {
             findNavController().navigate(
                 R.id.modelsListFragment,
                 bundle,
-                AnimationProvider.fragmentAnimationSlideUpDown()
+                AnimationProvider.slideUpDownNavOptions()
             )
 
         }
@@ -244,7 +244,7 @@ class AddEditOrderedItemFragment : Fragment() {
                     this.binding.parentLayout.alpha = 0.5f
                     this.binding.progressBar.visibility = View.VISIBLE
 
-                    this.supplierFirestoreRepository.deleteOrderedItem(this.prevOrderedItem) { status, message ->
+                    this.supplierRepository.deleteOrderedItem(this.prevOrderedItem) { status, message ->
 
                         Snackbar.make(
                             requireParentFragment().requireView(),
@@ -281,7 +281,7 @@ class AddEditOrderedItemFragment : Fragment() {
                 var month = 0
                 var myDate = 0
 
-                Converters.getDateFromTimestamp(prevOrderedItem.timestamp).apply {
+                Converters.getYearMonthDateFromTimestamp(prevOrderedItem.timestamp).apply {
                     year = first
                     month = second
                     myDate = third

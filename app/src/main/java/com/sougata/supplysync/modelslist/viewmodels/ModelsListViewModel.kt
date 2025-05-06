@@ -4,8 +4,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.DocumentSnapshot
-import com.sougata.supplysync.remote.SupplierFirestoreRepository
 import com.sougata.supplysync.models.Model
+import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 import kotlinx.coroutines.delay
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 class ModelsListViewModel(private val modelName: String) :
     ViewModel() {
 
-    val supplierFirestoreRepository = SupplierFirestoreRepository()
+    val supplierRepository = SupplierRepository()
 
     val itemsList = MutableLiveData<Triple<MutableList<Model>?, Int, String>>()
     var noMoreElementLeft = false
@@ -51,10 +51,10 @@ class ModelsListViewModel(private val modelName: String) :
         val limit: Long = 20
         val fetchList =
             when (this.modelName) {
-                Model.SUPPLIER -> this.supplierFirestoreRepository::getSuppliersList
-                Model.SUPPLIERS_ITEM -> this.supplierFirestoreRepository::getSupplierItemsList
-                Model.SUPPLIER_PAYMENT -> this.supplierFirestoreRepository::getSupplierPaymentsList
-                Model.ORDERED_ITEM -> this.supplierFirestoreRepository::getOrderedItemsList
+                Model.SUPPLIER -> this.supplierRepository::getSuppliersList
+                Model.SUPPLIERS_ITEM -> this.supplierRepository::getSupplierItemsList
+                Model.SUPPLIER_PAYMENT -> this.supplierRepository::getSupplierPaymentsList
+                Model.ORDERED_ITEM -> this.supplierRepository::getOrderedItemsList
                 else -> return
             }
 
@@ -104,19 +104,18 @@ class ModelsListViewModel(private val modelName: String) :
         for ((i, item) in list.withIndex()) {
             if (item.id == model.id) {
                 list.removeAt(i)
-                this.itemsList.postValue(
+                this.itemsList.value =
                     Triple(
                         list,
                         Status.SUCCESS,
                         if (list.isEmpty()) KeysAndMessages.EMPTY_LIST else KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
                     )
-                )
-                if (list.isEmpty()) {
-                    this.lastDocumentSnapshot = null
-                    this.noMoreElementLeft = true
-                }
-                return
+                break
             }
+        }
+        if (list.isEmpty()) {
+            this.lastDocumentSnapshot = null
+            this.noMoreElementLeft = true
         }
     }
 

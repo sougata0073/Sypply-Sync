@@ -18,6 +18,7 @@ object KeysAndMessages {
     const val MODEL_KEY = "Model"
     const val TO_ADD_KEY = "To add"
     const val TO_EDIT_KEY = "To edit"
+    const val BYTE_ARRAY_KEY = "Byte array"
     const val DELETE = "Delete"
     const val MODEL_NAME_KEY = "Model name"
     const val REASON = "Reason"

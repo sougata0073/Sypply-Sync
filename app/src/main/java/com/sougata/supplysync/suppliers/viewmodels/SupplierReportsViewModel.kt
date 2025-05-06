@@ -1,7 +1,7 @@
 package com.sougata.supplysync.suppliers.viewmodels
 
 import android.app.Application
-import androidx.core.util.Pair
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -11,78 +11,61 @@ import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.firebase.Timestamp
 import com.sougata.supplysync.R
-import com.sougata.supplysync.remote.SupplierFirestoreRepository
+import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.pdf.SupplierPdfRepository
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.Status
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Calendar
 
 class SupplierReportsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val app = getApplication<Application>()
 
+    // This one is for ui
     val purchasedItemsCompChartRangeDate = MutableLiveData("")
 
-    private val supplierFirestoreRepository = SupplierFirestoreRepository()
+    private val supplierRepository = SupplierRepository()
     private val supplierPdfRepository = SupplierPdfRepository()
 
-    val supplierPaymentsListPdfIndicator = MutableLiveData<Pair<Int, String>>()
+    val supplierPaymentsListPdf = MutableLiveData<Triple<Int, ByteArray?, String>>()
+    val orderedItemsListPdf = MutableLiveData<Triple<Int, ByteArray?, String>>()
+
     val purchasedItemsCompChartData = MutableLiveData<Triple<BarData?, Int, String>>()
     val purchasedItemsCompChartXStrings = mutableListOf<String>()
+
+    var pdfByteArray = byteArrayOf()
 
     init {
         this.loadThisMonthsPurchasedItemsCompChart()
     }
 
     fun generateSupplierPaymentsPdf(startDateString: String, endDateString: String) {
-        supplierPaymentsListPdfIndicator.postValue(Pair(Status.STARTED, ""))
+        this.supplierPaymentsListPdf.value = Triple(Status.STARTED, null, "")
 
         var startTimestamp: Timestamp
         var endTimestamp: Timestamp
 
         try {
-            val startDate = Converters.getYearMonthDateFromDateString(startDateString)
-            val endDate = Converters.getYearMonthDateFromDateString(endDateString)
-
-//            Log.d("date", startDate.toString())
-//            Log.d("date", endDate.toString())
-
-            startTimestamp = Converters.getTimestampFromDate(
-                startDate.first,
-                startDate.second,
-                startDate.third
-            )
-            endTimestamp = Converters.getTimestampFromDate(
-                endDate.first,
-                endDate.second,
-                endDate.third
-            )
-
-//            Log.d("date", startTimestamp.toString())
-//            Log.d("date", endTimestamp.toString())
-
+            startTimestamp = Converters.getTimestampFromDateString(startDateString)
+            endTimestamp = Converters.getTimestampFromDateString(endDateString)
         } catch (_: Exception) {
-            this.supplierPaymentsListPdfIndicator.postValue(Pair(Status.FAILED, "Invalid date"))
+            this.supplierPaymentsListPdf.value = Triple(Status.FAILED, null, "Invalid date")
             return
         }
 
-        this.supplierFirestoreRepository.getSupplierPaymentsByRange(
-            startTimestamp, endTimestamp,
-            this.viewModelScope
+        this.supplierRepository.getSupplierPaymentsByRange(
+            startTimestamp, endTimestamp
         ) { status, list, message ->
             if (status == Status.SUCCESS) {
-//                Log.d("list", list.toString())
 
                 this.viewModelScope.launch {
                     supplierPdfRepository.generateSupplierPaymentsPdf(
                         list,
-                        app.getExternalFilesDir(null) ?: return@launch,
-                        "supplier_payments.pdf",
-                        app.applicationContext
-                    ) { status, message ->
-                        supplierPaymentsListPdfIndicator.postValue(Pair(status, message))
+                    ) { status, byteArray, message ->
+                        supplierPaymentsListPdf.value = Triple(status, byteArray, message)
                     }
                 }
 
@@ -90,41 +73,46 @@ class SupplierReportsViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
-    fun loadThisMonthsPurchasedItemsCompChart() {
-        val calendar = Calendar.getInstance()
-
-        var startYear = calendar.get(Calendar.YEAR)
-        var startMonth = calendar.get(Calendar.MONTH) + 1
-        var startDate = 1
-        var endYear = startYear
-        var endMonth = startMonth + 1
-        var endDate = 1
-
-        this.loadPurchasedItemsCompBarChartData(
-            "$startDate-$startMonth-$startYear",
-            "$endDate-$endMonth-$endYear"
-        )
-    }
-
-    fun loadPurchasedItemsCompBarChartData(startDateString: String, endDateString: String) {
+    fun generateOrderedItemsPdf(startDateString: String, endDateString: String) {
+        this.orderedItemsListPdf.value = Triple(Status.STARTED, null, "")
 
         var startTimestamp: Timestamp
         var endTimestamp: Timestamp
 
         try {
-            val startDate = Converters.getYearMonthDateFromDateString(startDateString)
-            val endDate = Converters.getYearMonthDateFromDateString(endDateString)
+            startTimestamp = Converters.getTimestampFromDateString(startDateString)
+            endTimestamp = Converters.getTimestampFromDateString(endDateString)
+        } catch (_: Exception) {
+            this.orderedItemsListPdf.value = Triple(Status.FAILED, null, "Invalid date")
+            return
+        }
 
-            startTimestamp = Converters.getTimestampFromDate(
-                startDate.first,
-                startDate.second,
-                startDate.third
-            )
-            endTimestamp = Converters.getTimestampFromDate(
-                endDate.first,
-                endDate.second,
-                endDate.third
-            )
+        this.supplierRepository.getOrderedItemsByRange(
+            startTimestamp,
+            endTimestamp
+        ) { status, list, message ->
+            if (status == Status.SUCCESS) {
+                this.viewModelScope.launch {
+                    supplierPdfRepository.generateOrderedItemsPdf(
+                        list,
+                    ) { status, byteArray, message ->
+                        orderedItemsListPdf.value = Triple(status, byteArray, message)
+                    }
+
+                }
+            }
+        }
+    }
+
+    fun loadPurchasedItemsCompChartData(startDateString: String, endDateString: String) {
+
+        var startTimestamp: Timestamp
+        var endTimestamp: Timestamp
+
+        try {
+
+            startTimestamp = Converters.getTimestampFromDateString(startDateString)
+            endTimestamp = Converters.getTimestampFromDateString(endDateString)
 
         } catch (_: Exception) {
             this.purchasedItemsCompChartData.postValue(
@@ -137,9 +125,9 @@ class SupplierReportsViewModel(application: Application) : AndroidViewModel(appl
             return
         }
 
-        this.purchasedItemsCompChartData.postValue(Triple(null, Status.STARTED, ""))
+        this.purchasedItemsCompChartData.value = Triple(null, Status.STARTED, "")
 
-        this.supplierFirestoreRepository.getFrequencyOfOrderedItemsByRange(
+        this.supplierRepository.getFrequencyOfOrderedItemsByRange(
             startTimestamp,
             endTimestamp,
             this.viewModelScope
@@ -175,6 +163,22 @@ class SupplierReportsViewModel(application: Application) : AndroidViewModel(appl
             }
 
         }
+    }
+
+    fun loadThisMonthsPurchasedItemsCompChart() {
+        val calendar = Calendar.getInstance()
+
+        var startYear = calendar.get(Calendar.YEAR)
+        var startMonth = calendar.get(Calendar.MONTH) + 1
+        var startDate = 1
+        var endYear = startYear
+        var endMonth = startMonth + 1
+        var endDate = 1
+
+        this.loadPurchasedItemsCompChartData(
+            "$startDate-$startMonth-$startYear",
+            "$endDate-$endMonth-$endYear"
+        )
     }
 
 }

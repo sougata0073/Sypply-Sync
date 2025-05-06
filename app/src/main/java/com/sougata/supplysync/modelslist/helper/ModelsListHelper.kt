@@ -9,7 +9,7 @@ import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.models.SupplierPayment
-import com.sougata.supplysync.util.DataType
+import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.modelslist.helper.modelhelpers.OrderedItemHelper
 import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierHelper
 import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierItemHelper
@@ -51,7 +51,7 @@ class ModelsListHelper(
         }
     }
 
-    fun getSearchableModelFieldPair(): Array<Triple<String, String, DataType>> {
+    fun getSearchableModelFieldPair(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return when (this.modelName) {
             Model.SUPPLIER -> this.supplierHelper.getFieldsPair()
             Model.SUPPLIERS_ITEM -> this.supplierItemHelper.getFieldsPair()

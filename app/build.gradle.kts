@@ -107,4 +107,6 @@ dependencies {
     // Splash screen
     implementation(libs.androidx.core.splashscreen)
 
+    // PDF viewer
+    implementation(libs.android.pdf.viewer)
 }

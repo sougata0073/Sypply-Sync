@@ -1,22 +1,23 @@
-package com.sougata.supplysync.remote
+package com.sougata.supplysync.firestore.util
 
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.sougata.supplysync.models.Model
+import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
-import com.sougata.supplysync.util.DataType
 import kotlin.math.floor
 
-class FirestoreCommonRepository {
+class Helper {
 
-    private val currentUser = Firebase.auth.currentUser
+    private val currentUser = Firebase.auth.currentUser!!
     private val db = Firebase.firestore
     private val usersCol =
-        this.db.collection(FirestoreFieldNames.UsersCol.SELF_NAME)
+        this.db.collection(FieldNames.UsersCol.SELF_NAME)
 
     fun getAnyModelsList(
         firebaseCollectionName: String,
@@ -26,10 +27,6 @@ class FirestoreCommonRepository {
         howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model,
         onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        if (currentUser == null) {
-            onComplete(Status.FAILED, null, null, KeysAndMessages.USER_NOT_FOUND)
-            return
-        }
 
         val col = this.usersCol.document(this.currentUser.uid).collection(firebaseCollectionName)
 
@@ -61,8 +58,6 @@ class FirestoreCommonRepository {
                     }
                 }
 
-//                    delay(2000)
-
                 if (it.result.documents.isEmpty()) {
                     // When no more data is there
                     onComplete(Status.SUCCESS, modelsList, null, KeysAndMessages.EMPTY_LIST)
@@ -74,25 +69,21 @@ class FirestoreCommonRepository {
                         KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
                     )
                 }
-
             } else {
-
                 onComplete(
                     Status.FAILED,
                     null,
                     lastDocumentSnapshot,
                     it.exception?.message.toString()
                 )
-
             }
-
         }
     }
 
     fun searchInAnyModelsList(
         searchField: String,
         searchQuery: String,
-        queryDataType: DataType,
+        queryDataType: FirestoreFieldDataType,
         firebaseCollectionName: String,
         lastDocumentSnapshot: DocumentSnapshot?,
         limit: Long,
@@ -100,14 +91,9 @@ class FirestoreCommonRepository {
         onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit,
     ) {
 
-        if (currentUser == null) {
-            onComplete(Status.FAILED, null, null, KeysAndMessages.USER_NOT_FOUND)
-            return
-        }
-
         val col = this.usersCol.document(this.currentUser.uid).collection(firebaseCollectionName)
 
-        var query = if (queryDataType == DataType.NUMBER) {
+        var query = if (queryDataType == FirestoreFieldDataType.NUMBER) {
             val lowerBound = floor(searchQuery.toDouble())
             val upperBound = lowerBound + 1
 
@@ -162,4 +148,39 @@ class FirestoreCommonRepository {
         }
     }
 
+    fun getAnyValueFromValuesCol(
+        documentName: String,
+        fieldDataType: FirestoreFieldDataType,
+        onComplete: (Int, Any, String) -> Unit
+    ) {
+        val valuesCol = this.usersCol.document(this.currentUser.uid)
+            .collection(FieldNames.ValuesCol.SELF_NAME)
+
+        valuesCol.document(documentName).get()
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    val result = when (fieldDataType) {
+                        FirestoreFieldDataType.STRING -> {
+                            it.result[FieldNames.Commons.VALUE] as String
+                        }
+                        FirestoreFieldDataType.NUMBER -> {
+                            it.result[FieldNames.Commons.VALUE] as Number
+                        }
+                        FirestoreFieldDataType.TIMESTAMP -> {
+                            it.result[FieldNames.Commons.VALUE] as Timestamp
+                        }
+                        FirestoreFieldDataType.BOOLEAN -> {
+                            it.result[FieldNames.Commons.VALUE] as Boolean
+                        }
+                    }
+                    onComplete(
+                        Status.SUCCESS,
+                        result,
+                        KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                    )
+                } else {
+                    onComplete(Status.FAILED, "-1", it.exception?.message.toString())
+                }
+            }
+    }
 }

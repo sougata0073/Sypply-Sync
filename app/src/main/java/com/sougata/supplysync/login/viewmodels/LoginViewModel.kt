@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.findNavController
 import com.sougata.supplysync.R
-import com.sougata.supplysync.remote.AuthenticationRepository
+import com.sougata.supplysync.firestore.AuthRepository
 import com.sougata.supplysync.util.Status
 import com.sougata.supplysync.util.Validations
 
@@ -36,7 +36,7 @@ class LoginViewModel : ViewModel() {
         // When all validation is passed
         this.accountLoginIndicator.postValue(Status.STARTED to "")
 
-        val authRepository = AuthenticationRepository()
+        val authRepository = AuthRepository()
 
         authRepository.loginAccount(email, password) { status, message ->
             this.accountLoginIndicator.postValue(status to message)

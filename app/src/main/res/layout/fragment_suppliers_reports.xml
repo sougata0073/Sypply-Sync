@@ -12,130 +12,151 @@
 
     </data>
 
-    <androidx.core.widget.NestedScrollView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/fragment_bg"
-        android:fitsSystemWindows="true"
         tools:context=".suppliers.ui.SuppliersReportsFragment">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="15dp">
+            android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/generatePdfsHeading"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/acherus_feral_bold"
-                android:text="Generate PDFs"
-                android:textColor="@color/bw"
-                android:textSize="20sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <GridLayout
-                android:id="@+id/gridLayout"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:columnCount="1"
-                app:layout_constraintEnd_toEndOf="@+id/generatePdfsHeading"
-                app:layout_constraintStart_toStartOf="@+id/generatePdfsHeading"
-                app:layout_constraintTop_toBottomOf="@id/generatePdfsHeading">
+                android:padding="15dp">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/supplierPaymentsBtn"
+                <TextView
+                    android:id="@+id/createPdfsHeading"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_margin="5dp"
-                    android:padding="12dp"
-                    android:text="Payments To Suppliers"
-                    android:textColor="@color/white"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    app:cornerRadius="8dp" />
+                    android:fontFamily="@font/acherus_feral_bold"
+                    android:text="Create PDFs"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/purchasedItemsBtn"
+                <GridLayout
+                    android:id="@+id/gridLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:columnCount="2"
+                    app:layout_constraintEnd_toEndOf="@+id/createPdfsHeading"
+                    app:layout_constraintStart_toStartOf="@+id/createPdfsHeading"
+                    app:layout_constraintTop_toBottomOf="@id/createPdfsHeading">
+
+                    <include
+                        android:id="@+id/supplierPayment"
+                        layout="@layout/card_pdf_selection"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_rowWeight="1"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="5dp" />
+
+                    <include
+                        android:id="@+id/purchasedItem"
+                        layout="@layout/card_pdf_selection"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_rowWeight="1"
+                        android:layout_columnWeight="1"
+                        android:layout_margin="5dp" />
+
+                </GridLayout>
+
+                <TextView
+                    android:id="@+id/purchasedItemsCompChartLbl"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_columnWeight="1"
-                    android:layout_margin="5dp"
-                    android:padding="12dp"
-                    android:text="Items Purchased"
-                    android:textColor="@color/white"
-                    android:textSize="18sp"
+                    android:layout_marginTop="20dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:text="Purchased Items Comparison"
+                    android:textColor="@color/bw"
+                    android:textSize="20sp"
                     android:textStyle="bold"
-                    app:cornerRadius="8dp" />
-            </GridLayout>
+                    app:layout_constraintEnd_toStartOf="@id/purchasedItemsChartCompCalendarBtn"
+                    app:layout_constraintStart_toStartOf="@id/gridLayout"
+                    app:layout_constraintTop_toBottomOf="@id/gridLayout" />
 
-            <TextView
-                android:id="@+id/purchasedItemsCompChartLbl"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:text="Purchased Items Comparison"
-                android:textColor="@color/bw"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toStartOf="@id/purchasedItemsChartCompCalendarBtn"
-                app:layout_constraintStart_toStartOf="@id/gridLayout"
-                app:layout_constraintTop_toBottomOf="@id/gridLayout" />
+                <TextView
+                    android:id="@+id/purchasedItemsCompDateRange"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:ellipsize="end"
+                    android:maxLines="2"
+                    android:text="@={viewModel.purchasedItemsCompChartRangeDate}"
+                    android:textColor="@color/grey"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="@id/purchasedItemsChartCompCalendarBtn"
+                    app:layout_constraintStart_toStartOf="@id/purchasedItemsCompChartLbl"
+                    app:layout_constraintTop_toBottomOf="@+id/purchasedItemsCompChartLbl"
+                    tools:text="From: 01-04-2025 To: 01-05-2025" />
 
-            <ImageButton
-                android:id="@+id/purchasedItemsChartCompCalendarBtn"
-                android:layout_width="25dp"
-                android:layout_height="0dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:scaleType="fitCenter"
-                android:src="@drawable/ic_calendar"
-                app:layout_constraintBottom_toBottomOf="@+id/purchasedItemsCompChartLbl"
-                app:layout_constraintEnd_toEndOf="@+id/gridLayout"
-                app:layout_constraintTop_toTopOf="@id/purchasedItemsCompChartLbl"
-                app:tint="@color/bw" />
+                <ImageButton
+                    android:id="@+id/purchasedItemsChartCompCalendarBtn"
+                    android:layout_width="25dp"
+                    android:layout_height="0dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_calendar"
+                    app:layout_constraintBottom_toBottomOf="@+id/purchasedItemsCompChartLbl"
+                    app:layout_constraintEnd_toEndOf="@+id/gridLayout"
+                    app:layout_constraintTop_toTopOf="@id/purchasedItemsCompChartLbl"
+                    app:tint="@color/bw" />
 
-            <TextView
-                android:id="@+id/purchasedItemsCompDateRange"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:ellipsize="end"
-                android:maxLines="2"
-                android:textColor="@color/grey"
-                android:textSize="14sp"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="@id/purchasedItemsChartCompCalendarBtn"
-                app:layout_constraintStart_toStartOf="@id/purchasedItemsCompChartLbl"
-                app:layout_constraintTop_toBottomOf="@+id/purchasedItemsCompChartLbl"
-                tools:text="From: 01-04-2025 To: 01-05-2025" />
+                <com.github.mikephil.charting.charts.BarChart
+                    android:id="@+id/purchasedItemsCompChart"
+                    android:layout_width="0dp"
+                    android:layout_height="300dp"
+                    android:visibility="invisible"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="@+id/purchasedItemsChartCompCalendarBtn"
+                    app:layout_constraintStart_toStartOf="@+id/purchasedItemsCompChartLbl"
+                    app:layout_constraintTop_toBottomOf="@id/purchasedItemsCompDateRange" />
 
-            <com.github.mikephil.charting.charts.BarChart
-                android:id="@+id/purchasedItemsCompChart"
-                android:layout_width="0dp"
-                android:layout_height="300dp"
-                android:visibility="invisible"
-                app:layout_constraintEnd_toEndOf="@+id/purchasedItemsChartCompCalendarBtn"
-                app:layout_constraintStart_toStartOf="@+id/purchasedItemsCompChartLbl"
-                app:layout_constraintTop_toBottomOf="@id/purchasedItemsCompDateRange" />
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/progressBarPurchasedItemsCompChart"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:indeterminate="true"
+                    android:visibility="gone"
+                    app:indicatorColor="@color/bw"
+                    app:layout_constraintBottom_toBottomOf="@+id/purchasedItemsCompChart"
+                    app:layout_constraintEnd_toEndOf="@+id/purchasedItemsCompChart"
+                    app:layout_constraintStart_toStartOf="@+id/purchasedItemsCompChart"
+                    app:layout_constraintTop_toTopOf="@+id/purchasedItemsCompChart" />
 
-            <com.google.android.material.progressindicator.CircularProgressIndicator
-                android:id="@+id/progressBarPurchasedItemsCompChart"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:indeterminate="true"
-                android:visibility="gone"
-                app:indicatorColor="@color/bw"
-                app:layout_constraintBottom_toBottomOf="@+id/purchasedItemsCompChart"
-                app:layout_constraintEnd_toEndOf="@+id/purchasedItemsCompChart"
-                app:layout_constraintStart_toStartOf="@+id/purchasedItemsCompChart"
-                app:layout_constraintTop_toTopOf="@+id/purchasedItemsCompChart" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.core.widget.NestedScrollView>
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/mainProgressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:indicatorColor="@color/bw"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/touchBlocker"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:visibility="gone"
+            android:focusable="true" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

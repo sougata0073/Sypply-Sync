@@ -12,7 +12,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.BottomSheetAddEditSupplierItemBinding
-import com.sougata.supplysync.remote.SupplierFirestoreRepository
+import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierItemViewModel
 import com.sougata.supplysync.util.KeysAndMessages
@@ -34,7 +34,7 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
     private var isSupplierItemUpdated = false
     private var isSupplierItemDeleted = false
 
-    private val supplierFirestoreRepository = SupplierFirestoreRepository()
+    private val supplierRepository = SupplierRepository()
 
     companion object {
         @JvmStatic
@@ -161,7 +161,7 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
                     this.binding.parentLayout.alpha = 0.5f
                     this.binding.progressBar.visibility = View.VISIBLE
 
-                    this.supplierFirestoreRepository.deleteSupplierItem(this.prevSupplierItem) { status, message ->
+                    this.supplierRepository.deleteSupplierItem(this.prevSupplierItem) { status, message ->
 
                         Snackbar.make(
                             requireParentFragment().requireView(),

@@ -4,7 +4,7 @@ import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
-import com.sougata.supplysync.remote.SupplierFirestoreRepository
+import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.util.Inputs
 import com.sougata.supplysync.util.Status
@@ -18,7 +18,7 @@ class AddEditSupplierViewModel() : ViewModel() {
     val paymentDetails = MutableLiveData("")
     val note = MutableLiveData("")
 
-    private val supplierFirestoreRepository = SupplierFirestoreRepository()
+    private val supplierRepository = SupplierRepository()
 
     val supplierAddedIndicator = MutableLiveData<Pair<Int, String>>()
     val supplierEditedIndicator = MutableLiveData<Pair<Int, String>>()
@@ -34,9 +34,9 @@ class AddEditSupplierViewModel() : ViewModel() {
 
         this.supplierAddedIndicator.postValue(Status.STARTED to "")
 
-        supplierFirestoreRepository.addUpdateSupplier(
+        supplierRepository.addUpdateSupplier(
             supplier,
-            SupplierFirestoreRepository.TO_ADD
+            SupplierRepository.TO_ADD
         ) { status, message ->
             supplierAddedIndicator.postValue(status to message)
         }
@@ -54,9 +54,9 @@ class AddEditSupplierViewModel() : ViewModel() {
 
         this.supplierEditedIndicator.postValue(Status.STARTED to "")
 
-        this.supplierFirestoreRepository.addUpdateSupplier(
+        this.supplierRepository.addUpdateSupplier(
             supplier,
-            SupplierFirestoreRepository.TO_UPDATE
+            SupplierRepository.TO_UPDATE
         ) { status, message ->
             this.supplierEditedIndicator.postValue(status to message)
         }

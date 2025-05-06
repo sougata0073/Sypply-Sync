@@ -9,7 +9,7 @@ import androidx.navigation.fragment.NavHostFragment
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ActivityLogInBinding
-import com.sougata.supplysync.remote.AuthenticationRepository
+import com.sougata.supplysync.firestore.AuthRepository
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 
@@ -44,7 +44,7 @@ class LoginActivity : AppCompatActivity() {
             this.binding.progressBar.visibility = View.VISIBLE
 
             // Verify email
-            val authRepository = AuthenticationRepository()
+            val authRepository = AuthRepository()
 
             authRepository.sendEmailVerificationLink { status, message ->
 

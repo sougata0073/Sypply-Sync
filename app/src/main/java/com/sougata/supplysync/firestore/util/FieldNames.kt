@@ -1,6 +1,10 @@
-package com.sougata.supplysync.remote
+package com.sougata.supplysync.firestore.util
 
-object FirestoreFieldNames {
+object FieldNames {
+
+    object Commons {
+        const val VALUE = "value"
+    }
 
     object UsersCol {
         const val SELF_NAME = "users"

@@ -10,11 +10,11 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.sougata.supplysync.R
-import com.sougata.supplysync.remote.FirestoreFieldNames
+import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.databinding.ItemSuppliersListBinding
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.Supplier
-import com.sougata.supplysync.util.DataType
+import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.modelslist.helper.HelperStructure
 import com.sougata.supplysync.suppliers.ui.SupplierProfileBottomSheetFragment
 import com.sougata.supplysync.util.AnimationProvider
@@ -45,22 +45,22 @@ class SupplierHelper(private val fragment: Fragment) :
         return ItemSuppliersListBinding.inflate(inflater, parent, false)
     }
 
-    override fun getFieldsPair(): Array<Triple<String, String, DataType>> {
+    override fun getFieldsPair(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
-                FirestoreFieldNames.SuppliersCol.NAME,
+                FieldNames.SuppliersCol.NAME,
                 Supplier::name.name,
-                DataType.STRING
+                FirestoreFieldDataType.STRING
             ),
             Triple(
-                FirestoreFieldNames.SuppliersCol.DUE_AMOUNT,
+                FieldNames.SuppliersCol.DUE_AMOUNT,
                 Supplier::dueAmount.name,
-                DataType.NUMBER
+                FirestoreFieldDataType.NUMBER
             ),
             Triple(
-                FirestoreFieldNames.SuppliersCol.EMAIL,
+                FieldNames.SuppliersCol.EMAIL,
                 Supplier::email.name,
-                DataType.STRING
+                FirestoreFieldDataType.STRING
             ),
         )
     }
@@ -71,7 +71,7 @@ class SupplierHelper(private val fragment: Fragment) :
                 putBoolean(KeysAndMessages.TO_ADD_KEY, true)
             }
             this.fragment.findNavController().navigate(
-                R.id.addEditSupplierFragment, bundle, AnimationProvider.fragmentAnimationSlideRightLeft()
+                R.id.addEditSupplierFragment, bundle, AnimationProvider.slideRightLeftNavOptions()
             )
         }
     }

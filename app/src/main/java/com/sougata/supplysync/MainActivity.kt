@@ -1,25 +1,27 @@
 package com.sougata.supplysync
 
-import android.content.Intent
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.view.Window
+import android.view.WindowInsets
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.sougata.supplysync.databinding.ActivityMainBinding
-import com.sougata.supplysync.login.LoginActivity
-import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.AnimationProvider
+import androidx.core.graphics.toColorInt
+import androidx.core.view.WindowCompat
 
 class MainActivity : AppCompatActivity() {
 
     private var _binding: ActivityMainBinding? = null
     private val binding get() = _binding!!
-
-    private lateinit var viewModel: MainActivityViewModel
 
     private lateinit var navController: NavController
 
@@ -32,6 +34,9 @@ class MainActivity : AppCompatActivity() {
         this._binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         this.binding.lifecycleOwner = this
+
+        this.setSupportActionBar(this.binding.toolBar)
+        this.supportActionBar?.title = "Home"
 
         this.setupBottomNav()
     }
@@ -46,24 +51,40 @@ class MainActivity : AppCompatActivity() {
         val menu = popupMenu.menu
         this.binding.bottomNav.setupWithNavController(menu, this.navController)
 
-        val animationProvider = AnimationProvider(this.binding.bottomNav)
+        val bottomNavAnimator = AnimationProvider(this.binding.bottomNav)
+        val bottomNavBorderAnimator = AnimationProvider(this.binding.bottomNavBorder)
 
         this.navController.addOnDestinationChangedListener { navController, destination, arguments ->
+
+            when (destination.id) {
+                R.id.homeFragment -> this.supportActionBar?.title = "Home"
+                R.id.suppliersHomeFragment -> this.supportActionBar?.title = "Suppliers"
+                R.id.customersHomeFragment -> this.supportActionBar?.title = "Customers"
+                R.id.staffsHomeFragment -> this.supportActionBar?.title = "Staffs"
+            }
 
             when (destination.id) {
 
                 R.id.homeFragment, R.id.staffsHomeFragment,
                 R.id.customersHomeFragment, R.id.suppliersHomeFragment -> {
                     if (this.isBottomNavHidden) {
-                        animationProvider.slideUpFade()
+                        bottomNavAnimator.slideUp()
+                        bottomNavBorderAnimator.slideUp(this.binding.bottomNav.height.toFloat())
                         this.isBottomNavHidden = false
+                    }
+                    if (this.supportActionBar?.isShowing == false) {
+                        this.supportActionBar?.show()
                     }
                 }
 
                 else -> {
                     if (!this.isBottomNavHidden) {
-                        animationProvider.slideDownFade()
+                        bottomNavAnimator.slideDown()
+                        bottomNavBorderAnimator.slideDown(this.binding.bottomNav.height.toFloat())
                         this.isBottomNavHidden = true
+                    }
+                    if (this.supportActionBar?.isShowing == true) {
+                        this.supportActionBar?.hide()
                     }
                 }
 

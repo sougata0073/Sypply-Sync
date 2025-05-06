@@ -39,7 +39,7 @@ class SuppliersHomeFragment : Fragment() {
         )
 
         this.binding.apply {
-            childLayout.visibility = View.GONE
+            scrollView.visibility = View.GONE
             mainProgressBar.visibility = View.VISIBLE
         }
 
@@ -126,7 +126,7 @@ class SuppliersHomeFragment : Fragment() {
             if (it) {
                 this.binding.apply {
                     mainProgressBar.visibility = View.GONE
-                    childLayout.visibility = View.VISIBLE
+                    scrollView.visibility = View.VISIBLE
                 }
             }
         }

@@ -16,7 +16,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.sougata.supplysync.R
-import com.sougata.supplysync.remote.SupplierFirestoreRepository
+import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.databinding.FragmentAddEditSupplierPaymentBinding
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.Supplier
@@ -50,7 +50,7 @@ class AddEditSupplierPaymentFragment : Fragment() {
     private var isSupplierPaymentUpdated = false
     private var isSupplierPaymentDeleted = false
 
-    private val supplierFirestoreRepository = SupplierFirestoreRepository()
+    private val supplierRepository = SupplierRepository()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -181,7 +181,7 @@ class AddEditSupplierPaymentFragment : Fragment() {
             findNavController().navigate(
                 R.id.modelsListFragment,
                 bundle,
-                AnimationProvider.fragmentAnimationSlideUpDown()
+                AnimationProvider.slideUpDownNavOptions()
             )
 
         }
@@ -242,7 +242,7 @@ class AddEditSupplierPaymentFragment : Fragment() {
                     this.binding.parentLayout.alpha = 0.5f
                     this.binding.progressBar.visibility = View.VISIBLE
 
-                    this.supplierFirestoreRepository.deleteSupplierPayment(this.prevSupplierPayment) { status, message ->
+                    this.supplierRepository.deleteSupplierPayment(this.prevSupplierPayment) { status, message ->
 
                         Snackbar.make(
                             requireParentFragment().requireView(),
@@ -277,7 +277,7 @@ class AddEditSupplierPaymentFragment : Fragment() {
                 var month = 0
                 var myDate = 0
 
-                Converters.getDateFromTimestamp(prevSupplierPayment.timestamp).apply {
+                Converters.getYearMonthDateFromTimestamp(prevSupplierPayment.timestamp).apply {
                     year = first
                     month = second
                     myDate = third
@@ -291,7 +291,7 @@ class AddEditSupplierPaymentFragment : Fragment() {
                 var hour = 0
                 var minute = 0
 
-                Converters.getTimeFromTimestamp(prevSupplierPayment.timestamp).apply {
+                Converters.getHourMinuteFromTimestamp(prevSupplierPayment.timestamp).apply {
                     hour = first
                     minute = second
                 }
