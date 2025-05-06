@@ -1,7 +1,6 @@
 package com.sougata.supplysync.suppliers.viewmodels
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
@@ -9,20 +8,15 @@ import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
 import com.github.mikephil.charting.utils.ColorTemplate
-import com.google.firebase.Timestamp
 import com.sougata.supplysync.R
 import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.pdf.SupplierPdfRepository
 import com.sougata.supplysync.util.Converters
+import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.Status
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.util.Calendar
 
 class SupplierReportsViewModel(application: Application) : AndroidViewModel(application) {
-
-    private val app = getApplication<Application>()
 
     // This one is for ui
     val purchasedItemsCompChartRangeDate = MutableLiveData("")
@@ -39,22 +33,14 @@ class SupplierReportsViewModel(application: Application) : AndroidViewModel(appl
     var pdfByteArray = byteArrayOf()
 
     init {
-        this.loadThisMonthsPurchasedItemsCompChart()
+        this.loadPast30DaysPurchasedItemsCompChart()
     }
 
-    fun generateSupplierPaymentsPdf(startDateString: String, endDateString: String) {
+    fun generateSupplierPaymentsPdf(startDateMillis: Long, endDateMillis: Long) {
         this.supplierPaymentsListPdf.value = Triple(Status.STARTED, null, "")
 
-        var startTimestamp: Timestamp
-        var endTimestamp: Timestamp
-
-        try {
-            startTimestamp = Converters.getTimestampFromDateString(startDateString)
-            endTimestamp = Converters.getTimestampFromDateString(endDateString)
-        } catch (_: Exception) {
-            this.supplierPaymentsListPdf.value = Triple(Status.FAILED, null, "Invalid date")
-            return
-        }
+        var startTimestamp = DateTime.getTimestampFromMillis(startDateMillis)
+        var endTimestamp = DateTime.getTimestampFromMillis(endDateMillis)
 
         this.supplierRepository.getSupplierPaymentsByRange(
             startTimestamp, endTimestamp
@@ -73,19 +59,11 @@ class SupplierReportsViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
-    fun generateOrderedItemsPdf(startDateString: String, endDateString: String) {
+    fun generateOrderedItemsPdf(startDateMillis: Long, endDateMillis: Long) {
         this.orderedItemsListPdf.value = Triple(Status.STARTED, null, "")
 
-        var startTimestamp: Timestamp
-        var endTimestamp: Timestamp
-
-        try {
-            startTimestamp = Converters.getTimestampFromDateString(startDateString)
-            endTimestamp = Converters.getTimestampFromDateString(endDateString)
-        } catch (_: Exception) {
-            this.orderedItemsListPdf.value = Triple(Status.FAILED, null, "Invalid date")
-            return
-        }
+        var startTimestamp = DateTime.getTimestampFromMillis(startDateMillis)
+        var endTimestamp = DateTime.getTimestampFromMillis(endDateMillis)
 
         this.supplierRepository.getOrderedItemsByRange(
             startTimestamp,
@@ -104,81 +82,68 @@ class SupplierReportsViewModel(application: Application) : AndroidViewModel(appl
         }
     }
 
-    fun loadPurchasedItemsCompChartData(startDateString: String, endDateString: String) {
-
-        var startTimestamp: Timestamp
-        var endTimestamp: Timestamp
-
-        try {
-
-            startTimestamp = Converters.getTimestampFromDateString(startDateString)
-            endTimestamp = Converters.getTimestampFromDateString(endDateString)
-
-        } catch (_: Exception) {
-            this.purchasedItemsCompChartData.postValue(
-                Triple(
-                    null,
-                    Status.FAILED,
-                    "Invalid date"
-                )
-            )
-            return
-        }
-
+    fun loadPurchasedItemsCompChartData(startDateMillis: Long, endDateMillis: Long) {
         this.purchasedItemsCompChartData.value = Triple(null, Status.STARTED, "")
+
+        var startTimestamp = DateTime.getTimestampFromMillis(startDateMillis)
+        var endTimestamp = DateTime.getTimestampFromMillis(endDateMillis)
 
         this.supplierRepository.getFrequencyOfOrderedItemsByRange(
             startTimestamp,
             endTimestamp,
-            this.viewModelScope
         ) { status, list, message ->
             if (status == Status.FAILED) {
 
-                this.purchasedItemsCompChartData.postValue(Triple(null, status, message))
+                this.purchasedItemsCompChartData.value = Triple(null, status, message)
 
             } else {
-                this.viewModelScope.launch(Dispatchers.IO) {
-                    val barEntryList = mutableListOf<BarEntry>()
+                val barEntryList = mutableListOf<BarEntry>()
 
-                    for ((i, value) in list.withIndex()) {
-                        barEntryList.add(BarEntry(i.toFloat(), value.second.toFloat()))
-                        purchasedItemsCompChartXStrings.add(value.first)
-                    }
-
-                    val app = getApplication<Application>()
-
-                    val barDataSet = BarDataSet(barEntryList, "Comparison").apply {
-                        colors = ColorTemplate.JOYFUL_COLORS.toList()
-                        valueTextColor = app.getColor(R.color.bw)
-                        valueTextSize = 11f
-                    }
-
-                    val barData = BarData().apply {
-                        addDataSet(barDataSet)
-                    }
-
-                    purchasedItemsCompChartData.postValue(Triple(barData, status, message))
-
+                for ((i, value) in list.withIndex()) {
+                    barEntryList.add(BarEntry(i.toFloat(), value.second.toFloat()))
+                    purchasedItemsCompChartXStrings.add(value.first)
                 }
-            }
 
+                val app = getApplication<Application>()
+
+                val barDataSet = BarDataSet(barEntryList, "Comparison").apply {
+                    colors = ColorTemplate.JOYFUL_COLORS.toList()
+                    valueTextColor = app.getColor(R.color.bw)
+                    valueTextSize = 11f
+                }
+
+                val barData = BarData().apply {
+                    addDataSet(barDataSet)
+                }
+
+                val startDateString = DateTime.getDateStringFromTimestamp(startTimestamp)
+                val endDateString = DateTime.getDateStringFromTimestamp(endTimestamp)
+
+                this.purchasedItemsCompChartRangeDate.value =
+                    "From: $startDateString To: $endDateString"
+
+                this.purchasedItemsCompChartData.value = Triple(barData, status, message)
+
+            }
         }
     }
 
-    fun loadThisMonthsPurchasedItemsCompChart() {
-        val calendar = Calendar.getInstance()
+    fun loadPast30DaysPurchasedItemsCompChart() {
 
-        var startYear = calendar.get(Calendar.YEAR)
-        var startMonth = calendar.get(Calendar.MONTH) + 1
-        var startDate = 1
-        var endYear = startYear
-        var endMonth = startMonth + 1
-        var endDate = 1
+        val currentDate = DateTime.getCurrentDate()
+        var endYear = currentDate.first
+        var endMonth = currentDate.second
+        var endDate = currentDate.third
 
-        this.loadPurchasedItemsCompChartData(
-            "$startDate-$startMonth-$startYear",
-            "$endDate-$endMonth-$endYear"
-        )
+        val pastDate = DateTime.getCalculatedDate(-30, endYear, endMonth, endDate)
+        var startYear = pastDate.first
+        var startMonth = pastDate.second
+        var startDate = pastDate.third
+
+        val startDateMillis = DateTime.getMillisFromDate(startYear, startMonth, startDate)
+        val endDateMillis = DateTime.getMillisFromDate(endYear, endMonth, endDate)
+
+        this.loadPurchasedItemsCompChartData(startDateMillis, endDateMillis)
     }
 
 }

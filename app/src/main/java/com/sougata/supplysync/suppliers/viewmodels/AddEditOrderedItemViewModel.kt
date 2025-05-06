@@ -4,10 +4,13 @@ import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
 import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.util.Converters
+import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.Status
+import java.util.Date
 
 class AddEditOrderedItemViewModel : ViewModel() {
 
@@ -112,15 +115,10 @@ class AddEditOrderedItemViewModel : ViewModel() {
             throw Exception("Invalid quantity")
         }
 
-        var year = 0
-        var month = 0
-        var date = 0
+        var orderTimestamp: Timestamp
 
         try {
-            val res = Converters.getYearMonthDateFromDateString(dateString)
-            year = res.first
-            month = res.second
-            date = res.third
+            orderTimestamp = DateTime.getTimestampFromDateString(dateString)
         } catch (e: Exception) {
             throw e
         }
@@ -132,7 +130,7 @@ class AddEditOrderedItemViewModel : ViewModel() {
             amount = amount,
             supplierId = supplierId,
             supplierName = supplierName,
-            orderTimestamp = Converters.getTimestampFromDate(year, month, date),
+            orderTimestamp = orderTimestamp,
             isReceived = isReceived
         ).apply { id = orderedItemId.orEmpty() }
     }

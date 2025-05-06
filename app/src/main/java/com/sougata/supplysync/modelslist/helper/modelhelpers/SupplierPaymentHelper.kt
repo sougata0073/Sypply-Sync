@@ -8,16 +8,16 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.sougata.supplysync.R
-import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.databinding.ItemSupplierPaymentsListBinding
+import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.SupplierPayment
-import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.modelslist.helper.HelperStructure
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
+import com.sougata.supplysync.util.DateTime
+import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
-import java.util.Locale
 import kotlin.reflect.KProperty1
 
 class SupplierPaymentHelper(private val fragment: Fragment) :
@@ -72,7 +72,9 @@ class SupplierPaymentHelper(private val fragment: Fragment) :
                 putBoolean(KeysAndMessages.TO_ADD_KEY, true)
             }
             this.fragment.findNavController().navigate(
-                R.id.addEditSupplierPaymentFragment, bundle, AnimationProvider.slideRightLeftNavOptions()
+                R.id.addEditSupplierPaymentFragment,
+                bundle,
+                AnimationProvider.slideRightLeftNavOptions()
             )
         }
     }
@@ -85,38 +87,12 @@ class SupplierPaymentHelper(private val fragment: Fragment) :
         model as SupplierPayment
 
         binding.apply {
-            var year = 0
-            var month = 0
-            var myDate = 0
 
-            Converters.getYearMonthDateFromTimestamp(model.paymentTimestamp).apply {
-                year = first
-                month = second
-                myDate = third
-            }
-
-            var hour = 0
-            var minute = 0
-
-            Converters.getHourMinuteFromTimestamp(model.paymentTimestamp).apply {
-                hour = first
-                minute = second
-            }
-
-            val dateString = String.Companion.format(
-                Locale.getDefault(),
-                "On: %02d-%02d-%04d",
-                myDate, month, year
-            )
-            val timeString = String.Companion.format(
-                Locale.getDefault(),
-                "At: %02d:%02d",
-                hour, minute
-            )
+            val dateString = DateTime.getDateStringFromTimestamp(model.paymentTimestamp)
+            val timeString = DateTime.getTimeStringFromTimestamp(model.paymentTimestamp)
 
             name.text = "To: ${model.supplierName}"
-            date.text = dateString
-            time.text = timeString
+            dateTime.text = "At: $dateString On: $timeString"
             amount.text = Converters.numberToMoneyString(model.amount)
 
             root.setOnClickListener {

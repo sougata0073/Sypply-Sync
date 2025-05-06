@@ -1,22 +1,14 @@
 package com.sougata.supplysync
 
-import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
-import android.view.View
-import android.view.Window
-import android.view.WindowInsets
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.sougata.supplysync.databinding.ActivityMainBinding
 import com.sougata.supplysync.util.AnimationProvider
-import androidx.core.graphics.toColorInt
-import androidx.core.view.WindowCompat
 
 class MainActivity : AppCompatActivity() {
 

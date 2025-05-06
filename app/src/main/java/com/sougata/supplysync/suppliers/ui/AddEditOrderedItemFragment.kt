@@ -22,6 +22,7 @@ import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.suppliers.viewmodels.AddEditOrderedItemViewModel
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
+import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 import java.text.SimpleDateFormat
@@ -277,21 +278,7 @@ class AddEditOrderedItemFragment : Fragment() {
                 amount.value = prevOrderedItem.amount.toString()
                 quantity.value = prevOrderedItem.quantity.toString()
 
-                var year = 0
-                var month = 0
-                var myDate = 0
-
-                Converters.getYearMonthDateFromTimestamp(prevOrderedItem.timestamp).apply {
-                    year = first
-                    month = second
-                    myDate = third
-                }
-
-                val dateString = String.format(
-                    Locale.getDefault(),
-                    "%02d-%02d-%04d",
-                    myDate, month, year
-                )
+                val dateString = DateTime.getDateStringFromTimestamp(prevOrderedItem.timestamp)
 
                 date.value = dateString
 

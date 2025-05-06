@@ -8,6 +8,7 @@ import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.models.SupplierPayment
 import com.sougata.supplysync.pdf.util.Helper
 import com.sougata.supplysync.util.Converters
+import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 import kotlinx.coroutines.Dispatchers
@@ -47,9 +48,9 @@ class SupplierPdfRepository {
                     15f
                 ) { sp ->
                     val dateString =
-                        Converters.getDateStringFromTimestamp(sp.paymentTimestamp)
+                        DateTime.getDateStringFromTimestamp(sp.paymentTimestamp)
                     val timeString =
-                        Converters.getTimeStringFromTimestamp(sp.paymentTimestamp)
+                        DateTime.getTimeStringFromTimestamp(sp.paymentTimestamp)
 
                     val dateTimeString = "At: $dateString\nOn: $timeString"
 
@@ -112,12 +113,12 @@ class SupplierPdfRepository {
                 val table = helper.tableMaker(
                     headerNames,
                     orderedItemsList,
-                    12f
+                    15f
                 ) { oi ->
                     val dateString =
-                        Converters.getDateStringFromTimestamp(oi.orderTimestamp)
+                        DateTime.getDateStringFromTimestamp(oi.orderTimestamp)
                     val timeString =
-                        Converters.getTimeStringFromTimestamp(oi.orderTimestamp)
+                        DateTime.getTimeStringFromTimestamp(oi.orderTimestamp)
 
                     val dateTimeString = "At: $dateString\nOn: $timeString"
                     val orderDetails =

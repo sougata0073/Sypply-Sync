@@ -4,19 +4,14 @@ import android.app.Application
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
-import com.google.firebase.Timestamp
 import com.sougata.supplysync.R
 import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.util.Converters
+import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.Status
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.util.Calendar
-import java.util.Locale
 
 class HomeFragmentViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -28,42 +23,29 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
     val numberOfOrdersToReceive = MutableLiveData<Triple<Number, Int, String>>()
 
     init {
-        this.loadThisMonthsPurchaseChart()
+        this.loadPast30DaysPurchaseChart()
         this.loadOrdersToReceive()
     }
 
-    fun loadThisMonthsPurchaseChart() {
+    fun loadPast30DaysPurchaseChart() {
 
-        val calendar = Calendar.getInstance()
+        val currentDate = DateTime.getCurrentDate()
+        var endYear = currentDate.first
+        var endMonth = currentDate.second
+        var endDate = currentDate.third
 
-        var startYear = calendar.get(Calendar.YEAR)
-        var startMonth = calendar.get(Calendar.MONTH) + 1
-        var startDate = 1
-        var endYear = startYear
-        var endMonth = startMonth + 1
-        var endDate = 1
+        val pastDate = DateTime.getCalculatedDate(-30, endYear, endMonth, endDate)
+        var startYear = pastDate.first
+        var startMonth = pastDate.second
+        var startDate = pastDate.third
 
-        this.loadPurchaseLineChartData(
-            "$startDate-$startMonth-$startYear",
-            "$endDate-$endMonth-$endYear"
-        )
+        val startDateMillis = DateTime.getMillisFromDate(startYear, startMonth, startDate)
+        val endDateMillis = DateTime.getMillisFromDate(endYear, endMonth, endDate)
 
-        this.purchaseChartRangeDate.postValue(
-            String.format(
-                Locale.getDefault(),
-                "From: %02d-%02d-%04d To: %02d-%02d-%04d",
-                startDate,
-                startMonth,
-                startYear,
-                endDate,
-                endMonth,
-                endYear
-            )
-        )
+        this.loadPurchaseLineChartData(startDateMillis, endDateMillis)
     }
 
     fun loadOrdersToReceive() {
-//        Log.d("api", "orders to receive")
         this.numberOfOrdersToReceive.postValue(Triple(0, Status.STARTED, ""))
 
         this.supplierRepository.getOrdersToReceive { status, count, message ->
@@ -71,79 +53,52 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
-    fun loadPurchaseLineChartData(startDateString: String, endDateString: String) {
+    fun loadPurchaseLineChartData(startDateMillis: Long, endDateMillis: Long) {
+        this.purchaseChartData.value = Triple(null, Status.STARTED, "")
 
-        var startTimestamp: Timestamp
-        var endTimestamp: Timestamp
-
-        try {
-            val startDate = Converters.getYearMonthDateFromDateString(startDateString)
-            val endDate = Converters.getYearMonthDateFromDateString(endDateString)
-
-            startTimestamp = Converters.getTimestampFromDate(
-                startDate.first,
-                startDate.second,
-                startDate.third
-            )
-            endTimestamp = Converters.getTimestampFromDate(
-                endDate.first,
-                endDate.second,
-                endDate.third
-            )
-
-        } catch (_: Exception) {
-            this.purchaseChartData.postValue(
-                Triple(
-                    null,
-                    Status.FAILED,
-                    "Invalid date"
-                )
-            )
-            return
-        }
-
-        this.purchaseChartData.postValue(Triple(null, Status.STARTED, ""))
+        var startTimestamp = DateTime.getTimestampFromMillis(startDateMillis)
+        var endTimestamp = DateTime.getTimestampFromMillis(endDateMillis)
 
         this.supplierRepository.getPurchaseAmountByRange(
             startTimestamp,
-            endTimestamp,
-            viewModelScope
+            endTimestamp
         ) { status, list, message ->
 
             if (status == Status.FAILED) {
                 this.purchaseChartData.postValue(Triple(null, status, message))
             } else {
-//                Log.d("list", list.toString())
-                viewModelScope.launch(Dispatchers.IO) {
-                    val entryList = mutableListOf<Entry>()
+                val entryList = mutableListOf<Entry>()
 
-                    for ((i, value) in list.withIndex()) {
-                        val y = value.toFloat()
-                        entryList.add(Entry(i.toFloat(), y))
-                    }
-
-                    val app = getApplication<Application>()
-
-                    val lineDataSet = LineDataSet(entryList, "Amount").apply {
-                        color = app.getColor(R.color.primary_color)
-                        setDrawFilled(true)
-                        fillColor = app.getColor(R.color.primary_color)
-                        setDrawCircles(false)
-                        setDrawValues(false)
-                        valueTextColor = app.getColor(R.color.bw)
-                        valueTextSize = 11f
-                        mode = LineDataSet.Mode.CUBIC_BEZIER
-
-                        fillDrawable =
-                            AppCompatResources.getDrawable(app, R.drawable.line_chart_gradient_bg)
-                    }
-
-                    val lineData = LineData().apply { addDataSet(lineDataSet) }
-
-                    purchaseChartData.postValue(Triple(lineData, status, message))
-
+                for ((i, value) in list.withIndex()) {
+                    val y = value.toFloat()
+                    entryList.add(Entry(i.toFloat(), y))
                 }
 
+                val app = getApplication<Application>()
+
+                val lineDataSet = LineDataSet(entryList, "Amount").apply {
+                    color = app.getColor(R.color.primary_color)
+                    setDrawFilled(true)
+                    fillColor = app.getColor(R.color.primary_color)
+                    setDrawCircles(false)
+                    setDrawValues(false)
+                    valueTextColor = app.getColor(R.color.bw)
+                    valueTextSize = 11f
+                    mode = LineDataSet.Mode.CUBIC_BEZIER
+
+                    fillDrawable =
+                        AppCompatResources.getDrawable(app, R.drawable.line_chart_gradient_bg)
+                }
+
+                val lineData = LineData().apply { addDataSet(lineDataSet) }
+
+                val startDateString = DateTime.getDateStringFromTimestamp(startTimestamp)
+                val endDateString = DateTime.getDateStringFromTimestamp(endTimestamp)
+
+                this.purchaseChartRangeDate.value =
+                    "From: $startDateString To: $endDateString"
+
+                this.purchaseChartData.value = Triple(lineData, status, message)
             }
         }
     }

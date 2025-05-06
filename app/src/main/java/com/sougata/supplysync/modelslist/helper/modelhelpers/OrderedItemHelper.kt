@@ -16,6 +16,7 @@ import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.modelslist.helper.HelperStructure
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
+import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.KeysAndMessages
 import java.util.Locale
 import kotlin.reflect.KProperty1
@@ -89,24 +90,8 @@ class OrderedItemHelper(private val fragment: Fragment): HelperStructure {
 
         binding.apply {
 
-            var year = 0
-            var month = 0
-            var myDate = 0
-
-            Converters.getYearMonthDateFromTimestamp(model.orderTimestamp).apply {
-                year = first
-                month = second
-                myDate = third
-            }
-
-            val dateString = String.Companion.format(
-                Locale.getDefault(),
-                "On: %02d-%02d-%04d",
-                myDate, month, year
-            )
-
             itemName.text = model.itemName
-            date.text = dateString
+            date.text = DateTime.getDateStringFromTimestamp(model.orderTimestamp)
             amount.text = Converters.numberToMoneyString(model.amount)
 
             root.setOnClickListener {

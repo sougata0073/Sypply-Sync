@@ -20,9 +20,7 @@ import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -625,7 +623,6 @@ class SupplierRepository {
     fun getPurchaseAmountByRange(
         startTimestamp: Timestamp,
         endTimestamp: Timestamp,
-        coroutineScope: CoroutineScope,
         onComplete: (Int, MutableList<Double>, String) -> Unit
     ) {
 
@@ -650,24 +647,23 @@ class SupplierRepository {
 
                 val resultList = mutableListOf<Double>()
 
-                coroutineScope.launch(Dispatchers.IO) {
 
-                    for (doc in it.result.documents) {
-                        val data = doc.data
+                for (doc in it.result.documents) {
+                    val data = doc.data
 
-                        if (doc.exists() && data != null) {
-                            val amount =
-                                Converters.numberToDouble(data[FieldNames.OrderedItemsCol.AMOUNT] as Number)
-                            resultList.add(amount)
-                        }
+                    if (doc.exists() && data != null) {
+                        val amount =
+                            Converters.numberToDouble(data[FieldNames.OrderedItemsCol.AMOUNT] as Number)
+                        resultList.add(amount)
                     }
-
-                    onComplete(
-                        Status.SUCCESS,
-                        resultList,
-                        KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
-                    )
                 }
+
+                onComplete(
+                    Status.SUCCESS,
+                    resultList,
+                    KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                )
+
 
             } else {
                 onComplete(Status.FAILED, mutableListOf(), it.exception?.message.toString())
@@ -679,7 +675,6 @@ class SupplierRepository {
     fun getFrequencyOfOrderedItemsByRange(
         startTimestamp: Timestamp,
         endTimestamp: Timestamp,
-        coroutineScope: CoroutineScope,
         onComplete: (Int, MutableList<Pair<String, Int>>, String) -> Unit
     ) {
 
@@ -705,26 +700,25 @@ class SupplierRepository {
                 val map = hashMapOf<String, Int>()
                 val resultList = mutableListOf<Pair<String, Int>>()
 
-                coroutineScope.launch(Dispatchers.IO) {
 
-                    for (doc in it.result.documents) {
-                        val data = doc.data
-                        if (doc.exists() && data != null) {
-                            val itemName =
-                                data[FieldNames.OrderedItemsCol.ITEM_NAME] as String
-                            map[itemName] = map.getOrDefault(itemName, 0) + 1
-                        }
+                for (doc in it.result.documents) {
+                    val data = doc.data
+                    if (doc.exists() && data != null) {
+                        val itemName =
+                            data[FieldNames.OrderedItemsCol.ITEM_NAME] as String
+                        map[itemName] = map.getOrDefault(itemName, 0) + 1
                     }
-                    for (item in map) {
-                        resultList.add(Pair(item.key, item.value))
-                    }
-
-                    onComplete(
-                        Status.SUCCESS,
-                        resultList,
-                        KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
-                    )
                 }
+                for (item in map) {
+                    resultList.add(Pair(item.key, item.value))
+                }
+
+                onComplete(
+                    Status.SUCCESS,
+                    resultList,
+                    KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                )
+
 
             } else {
                 onComplete(Status.FAILED, mutableListOf(), it.exception?.message.toString())

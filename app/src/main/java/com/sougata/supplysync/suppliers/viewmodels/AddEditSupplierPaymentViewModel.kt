@@ -4,9 +4,11 @@ import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
 import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.models.SupplierPayment
 import com.sougata.supplysync.util.Converters
+import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.Status
 
 class AddEditSupplierPaymentViewModel : ViewModel() {
@@ -89,39 +91,17 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
             throw Exception("Invalid due amount")
         }
 
-        var year = 0
-        var month = 0
-        var date = 0
+        var paymentTimestamp: Timestamp
 
         try {
-            val res = Converters.getYearMonthDateFromDateString(dateString)
-            year = res.first
-            month = res.second
-            date = res.third
+            paymentTimestamp = DateTime.getTimestampFromDateTimeString(dateString, timeString)
         } catch (e: Exception) {
             throw e
         }
-
-        var hour = 0
-        var minute = 0
-
-        try {
-            val res = Converters.getHourMinuteFromTimeString(timeString)
-            hour = res.first
-            minute = res.second
-        } catch (e: Exception) {
-            throw e
-        }
-
-//        Log.d("mytag", supplierPaymentId.toString())
-//
-//        if(supplierPaymentId.orEmpty().isNotEmpty()) {
-//            month++
-//        }
 
         return SupplierPayment(
             amount = amount,
-            paymentTimestamp = Converters.getTimestampFromDataTime(year, month, date, hour, minute),
+            paymentTimestamp = paymentTimestamp,
             note = note,
             supplierId = supplierId,
             supplierName = supplierName

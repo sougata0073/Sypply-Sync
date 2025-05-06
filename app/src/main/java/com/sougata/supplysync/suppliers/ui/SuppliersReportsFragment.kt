@@ -81,8 +81,8 @@ class SuppliersReportsFragment : Fragment() {
             this.heading.text = "Payments to suppliers"
             this.createBtn.setOnClickListener {
                 this.actionButtonsLayout.visibility = View.GONE
-                openDateRangePicker { startDateString, endDateString ->
-                    viewModel.generateSupplierPaymentsPdf(startDateString, endDateString)
+                openDateRangePicker { startDateMillis, endDateMillis ->
+                    viewModel.generateSupplierPaymentsPdf(startDateMillis, endDateMillis)
                 }
             }
             this.open.setOnClickListener {
@@ -108,8 +108,8 @@ class SuppliersReportsFragment : Fragment() {
             this.heading.text = "Items purchased"
             this.createBtn.setOnClickListener {
                 this.actionButtonsLayout.visibility = View.GONE
-                openDateRangePicker { startDateString, endDateString ->
-                    viewModel.generateOrderedItemsPdf(startDateString, endDateString)
+                openDateRangePicker { startDateMillis, endDateMillis ->
+                    viewModel.generateOrderedItemsPdf(startDateMillis, endDateMillis)
                 }
             }
             this.open.setOnClickListener {
@@ -121,16 +121,15 @@ class SuppliersReportsFragment : Fragment() {
                 onSaveLocallyClick("Items purchased.pdf", byteArray)
             }
             this.send.setOnClickListener {
-                val byteArray = viewModel?.orderedItemsListPdf?.value?.second ?: byteArrayOf()
+                val byteArray = viewModel.orderedItemsListPdf.value?.second ?: byteArrayOf()
                 onSendClick("Items purchased.pdf", byteArray)
             }
         }
 
         this.binding.purchasedItemsChartCompCalendarBtn.setOnClickListener {
-            openDateRangePicker { startDateString, endDateString ->
+            openDateRangePicker { startDateMillis, endDateMillis ->
                 this.viewModel.loadPurchasedItemsCompChartData(
-                    startDateString,
-                    endDateString
+                    startDateMillis, endDateMillis
                 )
             }
         }
@@ -211,7 +210,7 @@ class SuppliersReportsFragment : Fragment() {
         }
     }
 
-    private fun openDateRangePicker(onPositiveButtonClick: (String, String) -> Unit) {
+    private fun openDateRangePicker(onPositiveButtonClick: (Long, Long) -> Unit) {
         val datePicker = MaterialDatePicker.Builder.dateRangePicker()
             .setSelection(
                 Pair(
@@ -224,14 +223,7 @@ class SuppliersReportsFragment : Fragment() {
             .build()
 
         datePicker.addOnPositiveButtonClickListener {
-            val startDateMillis = it.first
-            val endDateMillis = it.second
-
-            val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-            val formatedStartDate = dateFormat.format(Date(startDateMillis))
-            val formatedEndDate = dateFormat.format(Date(endDateMillis))
-
-            onPositiveButtonClick(formatedStartDate, formatedEndDate)
+            onPositiveButtonClick(it.first, it.second)
         }
         datePicker.show(this.parentFragmentManager, "dateRangePicker")
     }
