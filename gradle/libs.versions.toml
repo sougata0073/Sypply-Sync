@@ -1,5 +1,5 @@
 [versions]
-agp = "8.9.2"
+agp = "8.10.0"
 androidPdfViewer = "2.8.2"
 coreSplashscreen = "1.0.1"
 kotlin = "2.1.20"

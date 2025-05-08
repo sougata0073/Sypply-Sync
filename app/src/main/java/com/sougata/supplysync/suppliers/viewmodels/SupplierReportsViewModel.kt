@@ -29,6 +29,7 @@ class SupplierReportsViewModel(application: Application) : AndroidViewModel(appl
 
     val purchasedItemsCompChartData = MutableLiveData<Triple<BarData?, Int, String>>()
     val purchasedItemsCompChartXStrings = mutableListOf<String>()
+    var animatePurchasedItemsCompChart = true
 
     var pdfByteArray = byteArrayOf()
 
@@ -122,8 +123,8 @@ class SupplierReportsViewModel(application: Application) : AndroidViewModel(appl
                 this.purchasedItemsCompChartRangeDate.value =
                     "From: $startDateString To: $endDateString"
 
+                this.animatePurchasedItemsCompChart = true
                 this.purchasedItemsCompChartData.value = Triple(barData, status, message)
-
             }
         }
     }

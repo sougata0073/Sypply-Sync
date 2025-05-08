@@ -211,15 +211,15 @@ class AddEditSupplierFragment : Fragment() {
     private fun registerListeners() {
 
         this.viewModel.supplierAddedIndicator.observe(this.viewLifecycleOwner) {
-            this.howToObserve(it)
+            this.howToObserve(it, "Supplier added successfully")
         }
         this.viewModel.supplierEditedIndicator.observe(this.viewLifecycleOwner) {
-            this.howToObserve(it)
+            this.howToObserve(it, "Supplier updated successfully")
         }
 
     }
 
-    private fun howToObserve(observedData: Pair<Int, String>) {
+    private fun howToObserve(observedData: Pair<Int, String>, successMessage: String) {
         if (observedData.first == Status.STARTED) {
 
             this.binding.apply {
@@ -233,7 +233,7 @@ class AddEditSupplierFragment : Fragment() {
 
             Snackbar.make(
                 requireParentFragment().requireView(),
-                "Supplier added successfully",
+                successMessage,
                 Snackbar.LENGTH_SHORT
             ).show()
 

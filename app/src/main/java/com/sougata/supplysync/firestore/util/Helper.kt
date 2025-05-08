@@ -100,6 +100,8 @@ class Helper {
             col.whereGreaterThanOrEqualTo(searchField, lowerBound)
                 .whereLessThanOrEqualTo(searchField, upperBound)
 
+        } else if (queryDataType == FirestoreFieldDataType.BOOLEAN) {
+            col.whereEqualTo(searchField, searchQuery.toBoolean())
         } else {
             col.orderBy(searchField).startAt(searchQuery).endAt(searchQuery + "\uf8ff")
         }.limit(limit)

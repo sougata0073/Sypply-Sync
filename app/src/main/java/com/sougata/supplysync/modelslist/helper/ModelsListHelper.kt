@@ -9,11 +9,11 @@ import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.models.SupplierPayment
-import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.modelslist.helper.modelhelpers.OrderedItemHelper
 import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierHelper
 import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierItemHelper
 import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierPaymentHelper
+import com.sougata.supplysync.util.FirestoreFieldDataType
 
 class ModelsListHelper(
     private val modelName: String,
@@ -24,10 +24,10 @@ class ModelsListHelper(
     // getWhatToDoOnBind(), getWhatToDoOnFabClick(), getSearchableModelFieldPair()
     // getWhichViewToInflate(), getContentComparator(),
 
-    private val orderedItemHelper = OrderedItemHelper(this.fragment)
-    private val supplierHelper = SupplierHelper(this.fragment)
-    private val supplierItemHelper = SupplierItemHelper(this.fragment)
-    private val supplierPaymentHelper = SupplierPaymentHelper(this.fragment)
+    private val orderedItemHelper by lazy { OrderedItemHelper(this.fragment) }
+    private val supplierHelper by lazy { SupplierHelper(this.fragment) }
+    private val supplierItemHelper by lazy { SupplierItemHelper(this.fragment) }
+    private val supplierPaymentHelper by lazy { SupplierPaymentHelper(this.fragment) }
 
     fun getWhatToDoOnBind(): (ViewDataBinding, Model) -> Unit {
         return when (this.modelName) {
@@ -51,12 +51,23 @@ class ModelsListHelper(
         }
     }
 
-    fun getSearchableModelFieldPair(): Array<Triple<String, String, FirestoreFieldDataType>> {
+    fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return when (this.modelName) {
-            Model.SUPPLIER -> this.supplierHelper.getFieldsPair()
-            Model.SUPPLIERS_ITEM -> this.supplierItemHelper.getFieldsPair()
-            Model.SUPPLIER_PAYMENT -> this.supplierPaymentHelper.getFieldsPair()
-            Model.ORDERED_ITEM -> this.orderedItemHelper.getFieldsPair()
+            Model.SUPPLIER -> this.supplierHelper.getSearchableFieldPairs()
+            Model.SUPPLIERS_ITEM -> this.supplierItemHelper.getSearchableFieldPairs()
+            Model.SUPPLIER_PAYMENT -> this.supplierPaymentHelper.getSearchableFieldPairs()
+            Model.ORDERED_ITEM -> this.orderedItemHelper.getSearchableFieldPairs()
+
+            else -> throw IllegalArgumentException("Unknown model type")
+        }
+    }
+
+    fun getFilterableFields(): Array<Pair<String, (Model) -> Boolean>> {
+        return when (this.modelName) {
+            Model.SUPPLIER -> this.supplierHelper.getFilterableFields()
+            Model.SUPPLIERS_ITEM -> this.supplierItemHelper.getFilterableFields()
+            Model.SUPPLIER_PAYMENT -> this.supplierPaymentHelper.getFilterableFields()
+            Model.ORDERED_ITEM -> this.orderedItemHelper.getFilterableFields()
 
             else -> throw IllegalArgumentException("Unknown model type")
         }

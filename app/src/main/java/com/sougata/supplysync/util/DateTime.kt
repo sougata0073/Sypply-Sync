@@ -79,7 +79,7 @@ object DateTime {
 
         this.calendar.set(year, month - 1, date)
 
-        return Timestamp(calendar.time)
+        return Timestamp(this.calendar.time)
     }
 
     fun getTimestampFromDataTime(

@@ -11,8 +11,8 @@ class ModelsListViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
 
         return when {
-            modelClass.isAssignableFrom(ModelsListViewModel::class.java) ->
-                ModelsListViewModel(this.modelName) as T
+            modelClass.isAssignableFrom(ModelsListRegularViewModel::class.java) ->
+                ModelsListRegularViewModel(this.modelName) as T
 
             modelClass.isAssignableFrom(ModelSearchViewModel::class.java) ->
                 ModelSearchViewModel(this.modelName) as T

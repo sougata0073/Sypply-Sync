@@ -205,15 +205,15 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
     private fun registerListeners() {
 
         this.viewModel.supplierItemAddedIndicator.observe(this.viewLifecycleOwner) {
-            this.howToObserve(it)
+            this.howToObserve(it, "Item added successfully")
         }
         this.viewModel.supplierItemEditedIndicator.observe(this.viewLifecycleOwner) {
-            this.howToObserve(it)
+            this.howToObserve(it, "Item updated successfully")
         }
 
     }
 
-    private fun howToObserve(observedData: Pair<Int, String>) {
+    private fun howToObserve(observedData: Pair<Int, String>, successMessage: String) {
         if (observedData.first == Status.STARTED) {
 
             this.binding.apply {
@@ -227,7 +227,7 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
 
             Snackbar.make(
                 requireParentFragment().requireView(),
-                "Item added successfully",
+                successMessage,
                 Snackbar.LENGTH_SHORT
             ).show()
 

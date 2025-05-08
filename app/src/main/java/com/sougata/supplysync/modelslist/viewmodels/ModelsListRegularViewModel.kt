@@ -11,7 +11,7 @@ import com.sougata.supplysync.util.Status
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class ModelsListViewModel(private val modelName: String) :
+class ModelsListRegularViewModel(private val modelName: String) :
     ViewModel() {
 
     val supplierRepository = SupplierRepository()

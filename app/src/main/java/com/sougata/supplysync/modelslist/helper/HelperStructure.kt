@@ -11,7 +11,8 @@ interface HelperStructure {
     val listHeading: String
     fun getProperties(): Array<KProperty1<Model, *>>
     fun getViewToInflate(inflater: LayoutInflater, parent: ViewGroup): ViewDataBinding
-    fun getFieldsPair(): Array<Triple<String, String, FirestoreFieldDataType>>
+    fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>>
+    fun getFilterableFields(): Array<Pair<String, (Model) -> Boolean>>
     fun getFabClickHandler(): () -> Unit
     fun bind(binding: ViewDataBinding, model: Model)
 }

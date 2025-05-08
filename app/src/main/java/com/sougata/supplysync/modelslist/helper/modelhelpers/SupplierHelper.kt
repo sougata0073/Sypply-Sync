@@ -45,24 +45,28 @@ class SupplierHelper(private val fragment: Fragment) :
         return ItemSuppliersListBinding.inflate(inflater, parent, false)
     }
 
-    override fun getFieldsPair(): Array<Triple<String, String, FirestoreFieldDataType>> {
+    override fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
                 FieldNames.SuppliersCol.NAME,
-                Supplier::name.name,
+                "Name",
                 FirestoreFieldDataType.STRING
             ),
             Triple(
                 FieldNames.SuppliersCol.DUE_AMOUNT,
-                Supplier::dueAmount.name,
+                "Due amount",
                 FirestoreFieldDataType.NUMBER
             ),
             Triple(
                 FieldNames.SuppliersCol.EMAIL,
-                Supplier::email.name,
+                "Email",
                 FirestoreFieldDataType.STRING
             ),
         )
+    }
+
+    override fun getFilterableFields(): Array<Pair<String, (Model) -> Boolean>> {
+        return emptyArray()
     }
 
     override fun getFabClickHandler(): () -> Unit {

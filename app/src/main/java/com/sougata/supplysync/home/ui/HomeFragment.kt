@@ -112,15 +112,18 @@ class HomeFragment : Fragment() {
                     }
 
                     setVisibleXRangeMaximum(15f)
+
+                    visibility = View.VISIBLE
+                    if (viewModel.animatePurchaseChart == true) {
+                        animateY(1000)
+                        viewModel.animatePurchaseChart = false
+                    }
                 }
 
                 binding.apply {
-                    purchaseLineChart.visibility = View.VISIBLE
-                    purchaseLineChart.animateY(1000)
                     progressBarPurchaseChart.visibility = View.GONE
                     purchaseChartDateRange.visibility = View.VISIBLE
                 }
-
 
             } else if (it.second == Status.FAILED) {
                 Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()

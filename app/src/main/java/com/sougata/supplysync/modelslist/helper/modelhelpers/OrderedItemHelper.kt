@@ -8,20 +8,19 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.sougata.supplysync.R
-import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.databinding.ItemOrderedItemsListBinding
+import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.OrderedItem
-import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.modelslist.helper.HelperStructure
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
+import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
-import java.util.Locale
 import kotlin.reflect.KProperty1
 
-class OrderedItemHelper(private val fragment: Fragment): HelperStructure {
+class OrderedItemHelper(private val fragment: Fragment) : HelperStructure {
 
     private val context = this.fragment.requireContext()
 
@@ -43,33 +42,49 @@ class OrderedItemHelper(private val fragment: Fragment): HelperStructure {
         return ItemOrderedItemsListBinding.inflate(inflater, parent, false)
     }
 
-    override fun getFieldsPair(): Array<Triple<String, String, FirestoreFieldDataType>> {
+    override fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
                 FieldNames.OrderedItemsCol.ITEM_NAME,
-                OrderedItem::itemName.name,
+                "Item name",
                 FirestoreFieldDataType.STRING
             ),
             Triple(
                 FieldNames.OrderedItemsCol.QUANTITY,
-                OrderedItem::quantity.name,
+                "Quantity",
                 FirestoreFieldDataType.NUMBER
             ),
             Triple(
                 FieldNames.OrderedItemsCol.AMOUNT,
-                OrderedItem::amount.name,
+                "Amount",
                 FirestoreFieldDataType.NUMBER
             ),
             Triple(
                 FieldNames.OrderedItemsCol.SUPPLIER_NAME,
-                OrderedItem::supplierName.name,
+                "Supplier name",
                 FirestoreFieldDataType.STRING
             ),
             Triple(
                 FieldNames.OrderedItemsCol.ORDER_TIMESTAMP,
-                OrderedItem::orderTimestamp.name,
+                "Order time",
                 FirestoreFieldDataType.TIMESTAMP
             )
+        )
+    }
+
+    override fun getFilterableFields(): Array<Pair<String, (Model) -> Boolean>> {
+        return arrayOf(
+            "Received" to { model ->
+                model as OrderedItem
+
+                model.isReceived
+            },
+            "Not Received" to {
+                model ->
+                model as OrderedItem
+
+                model.isReceived.not()
+            }
         )
     }
 
@@ -79,7 +94,9 @@ class OrderedItemHelper(private val fragment: Fragment): HelperStructure {
                 putBoolean(KeysAndMessages.TO_ADD_KEY, true)
             }
             this.fragment.findNavController().navigate(
-                R.id.addEditOrderedItemFragment, bundle, AnimationProvider.slideRightLeftNavOptions()
+                R.id.addEditOrderedItemFragment,
+                bundle,
+                AnimationProvider.slideRightLeftNavOptions()
             )
         }
     }
@@ -93,6 +110,14 @@ class OrderedItemHelper(private val fragment: Fragment): HelperStructure {
             itemName.text = model.itemName
             date.text = DateTime.getDateStringFromTimestamp(model.orderTimestamp)
             amount.text = Converters.numberToMoneyString(model.amount)
+
+            if (model.isReceived) {
+                receiveStatus.text = "Received"
+                receiveStatus.setTextColor(this@OrderedItemHelper.context.getColor(R.color.green))
+            } else {
+                receiveStatus.text = "Not received"
+                receiveStatus.setTextColor(this@OrderedItemHelper.context.getColor(R.color.red))
+            }
 
             root.setOnClickListener {
 

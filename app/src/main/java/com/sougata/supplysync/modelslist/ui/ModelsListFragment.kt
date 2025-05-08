@@ -1,34 +1,31 @@
 package com.sougata.supplysync.modelslist.ui
 
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.InputType
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
-import com.sougata.supplysync.MainActivity
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentModelsListBinding
-import com.sougata.supplysync.login.LoginActivity
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.modelslist.helper.ModelsListHelper
 import com.sougata.supplysync.modelslist.viewmodels.ModelSearchViewModel
-import com.sougata.supplysync.modelslist.viewmodels.ModelsListViewModel
+import com.sougata.supplysync.modelslist.viewmodels.ModelsListRegularViewModel
 import com.sougata.supplysync.modelslist.viewmodels.ModelsListViewModelFactory
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.FirestoreFieldDataType
@@ -46,7 +43,7 @@ class ModelsListFragment : Fragment() {
         ViewModelProvider(
             this,
             this.viewModelFactory
-        )[ModelsListViewModel::class.java]
+        )[ModelsListRegularViewModel::class.java]
     }
     private val searchViewModel by lazy {
         ViewModelProvider(
@@ -55,7 +52,7 @@ class ModelsListFragment : Fragment() {
         )[ModelSearchViewModel::class.java]
     }
 
-    private val recyclerViewExtraCallBack = { view: View, model: Model ->
+    private val recyclerViewCallBack = { view: View, model: Model ->
         if (this.isSelectOnly) {
             view.setOnClickListener {
                 val bundle = Bundle().apply {
@@ -74,7 +71,8 @@ class ModelsListFragment : Fragment() {
         ModelsListRecyclerViewAdapter(
             mutableListOf(),
             this.helper,
-            this.recyclerViewExtraCallBack
+            this.loadListAgain,
+            this.recyclerViewCallBack
         )
     }
 
@@ -87,6 +85,11 @@ class ModelsListFragment : Fragment() {
 
     private var searchField: String? = null
     private var currentQueryDataType: FirestoreFieldDataType? = null
+
+    private lateinit var fieldsListSearch: Array<Triple<String, String, FirestoreFieldDataType>>
+    private lateinit var fieldsListFilter: Array<Pair<String, (Model) -> Boolean>>
+
+    private val loadListAgain = MutableLiveData(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,8 +107,6 @@ class ModelsListFragment : Fragment() {
         this._binding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_models_list, container, false)
 
-        this.binding.chipGroupHorizontalScrollView.visibility = View.GONE
-
         return this.binding.root
     }
 
@@ -114,10 +115,8 @@ class ModelsListFragment : Fragment() {
 
         this.helper = ModelsListHelper(this.modelName, this)
 
-        if (this.searchViewModel.isSearchClicked) {
-            this.loadChips()
-            this.binding.chipGroupHorizontalScrollView.visibility = View.VISIBLE
-        }
+        this.fieldsListSearch = this.helper.getSearchableFieldPairs()
+        this.fieldsListFilter = this.helper.getFilterableFields()
 
         this.initializeUI()
 
@@ -144,6 +143,22 @@ class ModelsListFragment : Fragment() {
 
     private fun initializeUI() {
 
+        this.loadChipsFilter()
+
+        this.loadChipsSearch()
+
+        this.binding.searchChipsLayout.visibility = if (searchViewModel.isSearchClicked) {
+            View.VISIBLE
+        } else {
+            View.GONE
+        }
+
+        this.binding.filterChipsLayout.visibility = if (fieldsListFilter.isEmpty()) {
+            View.GONE
+        } else {
+            View.VISIBLE
+        }
+
         this.setUpToolBar()
 
         this.setUpRecyclerView()
@@ -155,12 +170,45 @@ class ModelsListFragment : Fragment() {
 
     private fun registerSubscribers() {
 
-        this.binding.appBarLayout.addOnOffsetChangedListener(AppBarLayout.OnOffsetChangedListener { _, _ ->
-            if (this.binding.chipGroup.childCount < 2) {
-                this.binding.chipGroupHorizontalScrollView.visibility = View.GONE
-            }
-        })
+        this.registerAppBarOffSetListener()
+        this.registerRegularViewModelListListener()
+        this.registerSearchViewModelListListener()
+        this.registerFragmentResultListener()
 
+        this.loadListAgain.observe(this.viewLifecycleOwner) {
+            if (it) {
+                this.loadItemsList()
+            }
+        }
+
+    }
+
+    private fun registerAppBarOffSetListener() {
+        this.binding.appBarLayout.addOnOffsetChangedListener { _, _ ->
+
+            if (this.searchViewModel.isSearchClicked) {
+                if (!this.binding.searchChipsLayout.isVisible) {
+                    this.binding.searchChipsLayout.visibility = View.VISIBLE
+                }
+            } else {
+                if (this.binding.searchChipsLayout.isVisible) {
+                    this.binding.searchChipsLayout.visibility = View.GONE
+                }
+            }
+
+            if (this.fieldsListFilter.isNotEmpty()) {
+                if (!this.binding.filterChipsLayout.isVisible) {
+                    this.binding.filterChipsLayout.visibility = View.VISIBLE
+                }
+            } else {
+                if (this.binding.filterChipsLayout.isVisible) {
+                    this.binding.filterChipsLayout.visibility = View.GONE
+                }
+            }
+        }
+    }
+
+    private fun registerRegularViewModelListListener() {
         this.regularViewModel.itemsList.observe(this.viewLifecycleOwner) {
             if (it.second == Status.STARTED) {
 
@@ -180,11 +228,13 @@ class ModelsListFragment : Fragment() {
                 }
 
             } else if (it.second == Status.FAILED) {
-                this.onFailedToLoadData(it.third)
+                Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
             }
 
         }
+    }
 
+    private fun registerSearchViewModelListListener() {
         this.searchViewModel.itemsList.observe(this.viewLifecycleOwner) {
             if (it.second == Status.STARTED) {
 
@@ -205,13 +255,9 @@ class ModelsListFragment : Fragment() {
                 }
 
             } else if (it.second == Status.FAILED) {
-                this.onFailedToLoadData(it.third)
+                Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
             }
         }
-
-        this.registerFragmentResultListener()
-        this.registerScrollListener()
-
     }
 
     private fun setUpToolBar() {
@@ -228,6 +274,44 @@ class ModelsListFragment : Fragment() {
             layoutManager = LinearLayoutManager(requireContext(), RecyclerView.VERTICAL, false)
             adapter = recyclerViewAdapter
         }
+
+        this.binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+            private val fabAnimator = AnimationProvider(binding.fab)
+            private val layoutManager = binding.recyclerView.layoutManager as LinearLayoutManager
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                if (!isSelectOnly) {
+                    if (dy > 0) { // When scroll up
+                        this.fabAnimator.slideDownFadeForScroll()
+                    } else if (dy < 0) { // When scroll down
+                        this.fabAnimator.slideUpFadeForScroll()
+                    }
+                }
+
+                val itemCount = layoutManager.itemCount
+                val lastItemPosition = layoutManager.findLastCompletelyVisibleItemPosition()
+
+                if (lastItemPosition == itemCount - 1) {
+
+                    loadItemsList()
+
+                } else if (lastItemPosition == itemCount - 5) {
+                    if (searchViewModel.isSearchActive) {
+                        if (!searchViewModel.noMoreElementLeft) {
+                            recyclerViewAdapter.addLoadingAnimation()
+                        }
+                    } else {
+                        if (!regularViewModel.noMoreElementLeft) {
+                            recyclerViewAdapter.addLoadingAnimation()
+                        }
+                    }
+                }
+            }
+
+        })
     }
 
     private fun setUpFab() {
@@ -248,9 +332,8 @@ class ModelsListFragment : Fragment() {
             searchViewEditText.setTextColor(requireContext().getColor(R.color.bw))
 
             setOnSearchClickListener {
-                loadChips()
-                binding.chipGroupHorizontalScrollView.visibility = View.VISIBLE
                 searchViewModel.isSearchClicked = true
+                binding.searchChipsLayout.visibility = View.VISIBLE
             }
 
             setOnQueryTextListener(
@@ -284,7 +367,11 @@ class ModelsListFragment : Fragment() {
                 searchViewModel.isSearchClicked = false
                 searchField = null
                 currentQueryDataType = null
-                binding.chipGroupHorizontalScrollView.visibility = View.GONE
+
+                binding.searchChipsLayout.visibility = View.GONE
+                if (fieldsListFilter.isNotEmpty()) {
+                    binding.filterChipsLayout.visibility = View.VISIBLE
+                }
 
                 val list = regularViewModel.itemsList.value?.first
                 if (list != null) {
@@ -294,14 +381,12 @@ class ModelsListFragment : Fragment() {
                     }
                 }
 
-                binding.chipGroup.removeViews(1, helper.getSearchableModelFieldPair().size)
-
                 false
             }
         }
     }
 
-    private fun onSuccessfulListReceived(list: List<Model>) {
+    private fun onSuccessfulListReceived(list: MutableList<Model>) {
         this.binding.nothingHereLbl.visibility = View.GONE
         this.binding.progressBar.visibility = View.GONE
         this.recyclerViewAdapter.removeLoadingAnimation()
@@ -350,70 +435,19 @@ class ModelsListFragment : Fragment() {
         }
     }
 
-    private fun registerScrollListener() {
-        this.binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-
-            private val fabAnimator = AnimationProvider(binding.fab)
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-
-                if (!isSelectOnly) {
-                    if (dy > 0) { // When scroll up
-
-                        this.fabAnimator.slideDownFadeForScroll()
-
-                    } else if (dy < 0) { // When scroll down
-
-                        this.fabAnimator.slideUpFadeForScroll()
-
-                    }
-                }
-                val layoutManager = binding.recyclerView.layoutManager as LinearLayoutManager
-                val itemCount = layoutManager.itemCount
-                val lastItemPosition = layoutManager.findLastCompletelyVisibleItemPosition()
-
-                if (lastItemPosition == itemCount - 1) {
-
-                    if (searchViewModel.isSearchActive) {
-
-                        if (!searchViewModel.noMoreElementLeft) {
-                            searchViewModel.loadItemsList(
-                                searchViewModel.prevSearchField,
-                                searchViewModel.prevSearchQuery,
-                                searchViewModel.prevQueryDataType
-                            )
-                        }
-
-                    } else {
-
-                        if (!regularViewModel.noMoreElementLeft) {
-                            regularViewModel.loadItemsList()
-                        }
-
-                    }
-                } else if (lastItemPosition == itemCount - 5) {
-                    if (searchViewModel.isSearchActive) {
-                        if (!searchViewModel.noMoreElementLeft) {
-                            recyclerViewAdapter.addLoadingAnimation()
-                        }
-                    } else {
-                        if (!regularViewModel.noMoreElementLeft) {
-                            recyclerViewAdapter.addLoadingAnimation()
-                        }
-                    }
-                }
+    private fun loadItemsList() {
+        if (this.searchViewModel.isSearchActive) {
+            if (!this.searchViewModel.noMoreElementLeft) {
+                this.searchViewModel.loadItemsList(
+                    this.searchViewModel.prevSearchField,
+                    this.searchViewModel.prevSearchQuery,
+                    this.searchViewModel.prevQueryDataType
+                )
             }
-
-        })
-    }
-
-    private fun onFailedToLoadData(message: String) {
-        if (message == KeysAndMessages.USER_NOT_FOUND) {
-            startActivity(Intent(requireActivity(), LoginActivity::class.java))
-            requireActivity().finish()
         } else {
-            Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()
+            if (!this.regularViewModel.noMoreElementLeft) {
+                this.regularViewModel.loadItemsList()
+            }
         }
     }
 
@@ -441,49 +475,77 @@ class ModelsListFragment : Fragment() {
         }
     }
 
-    private fun loadChips() {
-        for (pair in this.helper.getSearchableModelFieldPair()) {
-            val chip = Chip(
-                requireContext(),
-                null,
-                com.google.android.material.R.style.Widget_Material3_Chip_Filter
-            ).apply {
-                isCheckable = true
-                isClickable = true
-                isFocusable = true
-                layoutParams = ViewGroup.MarginLayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                )
-                text = pair.second.uppercase()
-                chipStrokeWidth = 0f
-                chipBackgroundColor =
-                    requireContext().getColorStateList(R.color.active_non_active_button_color)
-                shapeAppearanceModel =
-                    shapeAppearanceModel.toBuilder().setAllCornerSizes(16f).build()
-                checkedIcon = AppCompatResources.getDrawable(
-                    requireContext(),
-                    R.drawable.ic_chip_check
-                )
-                setTextColor(requireContext().getColor(R.color.bw))
+    private fun loadChipsSearch() {
+        for (field in this.fieldsListSearch) {
+            val chip = this.getDecoratedChip(field.second)
 
-                setOnCheckedChangeListener { _, isChecked ->
-                    if (isChecked) {
-                        searchField = pair.first
-                        currentQueryDataType = pair.third
-                        searchViewEditText.text.clear()
-                        if (currentQueryDataType == FirestoreFieldDataType.NUMBER) {
-                            searchViewEditText.inputType = InputType.TYPE_CLASS_NUMBER
-                        } else {
-                            searchViewEditText.inputType = InputType.TYPE_CLASS_TEXT
-                        }
+            chip.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    searchField = field.first
+                    currentQueryDataType = field.third
+                    searchViewEditText.text.clear()
+
+                    if (currentQueryDataType == FirestoreFieldDataType.NUMBER) {
+                        searchViewEditText.inputType = InputType.TYPE_CLASS_NUMBER
                     } else {
-                        searchField = null
-                        currentQueryDataType = null
+                        searchViewEditText.inputType = InputType.TYPE_CLASS_TEXT
                     }
+                } else {
+                    searchField = null
+                    currentQueryDataType = null
                 }
             }
-            this.binding.chipGroup.addView(chip)
+            this.binding.chipGroupSearch.addView(chip)
+        }
+    }
+
+    private fun loadChipsFilter() {
+
+        this.binding.filterChipsLayout.visibility = if (this.fieldsListFilter.isEmpty()) {
+            View.GONE
+            return
+        } else {
+            View.VISIBLE
+        }
+
+        for (field in this.fieldsListFilter) {
+            val chip = this.getDecoratedChip(field.first)
+
+            chip.setOnCheckedChangeListener { _, isChecked ->
+                if (isChecked) {
+                    recyclerViewAdapter.filterList { model -> field.second(model) }
+                } else {
+                    recyclerViewAdapter.clearFilter()
+                }
+            }
+            this.binding.chipGroupFilter.addView(chip)
+        }
+    }
+
+    private fun getDecoratedChip(chipName: String): Chip {
+        return Chip(
+            requireContext(),
+            null,
+            com.google.android.material.R.style.Widget_Material3_Chip_Filter
+        ).apply {
+            isCheckable = true
+            isClickable = true
+            isFocusable = true
+            layoutParams = ViewGroup.MarginLayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            text = chipName
+            chipStrokeWidth = 0f
+            chipBackgroundColor =
+                requireContext().getColorStateList(R.color.active_non_active_button_color)
+            shapeAppearanceModel =
+                shapeAppearanceModel.toBuilder().setAllCornerSizes(16f).build()
+            checkedIcon = AppCompatResources.getDrawable(
+                requireContext(),
+                R.drawable.ic_chip_check
+            )
+            setTextColor(requireContext().getColor(R.color.bw))
         }
     }
 }

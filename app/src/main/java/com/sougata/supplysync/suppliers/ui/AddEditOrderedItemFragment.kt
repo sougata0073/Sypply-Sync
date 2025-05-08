@@ -291,10 +291,10 @@ class AddEditOrderedItemFragment : Fragment() {
 
     private fun registerListeners() {
         this.viewModel.orderedItemAddedIndicator.observe(this.viewLifecycleOwner) {
-            howToObserve(it)
+            howToObserve(it, "Ordered item added successfully")
         }
         this.viewModel.orderedItemEditedIndicator.observe(this.viewLifecycleOwner) {
-            howToObserve(it)
+            howToObserve(it, "Ordered item updated successfully")
         }
 
         this.parentFragmentManager.setFragmentResultListener(
@@ -326,7 +326,7 @@ class AddEditOrderedItemFragment : Fragment() {
         }
     }
 
-    private fun howToObserve(observedData: Pair<Int, String>) {
+    private fun howToObserve(observedData: Pair<Int, String>, successMessage: String) {
         if (observedData.first == Status.STARTED) {
 
             this.binding.apply {
@@ -340,7 +340,7 @@ class AddEditOrderedItemFragment : Fragment() {
 
             Snackbar.make(
                 requireParentFragment().requireView(),
-                "Ordered item added successfully",
+                successMessage,
                 Snackbar.LENGTH_SHORT
             ).show()
 

@@ -20,6 +20,8 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
     val purchaseChartRangeDate = MutableLiveData("")
 
     val purchaseChartData = MutableLiveData<Triple<LineData?, Int, String>>()
+    var animatePurchaseChart = true
+
     val numberOfOrdersToReceive = MutableLiveData<Triple<Number, Int, String>>()
 
     init {
@@ -98,6 +100,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
                 this.purchaseChartRangeDate.value =
                     "From: $startDateString To: $endDateString"
 
+                this.animatePurchaseChart = true
                 this.purchaseChartData.value = Triple(lineData, status, message)
             }
         }

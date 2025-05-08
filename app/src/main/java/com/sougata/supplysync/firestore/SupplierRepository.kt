@@ -3,6 +3,7 @@ package com.sougata.supplysync.firestore
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
@@ -42,7 +43,7 @@ class SupplierRepository {
     }
 
     fun insertUserToFirestore(user: User, onComplete: (Int, String) -> Unit) {
-
+        
         val userDoc = mapOf(
             FieldNames.UsersCol.NAME to user.name,
             FieldNames.UsersCol.EMAIL to user.email,

@@ -26,9 +26,6 @@ import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class SuppliersReportsFragment : Fragment() {
 
@@ -162,11 +159,14 @@ class SuppliersReportsFragment : Fragment() {
 
                     setVisibleXRangeMaximum(10f)
 
+                    visibility = View.VISIBLE
+                    if (viewModel.animatePurchasedItemsCompChart) {
+                        animateY(1000)
+                        viewModel.animatePurchasedItemsCompChart = false
+                    }
                 }
 
                 binding.apply {
-                    purchasedItemsCompChart.visibility = View.VISIBLE
-                    purchasedItemsCompChart.animateY(1000)
                     progressBarPurchasedItemsCompChart.visibility = View.GONE
                     purchasedItemsCompDateRange.visibility = View.VISIBLE
                 }

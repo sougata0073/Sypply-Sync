@@ -8,15 +8,15 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.sougata.supplysync.R
-import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.databinding.ItemSupplierItemsListBinding
+import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.SupplierItem
-import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.modelslist.helper.HelperStructure
 import com.sougata.supplysync.suppliers.ui.AddEditSupplierItemBottomSheetFragment
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
+import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
 import kotlin.reflect.KProperty1
 
@@ -45,19 +45,23 @@ class SupplierItemHelper(private val fragment: Fragment) :
         return ItemSupplierItemsListBinding.inflate(inflater, parent, false)
     }
 
-    override fun getFieldsPair(): Array<Triple<String, String, FirestoreFieldDataType>> {
+    override fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
                 FieldNames.SupplierItemsCol.NAME,
-                SupplierItem::name.name,
+                "Name",
                 FirestoreFieldDataType.STRING
             ),
             Triple(
                 FieldNames.SupplierItemsCol.PRICE,
-                SupplierItem::price.name,
+                "Price",
                 FirestoreFieldDataType.NUMBER
             )
         )
+    }
+
+    override fun getFilterableFields(): Array<Pair<String, (Model) -> Boolean>> {
+        return emptyArray()
     }
 
     override fun getFabClickHandler(): () -> Unit {
@@ -66,7 +70,9 @@ class SupplierItemHelper(private val fragment: Fragment) :
                 putBoolean(KeysAndMessages.TO_ADD_KEY, true)
             }
             this.fragment.findNavController().navigate(
-                R.id.addEditSupplierPaymentFragment, bundle, AnimationProvider.slideRightLeftNavOptions()
+                R.id.addEditSupplierPaymentFragment,
+                bundle,
+                AnimationProvider.slideRightLeftNavOptions()
             )
         }
     }

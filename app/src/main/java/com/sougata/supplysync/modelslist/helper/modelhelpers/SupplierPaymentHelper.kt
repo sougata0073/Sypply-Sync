@@ -46,24 +46,28 @@ class SupplierPaymentHelper(private val fragment: Fragment) :
         )
     }
 
-    override fun getFieldsPair(): Array<Triple<String, String, FirestoreFieldDataType>> {
+    override fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
                 FieldNames.SupplierPaymentsCol.AMOUNT,
-                SupplierPayment::amount.name,
+                "Amount",
                 FirestoreFieldDataType.NUMBER
             ),
             Triple(
                 FieldNames.SupplierPaymentsCol.PAYMENT_TIMESTAMP,
-                SupplierPayment::paymentTimestamp.name,
+                "Payment date",
                 FirestoreFieldDataType.TIMESTAMP
             ),
             Triple(
                 FieldNames.SupplierPaymentsCol.SUPPLIER_NAME,
-                SupplierPayment::supplierName.name,
+                "Supplier name",
                 FirestoreFieldDataType.STRING
             )
         )
+    }
+
+    override fun getFilterableFields(): Array<Pair<String, (Model) -> Boolean>> {
+        return emptyArray()
     }
 
     override fun getFabClickHandler(): () -> Unit {

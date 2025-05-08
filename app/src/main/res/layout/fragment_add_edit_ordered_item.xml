@@ -234,17 +234,18 @@
                         android:textSize="18sp"
                         android:textStyle="bold"
                         app:cornerRadius="8dp"
-                        app:layout_constraintBottom_toTopOf="@id/isReceived"
+                        app:layout_constraintBottom_toTopOf="@id/receiveStatus"
                         app:layout_constraintEnd_toEndOf="@+id/openItemsListBtn"
                         app:layout_constraintStart_toStartOf="@+id/openItemsListBtn"
                         app:layout_constraintTop_toBottomOf="@id/openItemsListBtn" />
 
                     <com.google.android.material.checkbox.MaterialCheckBox
-                        android:id="@+id/isReceived"
+                        android:id="@+id/receiveStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:checked="@={viewModel.isReceived}"
+                        app:buttonIconTint="@color/white"
                         app:layout_constraintBottom_toTopOf="@id/saveBtn"
                         app:layout_constraintEnd_toStartOf="@id/isReceivedMessage"
                         app:layout_constraintStart_toStartOf="@+id/openSuppliersListBtn"
@@ -258,10 +259,10 @@
                         android:textColor="@color/black"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="@id/isReceived"
+                        app:layout_constraintBottom_toBottomOf="@id/receiveStatus"
                         app:layout_constraintEnd_toEndOf="@id/openSuppliersListBtn"
-                        app:layout_constraintStart_toEndOf="@id/isReceived"
-                        app:layout_constraintTop_toTopOf="@id/isReceived" />
+                        app:layout_constraintStart_toEndOf="@id/receiveStatus"
+                        app:layout_constraintTop_toTopOf="@id/receiveStatus" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/saveBtn"
@@ -277,7 +278,7 @@
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="@id/openSuppliersListBtn"
                         app:layout_constraintStart_toStartOf="@id/openSuppliersListBtn"
-                        app:layout_constraintTop_toBottomOf="@id/isReceived" />
+                        app:layout_constraintTop_toBottomOf="@id/receiveStatus" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>
         </ScrollView>

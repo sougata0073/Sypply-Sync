@@ -289,10 +289,10 @@ class AddEditSupplierPaymentFragment : Fragment() {
 
     private fun registerListeners() {
         this.viewModel.supplierPaymentAddedIndicator.observe(this.viewLifecycleOwner) {
-            howToObserve(it)
+            howToObserve(it, "Payment added successfully")
         }
         this.viewModel.supplierPaymentEditedIndicator.observe(this.viewLifecycleOwner) {
-            howToObserve(it)
+            howToObserve(it, "Payment updated successfully")
         }
 
         this.parentFragmentManager.setFragmentResultListener(
@@ -314,7 +314,7 @@ class AddEditSupplierPaymentFragment : Fragment() {
         }
     }
 
-    private fun howToObserve(observedData: Pair<Int, String>) {
+    private fun howToObserve(observedData: Pair<Int, String>, successMessage: String) {
         if (observedData.first == Status.STARTED) {
 
             this.binding.apply {
@@ -328,7 +328,7 @@ class AddEditSupplierPaymentFragment : Fragment() {
 
             Snackbar.make(
                 requireParentFragment().requireView(),
-                "Payment added successfully",
+                successMessage,
                 Snackbar.LENGTH_SHORT
             ).show()
 

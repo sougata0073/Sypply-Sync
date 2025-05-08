@@ -1,5 +1,5 @@
 package com.sougata.supplysync.util
 
-enum class FirestoreFieldDataType {
+enum class FirestoreFieldDataType() {
     STRING, NUMBER, TIMESTAMP, BOOLEAN
 }
