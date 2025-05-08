@@ -4,14 +4,15 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.DocumentSnapshot
-import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.firestore.SupplierRepository
+import com.sougata.supplysync.models.Model
+import com.sougata.supplysync.modelslist.helper.ModelsListHelper
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class ModelsListRegularViewModel(private val modelName: String) :
+class ModelsListRegularViewModel(private val helper: ModelsListHelper) :
     ViewModel() {
 
     val supplierRepository = SupplierRepository()
@@ -49,14 +50,7 @@ class ModelsListRegularViewModel(private val modelName: String) :
 
     private fun callListByModelName(value: Triple<MutableList<Model>?, Int, String>?) {
         val limit: Long = 20
-        val fetchList =
-            when (this.modelName) {
-                Model.SUPPLIER -> this.supplierRepository::getSuppliersList
-                Model.SUPPLIERS_ITEM -> this.supplierRepository::getSupplierItemsList
-                Model.SUPPLIER_PAYMENT -> this.supplierRepository::getSupplierPaymentsList
-                Model.ORDERED_ITEM -> this.supplierRepository::getOrderedItemsList
-                else -> return
-            }
+        val fetchList = this.helper.getWhichListToFetch()
 
         if (value?.first == null) { // Means its the first time the list is loading
             fetchList(null, limit) { status, list, lastDocumentSnapshot, message ->
@@ -86,7 +80,7 @@ class ModelsListRegularViewModel(private val modelName: String) :
     }
 
     fun loadLastAddedData() {
-        if (this.modelName.contains("payment", true)) {
+        if (this.helper.getLoadFullListOnNewModelAdded()) {
             this.itemsList.value = Triple(null, Status.NO_CHANGE, "")
             this.noMoreElementLeft = false
             this.lastDocumentSnapshot = null

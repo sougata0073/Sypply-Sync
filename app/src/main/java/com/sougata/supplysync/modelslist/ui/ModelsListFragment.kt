@@ -37,7 +37,7 @@ class ModelsListFragment : Fragment() {
     private var _binding: FragmentModelsListBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModelFactory by lazy { ModelsListViewModelFactory(this.modelName) }
+    private val viewModelFactory by lazy { ModelsListViewModelFactory(this.helper) }
 
     private val regularViewModel by lazy {
         ViewModelProvider(

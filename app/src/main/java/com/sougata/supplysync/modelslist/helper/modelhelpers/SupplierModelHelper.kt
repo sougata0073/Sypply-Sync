@@ -9,20 +9,25 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
+import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
-import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.databinding.ItemSuppliersListBinding
+import com.sougata.supplysync.firestore.SupplierRepository
+import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.Supplier
-import com.sougata.supplysync.util.FirestoreFieldDataType
-import com.sougata.supplysync.modelslist.helper.HelperStructure
+import com.sougata.supplysync.modelslist.helper.ModelHelper
 import com.sougata.supplysync.suppliers.ui.SupplierProfileBottomSheetFragment
 import com.sougata.supplysync.util.AnimationProvider
+import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
 import kotlin.reflect.KProperty1
 
-class SupplierHelper(private val fragment: Fragment) :
-    HelperStructure {
+class SupplierModelHelper(
+    private val fragment: Fragment,
+    private val supplierRepository: SupplierRepository
+) :
+    ModelHelper {
 
     private val context = this.fragment.requireContext()
     private val fragmentManager = this.fragment.parentFragmentManager
@@ -99,13 +104,40 @@ class SupplierHelper(private val fragment: Fragment) :
 
             callBtn.setOnClickListener {
                 val callIntent = Intent(Intent.ACTION_DIAL, "tel:${model.phone}".toUri())
-                this@SupplierHelper.context.startActivity(callIntent)
+                this@SupplierModelHelper.context.startActivity(callIntent)
             }
 
             root.setOnClickListener {
                 SupplierProfileBottomSheetFragment.Companion.getInstance(model)
-                    .show(this@SupplierHelper.fragmentManager, "supplierProfile")
+                    .show(this@SupplierModelHelper.fragmentManager, "supplierProfile")
             }
         }
+    }
+
+    override fun fetchList(
+        lastDocumentSnapshot: DocumentSnapshot?,
+        limit: Long,
+        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+    ) {
+        this.supplierRepository.getSuppliersList(
+            lastDocumentSnapshot, limit, onComplete
+        )
+    }
+
+    override fun fetchListFiltered(
+        searchField: String,
+        searchQuery: String,
+        queryDataType: FirestoreFieldDataType,
+        lastDocumentSnapshot: DocumentSnapshot?,
+        limit: Long,
+        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+    ) {
+        this.supplierRepository.getSuppliersListFiltered(
+            searchField, searchQuery, queryDataType, lastDocumentSnapshot, limit, onComplete
+        )
+    }
+
+    override fun loadFullListOnNewModelAdded(): Boolean {
+        return false
     }
 }

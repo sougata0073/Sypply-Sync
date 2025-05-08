@@ -7,12 +7,14 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ItemOrderedItemsListBinding
+import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.OrderedItem
-import com.sougata.supplysync.modelslist.helper.HelperStructure
+import com.sougata.supplysync.modelslist.helper.ModelHelper
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
@@ -20,7 +22,10 @@ import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
 import kotlin.reflect.KProperty1
 
-class OrderedItemHelper(private val fragment: Fragment) : HelperStructure {
+class OrderedItemModelHelper(
+    private val fragment: Fragment,
+    private val supplierRepository: SupplierRepository
+) : ModelHelper {
 
     private val context = this.fragment.requireContext()
 
@@ -79,8 +84,7 @@ class OrderedItemHelper(private val fragment: Fragment) : HelperStructure {
 
                 model.isReceived
             },
-            "Not Received" to {
-                model ->
+            "Not Received" to { model ->
                 model as OrderedItem
 
                 model.isReceived.not()
@@ -113,10 +117,10 @@ class OrderedItemHelper(private val fragment: Fragment) : HelperStructure {
 
             if (model.isReceived) {
                 receiveStatus.text = "Received"
-                receiveStatus.setTextColor(this@OrderedItemHelper.context.getColor(R.color.green))
+                receiveStatus.setTextColor(this@OrderedItemModelHelper.context.getColor(R.color.green))
             } else {
                 receiveStatus.text = "Not received"
-                receiveStatus.setTextColor(this@OrderedItemHelper.context.getColor(R.color.red))
+                receiveStatus.setTextColor(this@OrderedItemModelHelper.context.getColor(R.color.red))
             }
 
             root.setOnClickListener {
@@ -125,7 +129,7 @@ class OrderedItemHelper(private val fragment: Fragment) : HelperStructure {
                     "Supplier name: ${model.supplierName}\nItem quantity: ${model.quantity}"
 
                 MaterialAlertDialogBuilder(
-                    this@OrderedItemHelper.context,
+                    this@OrderedItemModelHelper.context,
                     R.style.materialAlertDialogStyle
                 ).setTitle(model.itemName)
                     .setMessage(message)
@@ -135,7 +139,7 @@ class OrderedItemHelper(private val fragment: Fragment) : HelperStructure {
                             putBoolean(KeysAndMessages.TO_EDIT_KEY, true)
                             putParcelable("orderedItem", model)
                         }
-                        this@OrderedItemHelper.fragment.findNavController()
+                        this@OrderedItemModelHelper.fragment.findNavController()
                             .navigate(
                                 R.id.addEditOrderedItemFragment,
                                 bundle,
@@ -144,6 +148,40 @@ class OrderedItemHelper(private val fragment: Fragment) : HelperStructure {
                     }.show()
             }
         }
+    }
+
+    override fun fetchList(
+        lastDocumentSnapshot: DocumentSnapshot?,
+        limit: Long,
+        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+    ) {
+        this.supplierRepository.getOrderedItemsList(
+            lastDocumentSnapshot,
+            limit,
+            onComplete
+        )
+    }
+
+    override fun fetchListFiltered(
+        searchField: String,
+        searchQuery: String,
+        queryDataType: FirestoreFieldDataType,
+        lastDocumentSnapshot: DocumentSnapshot?,
+        limit: Long,
+        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+    ) {
+        this.supplierRepository.getOrderedItemsListFiltered(
+            searchField,
+            searchQuery,
+            queryDataType,
+            lastDocumentSnapshot,
+            limit,
+            onComplete
+        )
+    }
+
+    override fun loadFullListOnNewModelAdded(): Boolean {
+        return false
     }
 
 }

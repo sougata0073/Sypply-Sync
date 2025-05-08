@@ -7,12 +7,14 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ItemSupplierPaymentsListBinding
+import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.SupplierPayment
-import com.sougata.supplysync.modelslist.helper.HelperStructure
+import com.sougata.supplysync.modelslist.helper.ModelHelper
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
@@ -20,8 +22,11 @@ import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
 import kotlin.reflect.KProperty1
 
-class SupplierPaymentHelper(private val fragment: Fragment) :
-    HelperStructure {
+class SupplierPaymentModelHelper(
+    private val fragment: Fragment,
+    private val supplierRepository: SupplierRepository
+) :
+    ModelHelper {
 
     private val context = this.fragment.requireContext()
 
@@ -101,7 +106,7 @@ class SupplierPaymentHelper(private val fragment: Fragment) :
 
             root.setOnClickListener {
                 MaterialAlertDialogBuilder(
-                    this@SupplierPaymentHelper.context,
+                    this@SupplierPaymentModelHelper.context,
                     R.style.materialAlertDialogStyle
                 )
                     .setTitle("To: ${model.supplierName}")
@@ -112,7 +117,7 @@ class SupplierPaymentHelper(private val fragment: Fragment) :
                             putBoolean(KeysAndMessages.TO_EDIT_KEY, true)
                             putParcelable("supplierPayment", model)
                         }
-                        this@SupplierPaymentHelper.fragment.findNavController()
+                        this@SupplierPaymentModelHelper.fragment.findNavController()
                             .navigate(
                                 R.id.addEditSupplierPaymentFragment,
                                 bundle,
@@ -121,5 +126,39 @@ class SupplierPaymentHelper(private val fragment: Fragment) :
                     }.show()
             }
         }
+    }
+
+    override fun fetchList(
+        lastDocumentSnapshot: DocumentSnapshot?,
+        limit: Long,
+        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+    ) {
+        this.supplierRepository.getSupplierPaymentsList(
+            lastDocumentSnapshot,
+            limit,
+            onComplete
+        )
+    }
+
+    override fun fetchListFiltered(
+        searchField: String,
+        searchQuery: String,
+        queryDataType: FirestoreFieldDataType,
+        lastDocumentSnapshot: DocumentSnapshot?,
+        limit: Long,
+        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+    ) {
+        this.supplierRepository.getSupplierPaymentsListFiltered(
+            searchField,
+            searchQuery,
+            queryDataType,
+            lastDocumentSnapshot,
+            limit,
+            onComplete
+        )
+    }
+
+    override fun loadFullListOnNewModelAdded(): Boolean {
+        return true
     }
 }

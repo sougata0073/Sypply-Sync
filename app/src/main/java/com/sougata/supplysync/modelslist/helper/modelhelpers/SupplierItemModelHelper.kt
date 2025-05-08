@@ -7,12 +7,14 @@ import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ItemSupplierItemsListBinding
+import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.SupplierItem
-import com.sougata.supplysync.modelslist.helper.HelperStructure
+import com.sougata.supplysync.modelslist.helper.ModelHelper
 import com.sougata.supplysync.suppliers.ui.AddEditSupplierItemBottomSheetFragment
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
@@ -20,8 +22,11 @@ import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
 import kotlin.reflect.KProperty1
 
-class SupplierItemHelper(private val fragment: Fragment) :
-    HelperStructure {
+class SupplierItemModelHelper(
+    private val fragment: Fragment,
+    private val supplierRepository: SupplierRepository
+) :
+    ModelHelper {
 
     private val context = this.fragment.requireContext()
     private val fragmentManager = this.fragment.parentFragmentManager
@@ -91,7 +96,7 @@ class SupplierItemHelper(private val fragment: Fragment) :
 
             root.setOnClickListener {
                 MaterialAlertDialogBuilder(
-                    this@SupplierItemHelper.context,
+                    this@SupplierItemModelHelper.context,
                     R.style.materialAlertDialogStyle
                 )
                     .setTitle(model.name)
@@ -103,10 +108,44 @@ class SupplierItemHelper(private val fragment: Fragment) :
                             model,
                             KeysAndMessages.TO_EDIT_KEY
                         )
-                            .show(this@SupplierItemHelper.fragmentManager, "supplierItemAdd")
+                            .show(this@SupplierItemModelHelper.fragmentManager, "supplierItemAdd")
 
                     }.show()
             }
         }
+    }
+
+    override fun fetchList(
+        lastDocumentSnapshot: DocumentSnapshot?,
+        limit: Long,
+        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+    ) {
+        this.supplierRepository.getSupplierItemsList(
+            lastDocumentSnapshot,
+            limit,
+            onComplete
+        )
+    }
+
+    override fun fetchListFiltered(
+        searchField: String,
+        searchQuery: String,
+        queryDataType: FirestoreFieldDataType,
+        lastDocumentSnapshot: DocumentSnapshot?,
+        limit: Long,
+        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+    ) {
+        this.supplierRepository.getSupplierItemsListFiltered(
+            searchField,
+            searchQuery,
+            queryDataType,
+            lastDocumentSnapshot,
+            limit,
+            onComplete
+        )
+    }
+
+    override fun loadFullListOnNewModelAdded(): Boolean {
+        return false
     }
 }

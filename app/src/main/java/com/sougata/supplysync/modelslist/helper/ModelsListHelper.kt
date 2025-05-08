@@ -2,134 +2,76 @@ package com.sougata.supplysync.modelslist.helper
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.models.Model
-import com.sougata.supplysync.models.OrderedItem
-import com.sougata.supplysync.models.Supplier
-import com.sougata.supplysync.models.SupplierItem
-import com.sougata.supplysync.models.SupplierPayment
-import com.sougata.supplysync.modelslist.helper.modelhelpers.OrderedItemHelper
-import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierHelper
-import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierItemHelper
-import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierPaymentHelper
-import com.sougata.supplysync.util.FirestoreFieldDataType
+import com.sougata.supplysync.modelslist.helper.modelhelpers.OrderedItemModelHelper
+import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierModelHelper
+import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierItemModelHelper
+import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierPaymentModelHelper
 
 class ModelsListHelper(
     private val modelName: String,
     private val fragment: Fragment
 ) {
 
-    // Changes needed when new models are added
-    // getWhatToDoOnBind(), getWhatToDoOnFabClick(), getSearchableModelFieldPair()
-    // getWhichViewToInflate(), getContentComparator(),
+    val supplierRepository by lazy { SupplierRepository() }
 
-    private val orderedItemHelper by lazy { OrderedItemHelper(this.fragment) }
-    private val supplierHelper by lazy { SupplierHelper(this.fragment) }
-    private val supplierItemHelper by lazy { SupplierItemHelper(this.fragment) }
-    private val supplierPaymentHelper by lazy { SupplierPaymentHelper(this.fragment) }
+    // Add new helpers to the map
 
-    fun getWhatToDoOnBind(): (ViewDataBinding, Model) -> Unit {
-        return when (this.modelName) {
-            Model.SUPPLIER -> this.supplierHelper::bind
-            Model.SUPPLIERS_ITEM -> this.supplierItemHelper::bind
-            Model.SUPPLIER_PAYMENT -> this.supplierPaymentHelper::bind
-            Model.ORDERED_ITEM -> this.orderedItemHelper::bind
-
-            else -> throw IllegalArgumentException("Unknown model type")
-        }
+    private val orderedItemHelper by lazy {
+        OrderedItemModelHelper(
+            this.fragment,
+            this.supplierRepository
+        )
+    }
+    private val supplierHelper by lazy { SupplierModelHelper(this.fragment, this.supplierRepository) }
+    private val supplierItemHelper by lazy {
+        SupplierItemModelHelper(
+            this.fragment,
+            this.supplierRepository
+        )
+    }
+    private val supplierPaymentHelper by lazy {
+        SupplierPaymentModelHelper(
+            this.fragment,
+            this.supplierRepository
+        )
     }
 
-    fun getWhatToDoOnFabClick(): () -> Unit {
-        return when (this.modelName) {
-            Model.SUPPLIER -> this.supplierHelper.getFabClickHandler()
-            Model.SUPPLIERS_ITEM -> this.supplierItemHelper.getFabClickHandler()
-            Model.SUPPLIER_PAYMENT -> this.supplierPaymentHelper.getFabClickHandler()
-            Model.ORDERED_ITEM -> this.orderedItemHelper.getFabClickHandler()
+    private val helpersMap: Map<String, ModelHelper> = hashMapOf(
+        Model.SUPPLIER to this.supplierHelper,
+        Model.SUPPLIERS_ITEM to this.supplierItemHelper,
+        Model.SUPPLIER_PAYMENT to this.supplierPaymentHelper,
+        Model.ORDERED_ITEM to this.orderedItemHelper
+    )
 
-            else -> throw IllegalArgumentException("Unknown model type")
-        }
+    private fun getHelper(): ModelHelper {
+        return this.helpersMap[this.modelName]
+            ?: throw IllegalArgumentException("Unknown model type")
     }
 
-    fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>> {
-        return when (this.modelName) {
-            Model.SUPPLIER -> this.supplierHelper.getSearchableFieldPairs()
-            Model.SUPPLIERS_ITEM -> this.supplierItemHelper.getSearchableFieldPairs()
-            Model.SUPPLIER_PAYMENT -> this.supplierPaymentHelper.getSearchableFieldPairs()
-            Model.ORDERED_ITEM -> this.orderedItemHelper.getSearchableFieldPairs()
+    fun getWhatToDoOnBind() = getHelper()::bind
 
-            else -> throw IllegalArgumentException("Unknown model type")
-        }
-    }
+    fun getWhatToDoOnFabClick() = getHelper().getFabClickHandler()
 
-    fun getFilterableFields(): Array<Pair<String, (Model) -> Boolean>> {
-        return when (this.modelName) {
-            Model.SUPPLIER -> this.supplierHelper.getFilterableFields()
-            Model.SUPPLIERS_ITEM -> this.supplierItemHelper.getFilterableFields()
-            Model.SUPPLIER_PAYMENT -> this.supplierPaymentHelper.getFilterableFields()
-            Model.ORDERED_ITEM -> this.orderedItemHelper.getFilterableFields()
+    fun getSearchableFieldPairs() = getHelper().getSearchableFieldPairs()
 
-            else -> throw IllegalArgumentException("Unknown model type")
-        }
-    }
+    fun getFilterableFields() = getHelper().getFilterableFields()
 
-    fun getWhichViewToInflate(
-        inflater: LayoutInflater,
-        parent: ViewGroup
-    ): ViewDataBinding {
+    fun getWhichViewToInflate(inflater: LayoutInflater, parent: ViewGroup) =
+        getHelper().getViewToInflate(inflater, parent)
 
-        return when (this.modelName) {
-            Model.SUPPLIER -> this.supplierHelper.getViewToInflate(inflater, parent)
-            Model.SUPPLIERS_ITEM -> this.supplierItemHelper.getViewToInflate(
-                inflater,
-                parent
-            )
+    fun getHeading() = getHelper().listHeading
 
-            Model.SUPPLIER_PAYMENT -> this.supplierPaymentHelper.getViewToInflate(
-                inflater,
-                parent
-            )
+    fun getWhichListToFetch() = getHelper()::fetchList
 
-            Model.ORDERED_ITEM -> this.orderedItemHelper.getViewToInflate(
-                inflater,
-                parent
-            )
+    fun getWhichListToFetchFiltered() = getHelper()::fetchListFiltered
 
-            else -> throw Exception("Unknown model type")
-        }
-    }
+    fun getLoadFullListOnNewModelAdded() = getHelper().loadFullListOnNewModelAdded()
 
     fun getContentComparator(): (List<Model>, List<Model>, Int, Int) -> Boolean {
-        return when (this.modelName) {
-            Model.SUPPLIER -> createComparator<Supplier>(
-                *this.supplierHelper.getProperties()
-            )
-
-            Model.SUPPLIERS_ITEM -> createComparator<SupplierItem>(
-                *this.supplierItemHelper.getProperties()
-            )
-
-            Model.SUPPLIER_PAYMENT -> createComparator<SupplierPayment>(
-                *this.supplierPaymentHelper.getProperties()
-            )
-
-            Model.ORDERED_ITEM -> createComparator<OrderedItem>(
-                *this.orderedItemHelper.getProperties()
-            )
-
-            else -> throw IllegalArgumentException("Unknown model type")
-        }
-    }
-
-    fun getHeading(): String {
-        return when (this.modelName) {
-            Model.SUPPLIER -> this.supplierHelper.listHeading
-            Model.SUPPLIERS_ITEM -> this.supplierItemHelper.listHeading
-            Model.SUPPLIER_PAYMENT -> this.supplierPaymentHelper.listHeading
-            Model.ORDERED_ITEM -> this.orderedItemHelper.listHeading
-
-            else -> throw IllegalArgumentException("Unknown model type")
-        }
+        return createComparator(*getHelper().getProperties())
     }
 
     private inline fun <reified T : Model> createComparator(

@@ -100,8 +100,6 @@ class Helper {
             col.whereGreaterThanOrEqualTo(searchField, lowerBound)
                 .whereLessThanOrEqualTo(searchField, upperBound)
 
-        } else if (queryDataType == FirestoreFieldDataType.BOOLEAN) {
-            col.whereEqualTo(searchField, searchQuery.toBoolean())
         } else {
             col.orderBy(searchField).startAt(searchQuery).endAt(searchQuery + "\uf8ff")
         }.limit(limit)
@@ -165,12 +163,15 @@ class Helper {
                         FirestoreFieldDataType.STRING -> {
                             it.result[FieldNames.Commons.VALUE] as String
                         }
+
                         FirestoreFieldDataType.NUMBER -> {
                             it.result[FieldNames.Commons.VALUE] as Number
                         }
+
                         FirestoreFieldDataType.TIMESTAMP -> {
                             it.result[FieldNames.Commons.VALUE] as Timestamp
                         }
+
                         FirestoreFieldDataType.BOOLEAN -> {
                             it.result[FieldNames.Commons.VALUE] as Boolean
                         }

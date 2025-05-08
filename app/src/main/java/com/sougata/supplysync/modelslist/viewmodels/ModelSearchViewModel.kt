@@ -5,11 +5,12 @@ import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.firestore.SupplierRepository
+import com.sougata.supplysync.modelslist.helper.ModelsListHelper
 import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 
-class ModelSearchViewModel(private val modelName: String) : ViewModel() {
+class ModelSearchViewModel(private val helper: ModelsListHelper) : ViewModel() {
 
     val supplierRepository = SupplierRepository()
 
@@ -75,14 +76,7 @@ class ModelSearchViewModel(private val modelName: String) : ViewModel() {
         value: Triple<MutableList<Model>?, Int, String>?
     ) {
         val limit: Long = 20
-        val fetchList =
-            when (this.modelName) {
-                Model.Companion.SUPPLIER -> this.supplierRepository::getSuppliersListFiltered
-                Model.Companion.SUPPLIERS_ITEM -> this.supplierRepository::getSupplierItemsListFiltered
-                Model.Companion.SUPPLIER_PAYMENT -> this.supplierRepository::getSupplierPaymentsListFiltered
-                Model.Companion.ORDERED_ITEM -> this.supplierRepository::getOrderedItemsListFiltered
-                else -> return
-            }
+        val fetchList = this.helper.getWhichListToFetchFiltered()
 
         if (value?.first == null) {
             fetchList(
@@ -114,7 +108,7 @@ class ModelSearchViewModel(private val modelName: String) : ViewModel() {
     }
 
     fun loadLastAddedData() {
-        if (this.modelName.contains("payment", true)) {
+        if (this.helper.getLoadFullListOnNewModelAdded()) {
             this.itemsList.value = Triple(null, Status.NO_CHANGE, "")
             this.noMoreElementLeft = false
             this.lastDocumentSnapshot = null
