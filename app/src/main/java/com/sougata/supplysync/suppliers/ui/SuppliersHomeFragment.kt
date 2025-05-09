@@ -51,9 +51,11 @@ class SuppliersHomeFragment : Fragment() {
 
         this.viewModel = ViewModelProvider(this)[SuppliersHomeViewModel::class.java]
 
-        this.binding.dueToSuppliersAmount.text = Converters.numberToMoneyString(0.00)
+        this.binding.dueToSuppliers.value.text = Converters.numberToMoneyString(0.00)
 
         this.binding.viewModel = this.viewModel
+
+        this.initializeUI()
 
         this.registerSubscribers()
     }
@@ -74,6 +76,13 @@ class SuppliersHomeFragment : Fragment() {
         this._binding = null
     }
 
+    private fun initializeUI() {
+        this.binding.apply {
+            ordersToReceive.heading.text = "Orders to Receive"
+            numberOfSuppliers.heading.text = "Number of Suppliers"
+            dueToSuppliers.heading.text = "Due to Suppliers"
+        }
+    }
 
     private fun registerSubscribers() {
 
@@ -83,7 +92,7 @@ class SuppliersHomeFragment : Fragment() {
 
             } else if (it.second == Status.SUCCESS) {
 
-                this.binding.numberOfSuppliers.text = it.first.toString()
+                this.binding.numberOfSuppliers.value.text = it.first.toString()
 
             } else if (it.second == Status.FAILED) {
 
@@ -98,7 +107,7 @@ class SuppliersHomeFragment : Fragment() {
             if (it.second == Status.STARTED) {
 
             } else if (it.second == Status.SUCCESS) {
-                this.binding.dueToSuppliersAmount.text = Converters.numberToMoneyString(it.first)
+                this.binding.dueToSuppliers.value.text = Converters.numberToMoneyString(it.first)
 
             } else if (it.second == Status.FAILED) {
 
@@ -113,7 +122,7 @@ class SuppliersHomeFragment : Fragment() {
 
             } else if (it.second == Status.SUCCESS) {
 
-                this.binding.ordersToReceiveNumber.text = it.first.toString()
+                this.binding.ordersToReceive.value.text = it.first.toString()
 
             } else if (it.second == Status.FAILED) {
 

@@ -16,6 +16,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentHomeBinding
 import com.sougata.supplysync.home.viewmodels.HomeFragmentViewModel
+import com.sougata.supplysync.sharedviewmodels.ExpensiveValuesViewModel
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
@@ -26,6 +27,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var viewModel: HomeFragmentViewModel
+    private lateinit var expensiveViewModel: ExpensiveValuesViewModel
 
     private var isDataAdded = false
 
@@ -42,12 +44,13 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         this.viewModel = ViewModelProvider(this)[HomeFragmentViewModel::class.java]
+        this.expensiveViewModel = ViewModelProvider(this)[ExpensiveValuesViewModel::class.java]
 
         this.binding.viewModel = this.viewModel
 
         this.binding.lifecycleOwner = this.viewLifecycleOwner
 
-        this.setUpLineCHart(this.binding.purchaseLineChart)
+        this.setUpLineCHart(this.binding.purchaseChart.lineChart)
 
         this.initializeUI()
 
@@ -71,8 +74,26 @@ class HomeFragment : Fragment() {
     }
 
     private fun initializeUI() {
-        this.binding.purchaseChartCalendarBtn.setOnClickListener {
-            openDateRangePicker { startDateMillis, endDateMillis ->
+
+        this.binding.apply {
+            ordersToReceive.heading.text = "Orders to Receive"
+            ordersToShip.heading.text = "Orders to Ship"
+
+            salesByRange.heading.text = "Sales"
+            purchaseByRange.heading.text = "Purchase"
+
+            salesChart.heading.text = "Sales Chart"
+            purchaseChart.heading.text = "Purchase Chart"
+        }
+
+        this.binding.purchaseByRange.calendarBtn.setOnClickListener {
+            this.openDateRangePicker { startDateMillis, endDateMillis ->
+                this.expensiveViewModel.loadPurchaseAmountByRange(startDateMillis, endDateMillis)
+            }
+        }
+
+        this.binding.purchaseChart.calendarBtn.setOnClickListener {
+            this.openDateRangePicker { startDateMillis, endDateMillis ->
                 this.viewModel.loadPurchaseLineChartData(startDateMillis, endDateMillis)
             }
         }
@@ -86,49 +107,25 @@ class HomeFragment : Fragment() {
 
             } else if (it.second == Status.SUCCESS) {
 
-                this.binding.ordersToReceiveNumber.text = it.first.toString()
+                this.binding.ordersToReceive.value.text = it.first.toString()
 
             } else if (it.second == Status.FAILED) {
                 Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
             }
         }
 
-        this.viewModel.purchaseChartData.observe(this.viewLifecycleOwner) {
-
+        this.expensiveViewModel.purchaseAmountByRange.observe(this.viewLifecycleOwner) {
             if (it.second == Status.STARTED) {
-
-                this.binding.progressBarPurchaseChart.visibility = View.VISIBLE
 
             } else if (it.second == Status.SUCCESS) {
 
-                binding.purchaseLineChart.apply {
-
-                    data = it.first
-
-                    axisLeft.valueFormatter = object : IndexAxisValueFormatter() {
-                        override fun getFormattedValue(value: Float): String? {
-                            return Converters.getShortedNumberString(value.toDouble())
-                        }
-                    }
-
-                    setVisibleXRangeMaximum(15f)
-
-                    visibility = View.VISIBLE
-                    if (viewModel.animatePurchaseChart == true) {
-                        animateY(1000)
-                        viewModel.animatePurchaseChart = false
-                    }
-                }
-
-                binding.apply {
-                    progressBarPurchaseChart.visibility = View.GONE
-                    purchaseChartDateRange.visibility = View.VISIBLE
-                }
+                this.binding.purchaseByRange.value.text = Converters.numberToMoneyString(it.first!!)
+                this.binding.purchaseByRange.dateRange.text =
+                    this.expensiveViewModel.purchaseAmountDateRange
 
             } else if (it.second == Status.FAILED) {
                 Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
             }
-
         }
 
         this.parentFragmentManager.setFragmentResultListener(
@@ -143,6 +140,49 @@ class HomeFragment : Fragment() {
 
         }
 
+        this.registerPurchaseChartListener()
+
+    }
+
+    private fun registerPurchaseChartListener() {
+        this.viewModel.purchaseChartData.observe(this.viewLifecycleOwner) {
+
+            if (it.second == Status.STARTED) {
+
+                this.binding.purchaseChart.progressBar.visibility = View.VISIBLE
+
+            } else if (it.second == Status.SUCCESS) {
+
+                this.binding.purchaseChart.lineChart.apply {
+
+                    this.data = it.first
+
+                    this.axisLeft.valueFormatter = object : IndexAxisValueFormatter() {
+                        override fun getFormattedValue(value: Float): String? {
+                            return Converters.getShortedNumberString(value.toDouble())
+                        }
+                    }
+
+                    this.setVisibleXRangeMaximum(15f)
+
+                    this.notifyDataSetChanged()
+
+                    this.visibility = View.VISIBLE
+
+                    if (viewModel.animatePurchaseChart == true) {
+                        animateY(1000)
+                        viewModel.animatePurchaseChart = false
+                    }
+                }
+
+                this.binding.purchaseChart.progressBar.visibility = View.GONE
+                this.binding.purchaseChart.dateRange.text = this.viewModel.purchaseChartDateRange
+
+            } else if (it.second == Status.FAILED) {
+                Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
+            }
+
+        }
     }
 
     private fun setUpLineCHart(myLineChart: LineChart) {

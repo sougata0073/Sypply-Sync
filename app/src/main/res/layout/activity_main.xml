@@ -14,16 +14,19 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:orientation="vertical"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
             <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolBar"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                app:titleTextColor="@color/toolbar_title_color"
                 android:background="@color/night_mode_background"
+                app:menu="@menu/toolbar_menu"
+                app:navigationIcon="@drawable/ic_burger_menu"
+                app:titleCentered="true"
                 app:titleTextAppearance="@style/materialToolbarTitleStyle"
+                app:titleTextColor="@color/toolbar_title_color"
                 tools:title="Home" />
 
             <androidx.fragment.app.FragmentContainerView
@@ -38,12 +41,12 @@
 
         <View
             android:id="@+id/bottomNavBorder"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
             android:layout_gravity="bottom"
             android:layout_marginBottom="70dp"
             android:background="@color/bottom_nav_border_color"
-            android:layout_width="match_parent"
-            app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior"
-            android:layout_height="1dp"/>
+            app:layout_behavior="com.google.android.material.behavior.HideBottomViewOnScrollBehavior" />
 
         <me.ibrahimsn.lib.SmoothBottomBar
             android:id="@+id/bottomNav"

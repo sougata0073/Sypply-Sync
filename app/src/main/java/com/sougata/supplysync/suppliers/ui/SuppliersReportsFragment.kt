@@ -57,7 +57,7 @@ class SuppliersReportsFragment : Fragment() {
 
         this.binding.lifecycleOwner = this.viewLifecycleOwner
 
-        this.setUpBarChart(this.binding.purchasedItemsCompChart)
+        this.setUpBarChart(this.binding.purchasedItemsCompChart.barChart)
 
         this.initializeUI()
 
@@ -123,8 +123,8 @@ class SuppliersReportsFragment : Fragment() {
             }
         }
 
-        this.binding.purchasedItemsChartCompCalendarBtn.setOnClickListener {
-            openDateRangePicker { startDateMillis, endDateMillis ->
+        this.binding.purchasedItemsCompChart.calendarBtn.setOnClickListener {
+            this.openDateRangePicker { startDateMillis, endDateMillis ->
                 this.viewModel.loadPurchasedItemsCompChartData(
                     startDateMillis, endDateMillis
                 )
@@ -146,30 +146,38 @@ class SuppliersReportsFragment : Fragment() {
 
             if (it.second == Status.STARTED) {
 
-                this.binding.progressBarPurchasedItemsCompChart.visibility = View.VISIBLE
+                this.binding.purchasedItemsCompChart.progressBar.visibility = View.VISIBLE
 
             } else if (it.second == Status.SUCCESS) {
 
-                binding.purchasedItemsCompChart.apply {
+                binding.purchasedItemsCompChart.barChart.apply {
 
-                    data = it.first
+                    this.data = it.first
 
-                    xAxis.valueFormatter =
-                        IndexAxisValueFormatter(viewModel.purchasedItemsCompChartXStrings)
+                    this.xAxis.apply {
+                        this.valueFormatter =
+                            IndexAxisValueFormatter(viewModel.purchasedItemsCompChartXStrings)
+                        this.labelRotationAngle = 270f
+                        this.granularity = 1f
+                        this.isGranularityEnabled = true
+                    }
 
-                    setVisibleXRangeMaximum(10f)
+                    this.setVisibleXRangeMaximum(8f)
 
-                    visibility = View.VISIBLE
+                    this.notifyDataSetChanged()
+
+                    this.visibility = View.VISIBLE
+
                     if (viewModel.animatePurchasedItemsCompChart) {
                         animateY(1000)
                         viewModel.animatePurchasedItemsCompChart = false
                     }
                 }
 
-                binding.apply {
-                    progressBarPurchasedItemsCompChart.visibility = View.GONE
-                    purchasedItemsCompDateRange.visibility = View.VISIBLE
-                }
+                this.binding.purchasedItemsCompChart.progressBar.visibility = View.GONE
+                this.binding.purchasedItemsCompChart.dateRange.text =
+                    this.viewModel.purchasedItemsCompChartDateRange
+
 
             } else if (it.second == Status.FAILED) {
                 Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
@@ -188,7 +196,6 @@ class SuppliersReportsFragment : Fragment() {
                 setDrawGridLines(false)
                 textColor = bwColor
                 textSize = 11f
-                granularity = 1f
             }
 
             axisLeft.apply {
@@ -206,7 +213,6 @@ class SuppliersReportsFragment : Fragment() {
             description.isEnabled = false
 
             setFitBars(true)
-
         }
     }
 

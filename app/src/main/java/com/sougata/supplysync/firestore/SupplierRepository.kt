@@ -2,8 +2,9 @@ package com.sougata.supplysync.firestore
 
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.AggregateField
+import com.google.firebase.firestore.AggregateSource
 import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
@@ -43,7 +44,7 @@ class SupplierRepository {
     }
 
     fun insertUserToFirestore(user: User, onComplete: (Int, String) -> Unit) {
-        
+
         val userDoc = mapOf(
             FieldNames.UsersCol.NAME to user.name,
             FieldNames.UsersCol.EMAIL to user.email,
@@ -621,7 +622,7 @@ class SupplierRepository {
         }
     }
 
-    fun getPurchaseAmountByRange(
+    fun getPurchaseAmountsListByRange(
         startTimestamp: Timestamp,
         endTimestamp: Timestamp,
         onComplete: (Int, MutableList<Double>, String) -> Unit
@@ -875,6 +876,45 @@ class SupplierRepository {
         }
     }
 
+    fun getPurchaseAmountByRange(
+        startTimestamp: Timestamp,
+        endTimestamp: Timestamp,
+        onComplete: (Int, Number?, String) -> Unit
+    ) {
+        val orderedItemsCol =
+            this.usersCol.document(this.currentUser.uid)
+                .collection(FieldNames.OrderedItemsCol.SELF_NAME)
+
+        val query = orderedItemsCol
+            .whereGreaterThanOrEqualTo(
+                FieldNames.OrderedItemsCol.ORDER_TIMESTAMP,
+                startTimestamp
+            )
+            .whereLessThanOrEqualTo(
+                FieldNames.OrderedItemsCol.ORDER_TIMESTAMP,
+                endTimestamp
+            ).aggregate(AggregateField.sum(FieldNames.OrderedItemsCol.AMOUNT))
+
+        query.get(AggregateSource.SERVER).addOnCompleteListener {
+            if (it.isSuccessful) {
+                val sum =
+                    it.result.get(AggregateField.sum(FieldNames.OrderedItemsCol.AMOUNT)) as? Number
+
+                if (sum != null) {
+                    onComplete(
+                        Status.SUCCESS,
+                        Converters.numberToDouble(sum),
+                        KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                    )
+                } else {
+                    onComplete(Status.FAILED, null, KeysAndMessages.TASK_FAILED_TO_COMPLETE)
+                }
+
+            } else {
+                onComplete(Status.FAILED, null, it.exception?.message.toString())
+            }
+        }
+    }
 
     private fun createRequiredThings(onComplete: (Int, String) -> Unit) {
 

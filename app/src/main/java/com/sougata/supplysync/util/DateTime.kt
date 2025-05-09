@@ -187,5 +187,17 @@ object DateTime {
         )
     }
 
+    fun getPastDateInMillis(days: Int): Long {
+        val calendar = Calendar.getInstance()
+
+        if (days == 0) {
+            return calendar.timeInMillis
+        }
+
+        calendar.add(Calendar.DAY_OF_MONTH, -days)
+
+        return calendar.timeInMillis
+    }
+
 
 }

@@ -25,7 +25,9 @@ class ModelsListHelper(
             this.supplierRepository
         )
     }
-    private val supplierHelper by lazy { SupplierModelHelper(this.fragment, this.supplierRepository) }
+    private val supplierHelper by lazy {
+        SupplierModelHelper(this.fragment, this.supplierRepository)
+    }
     private val supplierItemHelper by lazy {
         SupplierItemModelHelper(
             this.fragment,
@@ -51,27 +53,27 @@ class ModelsListHelper(
             ?: throw IllegalArgumentException("Unknown model type")
     }
 
-    fun getWhatToDoOnBind() = getHelper()::bind
+    fun getWhatToDoOnBind() = this.getHelper()::bind
 
-    fun getWhatToDoOnFabClick() = getHelper().getFabClickHandler()
+    fun getWhatToDoOnFabClick() = this.getHelper().getFabClickHandler()
 
-    fun getSearchableFieldPairs() = getHelper().getSearchableFieldPairs()
+    fun getSearchableFieldPairs() = this.getHelper().getSearchableFieldPairs()
 
-    fun getFilterableFields() = getHelper().getFilterableFields()
+    fun getFilterableFields() = this.getHelper().getFilterableFields()
 
     fun getWhichViewToInflate(inflater: LayoutInflater, parent: ViewGroup) =
-        getHelper().getViewToInflate(inflater, parent)
+        this.getHelper().getViewToInflate(inflater, parent)
 
-    fun getHeading() = getHelper().listHeading
+    fun getHeading() = this.getHelper().listHeading
 
-    fun getWhichListToFetch() = getHelper()::fetchList
+    fun getWhichListToFetch() = this.getHelper()::fetchList
 
-    fun getWhichListToFetchFiltered() = getHelper()::fetchListFiltered
+    fun getWhichListToFetchFiltered() = this.getHelper()::fetchListFiltered
 
-    fun getLoadFullListOnNewModelAdded() = getHelper().loadFullListOnNewModelAdded()
+    fun getLoadFullListOnNewModelAdded() = this.getHelper().loadFullListOnNewModelAdded()
 
     fun getContentComparator(): (List<Model>, List<Model>, Int, Int) -> Boolean {
-        return createComparator(*getHelper().getProperties())
+        return this.createComparator(*this.getHelper().getProperties())
     }
 
     private inline fun <reified T : Model> createComparator(

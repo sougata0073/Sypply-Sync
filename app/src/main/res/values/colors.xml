@@ -17,4 +17,5 @@
     <color name="active_non_active_button_color">#EBE9E9</color>
     <color name="toolbar_title_color">#6E60F9</color>
     <color name="bottom_nav_border_color">#66A9A9A9</color>
+    <color name="ivory">#E8DECF</color>
 </resources>

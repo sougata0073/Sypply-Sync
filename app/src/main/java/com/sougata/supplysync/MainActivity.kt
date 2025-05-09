@@ -1,6 +1,8 @@
 package com.sougata.supplysync
 
+import com.sougata.supplysync.R
 import android.os.Bundle
+import android.view.Menu
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
@@ -9,6 +11,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.sougata.supplysync.databinding.ActivityMainBinding
 import com.sougata.supplysync.util.AnimationProvider
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,6 +31,7 @@ class MainActivity : AppCompatActivity() {
         this.binding.lifecycleOwner = this
 
         this.setSupportActionBar(this.binding.toolBar)
+
         this.supportActionBar?.title = "Home"
 
         this.setupBottomNav()
@@ -50,9 +54,9 @@ class MainActivity : AppCompatActivity() {
 
             when (destination.id) {
                 R.id.homeFragment -> this.supportActionBar?.title = "Home"
-                R.id.suppliersHomeFragment -> this.supportActionBar?.title = "Suppliers"
-                R.id.customersHomeFragment -> this.supportActionBar?.title = "Customers"
-                R.id.staffsHomeFragment -> this.supportActionBar?.title = "Staffs"
+                R.id.suppliersHomeFragment -> this.supportActionBar?.title = "Suppliers Dashboard"
+                R.id.customersHomeFragment -> this.supportActionBar?.title = "Customers Dashboard"
+                R.id.staffsHomeFragment -> this.supportActionBar?.title = "Staffs Dashboard"
             }
 
             when (destination.id) {
@@ -83,6 +87,11 @@ class MainActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.toolbar_menu, menu)
+        return true
     }
 
     override fun onDestroy() {

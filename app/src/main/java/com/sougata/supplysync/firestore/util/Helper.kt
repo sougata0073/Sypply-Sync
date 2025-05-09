@@ -161,26 +161,30 @@ class Helper {
                 if (it.isSuccessful) {
                     val result = when (fieldDataType) {
                         FirestoreFieldDataType.STRING -> {
-                            it.result[FieldNames.Commons.VALUE] as String
+                            it.result[FieldNames.Commons.VALUE] as? String
                         }
 
                         FirestoreFieldDataType.NUMBER -> {
-                            it.result[FieldNames.Commons.VALUE] as Number
+                            it.result[FieldNames.Commons.VALUE] as? Number
                         }
 
                         FirestoreFieldDataType.TIMESTAMP -> {
-                            it.result[FieldNames.Commons.VALUE] as Timestamp
+                            it.result[FieldNames.Commons.VALUE] as? Timestamp
                         }
 
                         FirestoreFieldDataType.BOOLEAN -> {
-                            it.result[FieldNames.Commons.VALUE] as Boolean
+                            it.result[FieldNames.Commons.VALUE] as? Boolean
                         }
                     }
-                    onComplete(
-                        Status.SUCCESS,
-                        result,
-                        KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
-                    )
+                    if (result != null) {
+                        onComplete(
+                            Status.SUCCESS,
+                            result,
+                            KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                        )
+                    } else {
+                        onComplete(Status.FAILED, "-1", KeysAndMessages.EMPTY_LIST)
+                    }
                 } else {
                     onComplete(Status.FAILED, "-1", it.exception?.message.toString())
                 }

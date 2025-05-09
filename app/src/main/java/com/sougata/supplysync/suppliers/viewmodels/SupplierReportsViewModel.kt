@@ -18,9 +18,6 @@ import kotlinx.coroutines.launch
 
 class SupplierReportsViewModel(application: Application) : AndroidViewModel(application) {
 
-    // This one is for ui
-    val purchasedItemsCompChartRangeDate = MutableLiveData("")
-
     private val supplierRepository = SupplierRepository()
     private val supplierPdfRepository = SupplierPdfRepository()
 
@@ -30,6 +27,7 @@ class SupplierReportsViewModel(application: Application) : AndroidViewModel(appl
     val purchasedItemsCompChartData = MutableLiveData<Triple<BarData?, Int, String>>()
     val purchasedItemsCompChartXStrings = mutableListOf<String>()
     var animatePurchasedItemsCompChart = true
+    var purchasedItemsCompChartDateRange = ""
 
     var pdfByteArray = byteArrayOf()
 
@@ -120,8 +118,7 @@ class SupplierReportsViewModel(application: Application) : AndroidViewModel(appl
                 val startDateString = DateTime.getDateStringFromTimestamp(startTimestamp)
                 val endDateString = DateTime.getDateStringFromTimestamp(endTimestamp)
 
-                this.purchasedItemsCompChartRangeDate.value =
-                    "From: $startDateString To: $endDateString"
+                this.purchasedItemsCompChartDateRange = "From: $startDateString To: $endDateString"
 
                 this.animatePurchasedItemsCompChart = true
                 this.purchasedItemsCompChartData.value = Triple(barData, status, message)
@@ -131,18 +128,8 @@ class SupplierReportsViewModel(application: Application) : AndroidViewModel(appl
 
     fun loadPast30DaysPurchasedItemsCompChart() {
 
-        val currentDate = DateTime.getCurrentDate()
-        var endYear = currentDate.first
-        var endMonth = currentDate.second
-        var endDate = currentDate.third
-
-        val pastDate = DateTime.getCalculatedDate(-30, endYear, endMonth, endDate)
-        var startYear = pastDate.first
-        var startMonth = pastDate.second
-        var startDate = pastDate.third
-
-        val startDateMillis = DateTime.getMillisFromDate(startYear, startMonth, startDate)
-        val endDateMillis = DateTime.getMillisFromDate(endYear, endMonth, endDate)
+        val startDateMillis = DateTime.getPastDateInMillis(30)
+        val endDateMillis = DateTime.getPastDateInMillis(0)
 
         this.loadPurchasedItemsCompChartData(startDateMillis, endDateMillis)
     }

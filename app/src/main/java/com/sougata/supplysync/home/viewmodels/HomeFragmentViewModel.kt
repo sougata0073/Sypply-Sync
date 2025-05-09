@@ -9,7 +9,6 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.sougata.supplysync.R
 import com.sougata.supplysync.firestore.SupplierRepository
-import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.Status
 
@@ -17,7 +16,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 
     private val supplierRepository = SupplierRepository()
 
-    val purchaseChartRangeDate = MutableLiveData("")
+    var purchaseChartDateRange = ""
 
     val purchaseChartData = MutableLiveData<Triple<LineData?, Int, String>>()
     var animatePurchaseChart = true
@@ -31,18 +30,8 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 
     fun loadPast30DaysPurchaseChart() {
 
-        val currentDate = DateTime.getCurrentDate()
-        var endYear = currentDate.first
-        var endMonth = currentDate.second
-        var endDate = currentDate.third
-
-        val pastDate = DateTime.getCalculatedDate(-30, endYear, endMonth, endDate)
-        var startYear = pastDate.first
-        var startMonth = pastDate.second
-        var startDate = pastDate.third
-
-        val startDateMillis = DateTime.getMillisFromDate(startYear, startMonth, startDate)
-        val endDateMillis = DateTime.getMillisFromDate(endYear, endMonth, endDate)
+        val startDateMillis = DateTime.getPastDateInMillis(30)
+        val endDateMillis = DateTime.getPastDateInMillis(0)
 
         this.loadPurchaseLineChartData(startDateMillis, endDateMillis)
     }
@@ -61,7 +50,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         var startTimestamp = DateTime.getTimestampFromMillis(startDateMillis)
         var endTimestamp = DateTime.getTimestampFromMillis(endDateMillis)
 
-        this.supplierRepository.getPurchaseAmountByRange(
+        this.supplierRepository.getPurchaseAmountsListByRange(
             startTimestamp,
             endTimestamp
         ) { status, list, message ->
@@ -97,8 +86,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
                 val startDateString = DateTime.getDateStringFromTimestamp(startTimestamp)
                 val endDateString = DateTime.getDateStringFromTimestamp(endTimestamp)
 
-                this.purchaseChartRangeDate.value =
-                    "From: $startDateString To: $endDateString"
+                this.purchaseChartDateRange = "From: $startDateString To: $endDateString"
 
                 this.animatePurchaseChart = true
                 this.purchaseChartData.value = Triple(lineData, status, message)
