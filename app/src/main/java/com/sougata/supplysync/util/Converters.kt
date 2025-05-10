@@ -11,11 +11,15 @@ object Converters {
 
     fun numberToInt(number: Number) = number.toInt()
 
-    fun numberToMoneyString(value: Number): String {
+    fun numberToMoneyString(value: Number?): String {
 
         val currencyFormat = NumberFormat.getCurrencyInstance(Locale.getDefault())
 
-        return currencyFormat.format(value)
+        return if (value == null) {
+            currencyFormat.format("0.00")
+        } else {
+            currencyFormat.format(value)
+        }
     }
 
     fun getShortedNumberString(num: Double): String {

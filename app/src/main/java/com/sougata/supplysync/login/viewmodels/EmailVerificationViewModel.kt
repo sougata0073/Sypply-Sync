@@ -10,9 +10,9 @@ class EmailVerificationViewModel : ViewModel() {
 
     private val authRepository = AuthRepository()
 
-    val emailVerifiedIndicator = MutableLiveData<Pair<Int, String>>()
+    val emailVerifiedIndicator = MutableLiveData<Pair<Status, String>>()
 
-    val emailAgainSendIndicator = MutableLiveData<Pair<Int, String>>()
+    val emailAgainSendIndicator = MutableLiveData<Pair<Status, String>>()
 
     fun onVerifiedClick(view: View) {
 

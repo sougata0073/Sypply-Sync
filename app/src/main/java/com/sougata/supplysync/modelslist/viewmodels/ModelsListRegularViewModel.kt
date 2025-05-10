@@ -17,7 +17,7 @@ class ModelsListRegularViewModel(private val helper: ModelsListHelper) :
 
     val supplierRepository = SupplierRepository()
 
-    val itemsList = MutableLiveData<Triple<MutableList<Model>?, Int, String>>()
+    val itemsList = MutableLiveData<Triple<MutableList<Model>?, Status, String>>()
     var noMoreElementLeft = false
     var lastDocumentSnapshot: DocumentSnapshot? = null
 
@@ -48,7 +48,7 @@ class ModelsListRegularViewModel(private val helper: ModelsListHelper) :
         this.callListByModelName(this.itemsList.value)
     }
 
-    private fun callListByModelName(value: Triple<MutableList<Model>?, Int, String>?) {
+    private fun callListByModelName(value: Triple<MutableList<Model>?, Status, String>?) {
         val limit: Long = 20
         val fetchList = this.helper.getWhichListToFetch()
 

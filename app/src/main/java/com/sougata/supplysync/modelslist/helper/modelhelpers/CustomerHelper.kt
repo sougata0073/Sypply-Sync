@@ -1,45 +1,39 @@
 package com.sougata.supplysync.modelslist.helper.modelhelpers
 
 import android.content.Intent
-import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.net.toUri
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
-import com.sougata.supplysync.databinding.ItemSuppliersListBinding
-import com.sougata.supplysync.firestore.SupplierRepository
+import com.sougata.supplysync.databinding.ItemCustomerBinding
+import com.sougata.supplysync.firestore.CustomerRepository
 import com.sougata.supplysync.firestore.util.FieldNames
+import com.sougata.supplysync.models.Customer
 import com.sougata.supplysync.models.Model
-import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.modelslist.helper.ModelHelper
-import com.sougata.supplysync.suppliers.ui.SupplierProfileBottomSheetFragment
-import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.FirestoreFieldDataType
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Status
 import kotlin.reflect.KProperty1
 
-class SupplierModelHelper(
+class CustomerHelper(
     private val fragment: Fragment,
-    private val supplierRepository: SupplierRepository
-) :
-    ModelHelper {
+    private val customerRepository: CustomerRepository
+) : ModelHelper {
 
     private val context = this.fragment.requireContext()
     private val fragmentManager = this.fragment.parentFragmentManager
 
-    override val listHeading: String = "All suppliers"
+    override val listHeading = "All customers"
 
     @Suppress("UNCHECKED_CAST")
     override fun getProperties(): Array<KProperty1<Model, *>> {
         return arrayOf(
-            Supplier::name, Supplier::dueAmount, Supplier::phone,
-            Supplier::email, Supplier::note, Supplier::paymentDetails,
-            Supplier::profileImageUrl, Supplier::timestamp
+            Customer::name, Customer::receivableAmount, Customer::dueOrders,
+            Customer::phone, Customer::email, Customer::note, Customer::profileImageUrl
         ) as Array<KProperty1<Model, *>>
     }
 
@@ -47,23 +41,28 @@ class SupplierModelHelper(
         inflater: LayoutInflater,
         parent: ViewGroup
     ): ViewDataBinding {
-        return ItemSuppliersListBinding.inflate(inflater, parent, false)
+        return ItemCustomerBinding.inflate(inflater, parent, false)
     }
 
     override fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
-                FieldNames.SuppliersCol.NAME,
+                FieldNames.CustomersCol.NAME,
                 "Name",
                 FirestoreFieldDataType.STRING
             ),
             Triple(
-                FieldNames.SuppliersCol.DUE_AMOUNT,
-                "Due amount",
+                FieldNames.CustomersCol.RECEIVABLE_AMOUNT,
+                "Receivable amount",
                 FirestoreFieldDataType.NUMBER
             ),
             Triple(
-                FieldNames.SuppliersCol.EMAIL,
+                FieldNames.CustomersCol.DUE_ORDERS,
+                "Due orders",
+                FirestoreFieldDataType.NUMBER
+            ),
+            Triple(
+                FieldNames.CustomersCol.EMAIL,
                 "Email",
                 FirestoreFieldDataType.STRING
             ),
@@ -75,22 +74,16 @@ class SupplierModelHelper(
     }
 
     override fun getFabClickHandler(): () -> Unit {
-        return {
-            val bundle = Bundle().apply {
-                putBoolean(KeysAndMessages.TO_ADD_KEY, true)
-            }
-            this.fragment.findNavController().navigate(
-                R.id.addEditSupplierFragment, bundle, AnimationProvider.slideRightLeftNavOptions()
-            )
-        }
+        TODO("Not yet implemented")
     }
 
     override fun bind(
         binding: ViewDataBinding,
         model: Model
     ) {
-        binding as ItemSuppliersListBinding
-        model as Supplier
+        binding as ItemCustomerBinding
+        model as Customer
+
 
         Glide.with(this.context)
             .load(model.profileImageUrl)
@@ -99,27 +92,28 @@ class SupplierModelHelper(
             .into(binding.profileImage)
 
         binding.apply {
+
             name.text = model.name
             email.text = model.email
 
             callBtn.setOnClickListener {
                 val callIntent = Intent(Intent.ACTION_DIAL, "tel:${model.phone}".toUri())
-                this@SupplierModelHelper.context.startActivity(callIntent)
+                this@CustomerHelper.context.startActivity(callIntent)
             }
 
             root.setOnClickListener {
-                SupplierProfileBottomSheetFragment.Companion.getInstance(model)
-                    .show(this@SupplierModelHelper.fragmentManager, "supplierProfile")
+
             }
+
         }
     }
 
     override fun fetchList(
         lastDocumentSnapshot: DocumentSnapshot?,
         limit: Long,
-        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+        onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        this.supplierRepository.getSuppliersList(
+        this.customerRepository.getCustomersList(
             lastDocumentSnapshot, limit, onComplete
         )
     }
@@ -130,9 +124,9 @@ class SupplierModelHelper(
         queryDataType: FirestoreFieldDataType,
         lastDocumentSnapshot: DocumentSnapshot?,
         limit: Long,
-        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+        onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        this.supplierRepository.getSuppliersListFiltered(
+        this.customerRepository.getCustomersListFiltered(
             searchField, searchQuery, queryDataType, lastDocumentSnapshot, limit, onComplete
         )
     }
@@ -140,4 +134,5 @@ class SupplierModelHelper(
     override fun loadFullListOnNewModelAdded(): Boolean {
         return false
     }
+
 }

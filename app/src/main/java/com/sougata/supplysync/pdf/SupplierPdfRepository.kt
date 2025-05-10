@@ -1,6 +1,5 @@
 package com.sougata.supplysync.pdf
 
-import android.util.Log
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
 import com.itextpdf.layout.Document
@@ -9,7 +8,6 @@ import com.sougata.supplysync.models.SupplierPayment
 import com.sougata.supplysync.pdf.util.Helper
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
-import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -21,7 +19,7 @@ class SupplierPdfRepository {
 
     suspend fun generateSupplierPaymentsPdf(
         supplierPaymentsList: List<SupplierPayment>,
-        onComplete: (Int, ByteArray?, String) -> Unit
+        onComplete: (Status, ByteArray?, String) -> Unit
     ) {
 
         val outputStream = ByteArrayOutputStream()
@@ -85,7 +83,7 @@ class SupplierPdfRepository {
 
     suspend fun generateOrderedItemsPdf(
         orderedItemsList: List<OrderedItem>,
-        onComplete: (Int, ByteArray?, String) -> Unit
+        onComplete: (Status, ByteArray?, String) -> Unit
     ) {
 
         val outputStream = ByteArrayOutputStream()
@@ -129,7 +127,7 @@ class SupplierPdfRepository {
                         """.trimIndent()
 
                     listOf(
-                        oi.itemName,
+                        oi.supplierItemName,
                         oi.supplierName,
                         dateTimeString,
                         orderDetails

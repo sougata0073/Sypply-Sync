@@ -19,7 +19,7 @@ class CreateAccountViewModel : ViewModel() {
     val password = MutableLiveData("")
     val confirmPassword = MutableLiveData("")
 
-    val accountCreationIndicator = MutableLiveData<Triple<User, Int, String>>()
+    val accountCreationIndicator = MutableLiveData<Triple<User, Status, String>>()
 
 
     fun onNextClick(view: View) {

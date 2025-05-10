@@ -6,6 +6,7 @@ import androidx.databinding.ViewDataBinding
 import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.util.FirestoreFieldDataType
+import com.sougata.supplysync.util.Status
 import kotlin.reflect.KProperty1
 
 interface ModelHelper {
@@ -19,7 +20,7 @@ interface ModelHelper {
     fun fetchList(
         lastDocumentSnapshot: DocumentSnapshot?,
         limit: Long,
-        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+        onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     )
     fun fetchListFiltered(
         searchField: String,
@@ -27,7 +28,7 @@ interface ModelHelper {
         queryDataType: FirestoreFieldDataType,
         lastDocumentSnapshot: DocumentSnapshot?,
         limit: Long,
-        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+        onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     )
     fun loadFullListOnNewModelAdded(): Boolean
 }

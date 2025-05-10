@@ -21,7 +21,6 @@ import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.suppliers.viewmodels.AddEditOrderedItemViewModel
 import com.sougata.supplysync.util.AnimationProvider
-import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
@@ -173,8 +172,8 @@ class AddEditOrderedItemFragment : Fragment() {
                 val orderedItemId = this.prevOrderedItem.id
 
                 this.updatedOrderedItem = this.viewModel.updateOrderedItem(
-                    supplierItem?.id ?: this.prevOrderedItem.itemId,
-                    supplierItem?.name ?: this.prevOrderedItem.itemName,
+                    supplierItem?.id ?: this.prevOrderedItem.supplierItemId,
+                    supplierItem?.name ?: this.prevOrderedItem.supplierItemName,
                     supplier?.id ?: this.prevOrderedItem.supplierId,
                     supplier?.name ?: this.prevOrderedItem.supplierName,
                     orderedItemId,
@@ -282,7 +281,7 @@ class AddEditOrderedItemFragment : Fragment() {
 
                 date.value = dateString
 
-                itemName.value = "Item: ${prevOrderedItem.itemName}"
+                itemName.value = "Item: ${prevOrderedItem.supplierItemName}"
                 supplierName.value = "Supplier: ${prevOrderedItem.supplierName}"
                 isReceived.value = prevOrderedItem.isReceived
             }
@@ -326,7 +325,7 @@ class AddEditOrderedItemFragment : Fragment() {
         }
     }
 
-    private fun howToObserve(observedData: Pair<Int, String>, successMessage: String) {
+    private fun howToObserve(observedData: Pair<Status, String>, successMessage: String) {
         if (observedData.first == Status.STARTED) {
 
             this.binding.apply {

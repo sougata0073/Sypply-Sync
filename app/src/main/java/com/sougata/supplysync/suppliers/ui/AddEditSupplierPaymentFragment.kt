@@ -23,7 +23,6 @@ import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.models.SupplierPayment
 import com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierPaymentViewModel
 import com.sougata.supplysync.util.AnimationProvider
-import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
@@ -314,7 +313,7 @@ class AddEditSupplierPaymentFragment : Fragment() {
         }
     }
 
-    private fun howToObserve(observedData: Pair<Int, String>, successMessage: String) {
+    private fun howToObserve(observedData: Pair<Status, String>, successMessage: String) {
         if (observedData.first == Status.STARTED) {
 
             this.binding.apply {

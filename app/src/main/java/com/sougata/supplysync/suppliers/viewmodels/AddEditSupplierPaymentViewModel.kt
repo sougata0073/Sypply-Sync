@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
 import com.sougata.supplysync.firestore.SupplierRepository
+import com.sougata.supplysync.firestore.util.Action
 import com.sougata.supplysync.models.SupplierPayment
-import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.Status
 
@@ -21,8 +21,8 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
 
     private val supplierRepository = SupplierRepository()
 
-    val supplierPaymentAddedIndicator = MutableLiveData<Pair<Int, String>>()
-    val supplierPaymentEditedIndicator = MutableLiveData<Pair<Int, String>>()
+    val supplierPaymentAddedIndicator = MutableLiveData<Pair<Status, String>>()
+    val supplierPaymentEditedIndicator = MutableLiveData<Pair<Status, String>>()
 
     fun addSupplierPayment(supplierId: String, supplierName: String, view: View) {
 
@@ -37,7 +37,7 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
 
         this.supplierRepository.addUpdateSupplierPayment(
             supplierPayment,
-            SupplierRepository.TO_ADD
+            Action.TO_ADD
         ) { status, message ->
             this.supplierPaymentAddedIndicator.postValue(status to message)
         }
@@ -61,7 +61,7 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
 
         this.supplierRepository.addUpdateSupplierPayment(
             supplierPayment,
-            SupplierRepository.TO_UPDATE
+            Action.TO_UPDATE
         ) { status, message ->
             this.supplierPaymentEditedIndicator.postValue(status to message)
         }

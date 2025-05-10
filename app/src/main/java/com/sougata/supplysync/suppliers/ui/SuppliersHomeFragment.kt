@@ -1,6 +1,5 @@
 package com.sougata.supplysync.suppliers.ui
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentSuppliersHomeBinding
-import com.sougata.supplysync.login.LoginActivity
+import com.sougata.supplysync.sharedviewmodels.CommonDataViewModel
 import com.sougata.supplysync.suppliers.viewmodels.SuppliersHomeViewModel
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.KeysAndMessages
@@ -23,9 +22,9 @@ class SuppliersHomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var viewModel: SuppliersHomeViewModel
+    private lateinit var commonDataViewModel: CommonDataViewModel
 
     private var isDataAdded = false
-
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,6 +49,8 @@ class SuppliersHomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         this.viewModel = ViewModelProvider(this)[SuppliersHomeViewModel::class.java]
+        this.commonDataViewModel =
+            ViewModelProvider(requireActivity())[CommonDataViewModel::class.java]
 
         this.binding.dueToSuppliers.value.text = Converters.numberToMoneyString(0.00)
 
@@ -96,7 +97,7 @@ class SuppliersHomeFragment : Fragment() {
 
             } else if (it.second == Status.FAILED) {
 
-                failedToLoadData(it.third)
+                Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
 
             }
 
@@ -111,12 +112,12 @@ class SuppliersHomeFragment : Fragment() {
 
             } else if (it.second == Status.FAILED) {
 
-                failedToLoadData(it.third)
+                Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
 
             }
         }
 
-        this.viewModel.numberOfOrdersToReceive.observe(this.viewLifecycleOwner) {
+        this.commonDataViewModel.numberOfOrdersToReceive.observe(this.viewLifecycleOwner) {
 
             if (it.second == Status.STARTED) {
 
@@ -126,12 +127,12 @@ class SuppliersHomeFragment : Fragment() {
 
             } else if (it.second == Status.FAILED) {
 
-                failedToLoadData(it.third)
+                Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
 
             }
         }
 
-        this.viewModel.allApiCallFinishedIndicator.observe(this.viewLifecycleOwner) {
+        this.viewModel.allApiCallFinished.observe(this.viewLifecycleOwner) {
             if (it) {
                 this.binding.apply {
                     mainProgressBar.visibility = View.GONE
@@ -149,18 +150,14 @@ class SuppliersHomeFragment : Fragment() {
             if (isDataAdded) {
                 this.viewModel.loadDueAmountToSuppliers()
                 this.viewModel.loadNumberOfSuppliers()
-                this.viewModel.loadOrdersToReceive()
+                this.commonDataViewModel.apply {
+                    loadOrdersToReceive()
+                    loadOrdersToDeliver()
+                    loadPast30DaysSalesAmount()
+                    loadPast30DaysPurchaseAmount()
+                }
             }
 
-        }
-    }
-
-    private fun failedToLoadData(message: String) {
-        if (message == KeysAndMessages.USER_NOT_FOUND) {
-            startActivity(Intent(requireActivity(), LoginActivity::class.java))
-            requireActivity().finish()
-        } else {
-            Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()
         }
     }
 }

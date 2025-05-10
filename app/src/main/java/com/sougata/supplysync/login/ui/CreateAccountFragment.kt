@@ -61,7 +61,6 @@ class CreateAccountFragment : Fragment() {
                     parentLayout.alpha = 0.5F
 
                 }
-//                Log.d("MyTag", "Started")
 
             } else if (it.second == Status.SUCCESS) {
 
@@ -79,9 +78,7 @@ class CreateAccountFragment : Fragment() {
                     parentLayout.alpha = 1F
                 }
 
-                Snackbar.make(requireView(), it.second, Snackbar.LENGTH_SHORT).show()
-
-//                Log.d("MyTag", "Failed")
+                Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
 
             }
         }

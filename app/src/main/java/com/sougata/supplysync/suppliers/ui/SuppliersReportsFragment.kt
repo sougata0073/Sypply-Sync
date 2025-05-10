@@ -311,7 +311,7 @@ class SuppliersReportsFragment : Fragment() {
         }
     }
 
-    private fun pdfCreationListener(value: Triple<Int, ByteArray?, String>, view: View) {
+    private fun pdfCreationListener(value: Triple<Status, ByteArray?, String>, view: View) {
         if (value.first == Status.STARTED) {
             this.onPdfCreationStarted()
         } else if (value.first == Status.SUCCESS) {

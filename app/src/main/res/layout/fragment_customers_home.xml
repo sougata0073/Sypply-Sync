@@ -4,6 +4,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.sougata.supplysync.customers.viewmodels.CustomersHomeViewModel" />
+
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -21,25 +29,25 @@
                 android:padding="15dp">
 
                 <include
-                    android:id="@+id/ordersToShip"
+                    android:id="@+id/ordersToDeliver"
                     layout="@layout/value_representer_small"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
-                    app:layout_constraintEnd_toStartOf="@id/mostSoldItem"
+                    app:layout_constraintEnd_toStartOf="@id/numberOfCustomers"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <include
-                    android:id="@+id/mostSoldItem"
+                    android:id="@+id/numberOfCustomers"
                     layout="@layout/value_representer_small"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     android:layout_marginStart="8dp"
-                    app:layout_constraintBottom_toBottomOf="@id/ordersToShip"
+                    app:layout_constraintBottom_toBottomOf="@id/ordersToDeliver"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/ordersToShip"
-                    app:layout_constraintTop_toTopOf="@id/ordersToShip" />
+                    app:layout_constraintStart_toEndOf="@id/ordersToDeliver"
+                    app:layout_constraintTop_toTopOf="@id/ordersToDeliver" />
 
                 <include
                     android:id="@+id/sales"
@@ -47,9 +55,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    app:layout_constraintEnd_toEndOf="@id/mostSoldItem"
-                    app:layout_constraintStart_toStartOf="@id/ordersToShip"
-                    app:layout_constraintTop_toBottomOf="@id/ordersToShip" />
+                    app:layout_constraintEnd_toEndOf="@id/numberOfCustomers"
+                    app:layout_constraintStart_toStartOf="@id/ordersToDeliver"
+                    app:layout_constraintTop_toBottomOf="@id/ordersToDeliver" />
 
                 <include
                     android:id="@+id/receivableFromCustomers"
@@ -60,6 +68,78 @@
                     app:layout_constraintEnd_toEndOf="@id/sales"
                     app:layout_constraintStart_toStartOf="@id/sales"
                     app:layout_constraintTop_toBottomOf="@id/sales" />
+
+                <LinearLayout
+                    android:id="@+id/buttonsLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="vertical"
+                    app:layout_constraintEnd_toEndOf="@id/receivableFromCustomers"
+                    app:layout_constraintStart_toStartOf="@id/receivableFromCustomers"
+                    app:layout_constraintTop_toBottomOf="@id/receivableFromCustomers">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/customersListBtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{viewModel::onCustomersListBtnClicked}"
+                        android:padding="12dp"
+                        android:text="Customers List"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="8dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/ordersListBtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{viewModel::onOrdersListBtnClicked}"
+                        android:padding="12dp"
+                        android:text="Orders List"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="8dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/paymentsListBtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{viewModel::onPaymentsListBtnClicked}"
+                        android:padding="12dp"
+                        android:text="Payments List"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="8dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/itemsListBtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{viewModel::onItemsListBtnClicked}"
+                        android:padding="12dp"
+                        android:text="Items List"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="8dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/reportsBtn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{viewModel::onReportsBtnClicked}"
+                        android:padding="12dp"
+                        android:text="Reports"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="8dp" />
+
+                </LinearLayout>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

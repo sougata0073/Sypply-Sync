@@ -16,52 +16,41 @@ class SuppliersHomeViewModel : ViewModel() {
 
     val supplierRepository = SupplierRepository()
 
-    val numberOfSuppliers = MutableLiveData<Triple<Number, Int, String>>()
-    val dueAmountToSuppliers = MutableLiveData<Triple<Number, Int, String>>()
-    val numberOfOrdersToReceive = MutableLiveData<Triple<Number, Int, String>>()
+    val numberOfSuppliers = MutableLiveData<Triple<Number, Status, String>>()
+    val dueAmountToSuppliers = MutableLiveData<Triple<Number, Status, String>>()
 
-    val allApiCallFinishedIndicator = MutableLiveData(false)
+    val allApiCallFinished = MutableLiveData(false)
 
     // Change the value according to the number of api calls
-    private val totalApiCalls = 3
+    private val totalApiCalls = 2
 
     private var apiCallFinishCount = 0
         set(value) {
             field = value
             if (field == this.totalApiCalls) {
-                this.allApiCallFinishedIndicator.postValue(true)
+                this.allApiCallFinished.value = true
             }
         }
 
     init {
         this.loadNumberOfSuppliers()
         this.loadDueAmountToSuppliers()
-        this.loadOrdersToReceive()
     }
 
     fun loadNumberOfSuppliers() {
-        this.numberOfSuppliers.postValue(Triple(0, Status.STARTED, ""))
+        this.numberOfSuppliers.value = Triple(0, Status.STARTED, "")
 
         this.supplierRepository.getNumberOfSuppliers { status, count, message ->
-            this.numberOfSuppliers.postValue(Triple(count, status, message))
+            this.numberOfSuppliers.value = Triple(count, status, message)
             this.apiCallFinishCount++
         }
     }
 
     fun loadDueAmountToSuppliers() {
-        this.dueAmountToSuppliers.postValue(Triple(0.0, Status.STARTED, ""))
+        this.dueAmountToSuppliers.value = Triple(0.0, Status.STARTED, "")
 
         this.supplierRepository.getDueAmountToSuppliers { status, amount, message ->
-            this.dueAmountToSuppliers.postValue(Triple(amount, status, message))
-            this.apiCallFinishCount++
-        }
-    }
-
-    fun loadOrdersToReceive() {
-        this.numberOfOrdersToReceive.postValue(Triple(0, Status.STARTED, ""))
-
-        this.supplierRepository.getOrdersToReceive { status, count, message ->
-            this.numberOfOrdersToReceive.postValue(Triple(count, status, message))
+            this.dueAmountToSuppliers.value = Triple(amount, status, message)
             this.apiCallFinishCount++
         }
     }

@@ -35,13 +35,13 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
-                    app:layout_constraintEnd_toStartOf="@id/ordersToShip"
-                    app:layout_constraintStart_toEndOf="@id/ordersToShip"
+                    app:layout_constraintEnd_toStartOf="@id/ordersToDeliver"
+                    app:layout_constraintStart_toEndOf="@id/ordersToDeliver"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <include
-                    android:id="@+id/ordersToShip"
+                    android:id="@+id/ordersToDeliver"
                     layout="@layout/value_representer_small"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
@@ -57,7 +57,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    app:layout_constraintEnd_toEndOf="@id/ordersToShip"
+                    app:layout_constraintEnd_toEndOf="@id/ordersToDeliver"
                     app:layout_constraintStart_toStartOf="@id/ordersToReceive"
                     app:layout_constraintTop_toBottomOf="@id/ordersToReceive" />
 

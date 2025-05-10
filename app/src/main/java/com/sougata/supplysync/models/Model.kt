@@ -13,5 +13,10 @@ open class Model {
         const val SUPPLIERS_ITEM = "Supplier item"
         const val SUPPLIER_PAYMENT = "Supplier payment"
         const val ORDERED_ITEM = "Ordered item"
+        const val CUSTOMER = "Customer"
+        const val CUSTOMER_PAYMENT = "Customer payment"
+        const val ORDER = "Order"
+        const val USER_ITEM = "User item"
+
     }
 }

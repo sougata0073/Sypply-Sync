@@ -56,7 +56,7 @@ class Helper {
     }
 
 
-    suspend fun getCurrentUserDetailsParagraph(): Triple<Int, Paragraph?, String> =
+    suspend fun getCurrentUserDetailsParagraph(): Triple<Status, Paragraph?, String> =
         withContext(Dispatchers.Default) {
             val result = firestoreRepository.getCurrentUserDetails()
 

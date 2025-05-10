@@ -16,7 +16,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentHomeBinding
 import com.sougata.supplysync.home.viewmodels.HomeFragmentViewModel
-import com.sougata.supplysync.sharedviewmodels.ExpensiveValuesViewModel
+import com.sougata.supplysync.sharedviewmodels.CommonDataViewModel
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
@@ -27,7 +27,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private lateinit var viewModel: HomeFragmentViewModel
-    private lateinit var expensiveViewModel: ExpensiveValuesViewModel
+    private lateinit var commonDataViewModel: CommonDataViewModel
 
     private var isDataAdded = false
 
@@ -44,7 +44,7 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         this.viewModel = ViewModelProvider(this)[HomeFragmentViewModel::class.java]
-        this.expensiveViewModel = ViewModelProvider(this)[ExpensiveValuesViewModel::class.java]
+        this.commonDataViewModel = ViewModelProvider(requireActivity())[CommonDataViewModel::class.java]
 
         this.binding.viewModel = this.viewModel
 
@@ -76,19 +76,19 @@ class HomeFragment : Fragment() {
     private fun initializeUI() {
 
         this.binding.apply {
-            ordersToReceive.heading.text = "Orders to Receive"
-            ordersToShip.heading.text = "Orders to Ship"
+            ordersToReceive.heading.text = "Orders to receive"
+            ordersToDeliver.heading.text = "Orders to deliver"
 
             salesByRange.heading.text = "Sales"
             purchaseByRange.heading.text = "Purchase"
 
-            salesChart.heading.text = "Sales Chart"
-            purchaseChart.heading.text = "Purchase Chart"
+            salesChart.heading.text = "Sales chart"
+            purchaseChart.heading.text = "Purchase chart"
         }
 
         this.binding.purchaseByRange.calendarBtn.setOnClickListener {
             this.openDateRangePicker { startDateMillis, endDateMillis ->
-                this.expensiveViewModel.loadPurchaseAmountByRange(startDateMillis, endDateMillis)
+                this.commonDataViewModel.loadPurchaseAmountByRange(startDateMillis, endDateMillis)
             }
         }
 
@@ -101,7 +101,7 @@ class HomeFragment : Fragment() {
 
     private fun registerListeners() {
 
-        this.viewModel.numberOfOrdersToReceive.observe(this.viewLifecycleOwner) {
+        this.commonDataViewModel.numberOfOrdersToReceive.observe(this.viewLifecycleOwner) {
 
             if (it.second == Status.STARTED) {
 
@@ -114,14 +114,26 @@ class HomeFragment : Fragment() {
             }
         }
 
-        this.expensiveViewModel.purchaseAmountByRange.observe(this.viewLifecycleOwner) {
+        this.commonDataViewModel.purchaseAmountByRange.observe(this.viewLifecycleOwner) {
             if (it.second == Status.STARTED) {
 
             } else if (it.second == Status.SUCCESS) {
 
-                this.binding.purchaseByRange.value.text = Converters.numberToMoneyString(it.first!!)
+                this.binding.purchaseByRange.value.text = Converters.numberToMoneyString(it.first)
                 this.binding.purchaseByRange.dateRange.text =
-                    this.expensiveViewModel.purchaseAmountDateRange
+                    this.commonDataViewModel.purchaseAmountDateRange
+
+            } else if (it.second == Status.FAILED) {
+                Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
+            }
+        }
+
+        this.commonDataViewModel.numberOfOrdersToDeliver.observe(this.viewLifecycleOwner) {
+            if (it.second == Status.STARTED) {
+
+            } else if (it.second == Status.SUCCESS) {
+
+                this.binding.ordersToDeliver.value.text = it.first.toString()
 
             } else if (it.second == Status.FAILED) {
                 Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
@@ -135,7 +147,12 @@ class HomeFragment : Fragment() {
             this.isDataAdded = bundle.getBoolean(KeysAndMessages.DATA_ADDED_KEY)
 
             if (isDataAdded) {
-                this.viewModel.loadOrdersToReceive()
+                this.commonDataViewModel.apply {
+                    loadOrdersToReceive()
+                    loadOrdersToDeliver()
+                    loadPast30DaysSalesAmount()
+                    loadPast30DaysPurchaseAmount()
+                }
             }
 
         }

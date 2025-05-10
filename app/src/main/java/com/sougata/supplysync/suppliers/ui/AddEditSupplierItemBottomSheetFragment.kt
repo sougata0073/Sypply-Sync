@@ -213,7 +213,7 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
 
     }
 
-    private fun howToObserve(observedData: Pair<Int, String>, successMessage: String) {
+    private fun howToObserve(observedData: Pair<Status, String>, successMessage: String) {
         if (observedData.first == Status.STARTED) {
 
             this.binding.apply {

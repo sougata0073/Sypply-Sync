@@ -9,7 +9,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
-import com.sougata.supplysync.databinding.ItemSupplierItemsListBinding
+import com.sougata.supplysync.databinding.ItemSupplierItemBinding
 import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.models.Model
@@ -20,9 +20,10 @@ import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Status
 import kotlin.reflect.KProperty1
 
-class SupplierItemModelHelper(
+class SupplierItemHelper(
     private val fragment: Fragment,
     private val supplierRepository: SupplierRepository
 ) :
@@ -31,7 +32,7 @@ class SupplierItemModelHelper(
     private val context = this.fragment.requireContext()
     private val fragmentManager = this.fragment.parentFragmentManager
 
-    override val listHeading: String = "Items"
+    override val listHeading: String = "Suppliers items"
 
     @Suppress("UNCHECKED_CAST")
     override fun getProperties(): Array<KProperty1<Model, *>> {
@@ -47,7 +48,7 @@ class SupplierItemModelHelper(
         inflater: LayoutInflater,
         parent: ViewGroup
     ): ViewDataBinding {
-        return ItemSupplierItemsListBinding.inflate(inflater, parent, false)
+        return ItemSupplierItemBinding.inflate(inflater, parent, false)
     }
 
     override fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>> {
@@ -86,7 +87,7 @@ class SupplierItemModelHelper(
         binding: ViewDataBinding,
         model: Model
     ) {
-        binding as ItemSupplierItemsListBinding
+        binding as ItemSupplierItemBinding
         model as SupplierItem
 
         binding.apply {
@@ -96,7 +97,7 @@ class SupplierItemModelHelper(
 
             root.setOnClickListener {
                 MaterialAlertDialogBuilder(
-                    this@SupplierItemModelHelper.context,
+                    this@SupplierItemHelper.context,
                     R.style.materialAlertDialogStyle
                 )
                     .setTitle(model.name)
@@ -108,7 +109,7 @@ class SupplierItemModelHelper(
                             model,
                             KeysAndMessages.TO_EDIT_KEY
                         )
-                            .show(this@SupplierItemModelHelper.fragmentManager, "supplierItemAdd")
+                            .show(this@SupplierItemHelper.fragmentManager, "supplierItemAdd")
 
                     }.show()
             }
@@ -118,7 +119,7 @@ class SupplierItemModelHelper(
     override fun fetchList(
         lastDocumentSnapshot: DocumentSnapshot?,
         limit: Long,
-        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+        onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
         this.supplierRepository.getSupplierItemsList(
             lastDocumentSnapshot,
@@ -133,7 +134,7 @@ class SupplierItemModelHelper(
         queryDataType: FirestoreFieldDataType,
         lastDocumentSnapshot: DocumentSnapshot?,
         limit: Long,
-        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+        onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
         this.supplierRepository.getSupplierItemsListFiltered(
             searchField,

@@ -56,6 +56,50 @@ object FieldNames {
         const val TIMESTAMP = "timestamp"
     }
 
+    object CustomersCol {
+        const val SELF_NAME = "customers"
+        const val NAME = "name"
+        const val RECEIVABLE_AMOUNT = "receivable_amount"
+        const val DUE_ORDERS = "due_orders"
+        const val PHONE = "phone"
+        const val EMAIL = "email"
+        const val NOTE = "note"
+        const val PROFILE_IMAGE_URL = "profile_image_url"
+        const val TIMESTAMP = "timestamp"
+    }
+
+    object CustomerPaymentsCol {
+        const val SELF_NAME = "customer_payments"
+        const val AMOUNT = "amount"
+        const val PAYMENT_TIMESTAMP = "payment_timestamp"
+        const val NOTE = "note"
+        const val CUSTOMER_ID = "customer_id"
+        const val CUSTOMER_NAME = "customer_name"
+        const val TIMESTAMP = "timestamp"
+    }
+
+    object OrdersCol {
+        const val SELF_NAME = "orders"
+        const val USER_ITEM_ID = "user_item_id"
+        const val USER_ITEM_NAME = "user_item_name"
+        const val QUANTITY = "quantity"
+        const val AMOUNT = "amount"
+        const val CUSTOMER_ID = "customer_id"
+        const val CUSTOMER_NAME = "customer_name"
+        const val DELIVERY_TIMESTAMP = "delivery_timestamp"
+        const val IS_DELIVERED = "is_delivered"
+        const val TIMESTAMP = "timestamp"
+    }
+
+    object UserItemsCol {
+        const val SELF_NAME = "users"
+        const val NAME = "name"
+        const val IN_STOCK = "in_stock"
+        const val PRICE = "price"
+        const val DETAILS = "details"
+        const val TIMESTAMP = "timestamp"
+    }
+
     object ValuesCol {
         const val SELF_NAME = "values"
 
@@ -76,6 +120,21 @@ object FieldNames {
 
         object SuppliersDueAmountDoc {
             const val SELF_NAME = "suppliers_due_amount"
+            const val VALUE = "value"
+        }
+
+        object OrdersToDeliverDoc {
+            const val SELF_NAME = "orders_to_deliver"
+            const val VALUE = "value"
+        }
+
+        object CustomersCountDoc {
+            const val SELF_NAME = "customers_count"
+            const val VALUE = "value"
+        }
+
+        object ReceivableAmountFromCustomersDoc {
+            const val SELF_NAME = "receivable_amount_from_customers"
             const val VALUE = "value"
         }
     }

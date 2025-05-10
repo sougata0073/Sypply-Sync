@@ -9,34 +9,35 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
-import com.sougata.supplysync.databinding.ItemSupplierPaymentsListBinding
+import com.sougata.supplysync.databinding.ItemOrderedItemBinding
 import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.models.Model
-import com.sougata.supplysync.models.SupplierPayment
+import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.modelslist.helper.ModelHelper
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Status
 import kotlin.reflect.KProperty1
 
-class SupplierPaymentModelHelper(
+class OrderedItemHelper(
     private val fragment: Fragment,
     private val supplierRepository: SupplierRepository
-) :
-    ModelHelper {
+) : ModelHelper {
 
     private val context = this.fragment.requireContext()
 
-    override val listHeading: String = "Payments"
+    override val listHeading: String = "Ordered items"
 
     @Suppress("UNCHECKED_CAST")
     override fun getProperties(): Array<KProperty1<Model, *>> {
         return arrayOf(
-            SupplierPayment::amount, SupplierPayment::paymentTimestamp,
-            SupplierPayment::note, SupplierPayment::supplierId, SupplierPayment::timestamp
+            OrderedItem::supplierItemId, OrderedItem::supplierItemName, OrderedItem::quantity,
+            OrderedItem::amount, OrderedItem::supplierId, OrderedItem::supplierName,
+            OrderedItem::orderTimestamp, OrderedItem::isReceived
         ) as Array<KProperty1<Model, *>>
     }
 
@@ -44,35 +45,48 @@ class SupplierPaymentModelHelper(
         inflater: LayoutInflater,
         parent: ViewGroup
     ): ViewDataBinding {
-        return ItemSupplierPaymentsListBinding.inflate(
-            inflater,
-            parent,
-            false
-        )
+        return ItemOrderedItemBinding.inflate(inflater, parent, false)
     }
 
     override fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
-                FieldNames.SupplierPaymentsCol.AMOUNT,
+                FieldNames.OrderedItemsCol.ITEM_NAME,
+                "Item name",
+                FirestoreFieldDataType.STRING
+            ),
+            Triple(
+                FieldNames.OrderedItemsCol.QUANTITY,
+                "Quantity",
+                FirestoreFieldDataType.NUMBER
+            ),
+            Triple(
+                FieldNames.OrderedItemsCol.AMOUNT,
                 "Amount",
                 FirestoreFieldDataType.NUMBER
             ),
             Triple(
-                FieldNames.SupplierPaymentsCol.PAYMENT_TIMESTAMP,
-                "Payment date",
-                FirestoreFieldDataType.TIMESTAMP
-            ),
-            Triple(
-                FieldNames.SupplierPaymentsCol.SUPPLIER_NAME,
+                FieldNames.OrderedItemsCol.SUPPLIER_NAME,
                 "Supplier name",
                 FirestoreFieldDataType.STRING
+            ),
+            Triple(
+                FieldNames.OrderedItemsCol.ORDER_TIMESTAMP,
+                "Order time",
+                FirestoreFieldDataType.TIMESTAMP
             )
         )
     }
 
     override fun getFilterableFields(): Array<Pair<String, (Model) -> Boolean>> {
-        return emptyArray()
+        return arrayOf(
+            "Received" to { model ->
+                (model as OrderedItem).isReceived
+            },
+            "Not Received" to { model ->
+                (model as OrderedItem).isReceived.not()
+            }
+        )
     }
 
     override fun getFabClickHandler(): () -> Unit {
@@ -81,45 +95,50 @@ class SupplierPaymentModelHelper(
                 putBoolean(KeysAndMessages.TO_ADD_KEY, true)
             }
             this.fragment.findNavController().navigate(
-                R.id.addEditSupplierPaymentFragment,
+                R.id.addEditOrderedItemFragment,
                 bundle,
                 AnimationProvider.slideRightLeftNavOptions()
             )
         }
     }
 
-    override fun bind(
-        binding: ViewDataBinding,
-        model: Model
-    ) {
-        binding as ItemSupplierPaymentsListBinding
-        model as SupplierPayment
+    override fun bind(binding: ViewDataBinding, model: Model) {
+        binding as ItemOrderedItemBinding
+        model as OrderedItem
 
         binding.apply {
 
-            val dateString = DateTime.getDateStringFromTimestamp(model.paymentTimestamp)
-            val timeString = DateTime.getTimeStringFromTimestamp(model.paymentTimestamp)
-
-            name.text = "To: ${model.supplierName}"
-            dateTime.text = "At: $dateString On: $timeString"
+            itemName.text = model.supplierItemName
+            date.text = DateTime.getDateStringFromTimestamp(model.orderTimestamp)
             amount.text = Converters.numberToMoneyString(model.amount)
 
+            if (model.isReceived) {
+                receiveStatus.text = "Received"
+                receiveStatus.setTextColor(this@OrderedItemHelper.context.getColor(R.color.green))
+            } else {
+                receiveStatus.text = "Not received"
+                receiveStatus.setTextColor(this@OrderedItemHelper.context.getColor(R.color.red))
+            }
+
             root.setOnClickListener {
+
+                val message =
+                    "Supplier name: ${model.supplierName}\nItem quantity: ${model.quantity}"
+
                 MaterialAlertDialogBuilder(
-                    this@SupplierPaymentModelHelper.context,
+                    this@OrderedItemHelper.context,
                     R.style.materialAlertDialogStyle
-                )
-                    .setTitle("To: ${model.supplierName}")
-                    .setMessage(model.note)
+                ).setTitle(model.supplierItemName)
+                    .setMessage(message)
                     .setPositiveButton("Close") { dialog, _ -> dialog.dismiss() }
                     .setNeutralButton("Edit") { dialog, _ ->
                         val bundle = Bundle().apply {
                             putBoolean(KeysAndMessages.TO_EDIT_KEY, true)
-                            putParcelable("supplierPayment", model)
+                            putParcelable("orderedItem", model)
                         }
-                        this@SupplierPaymentModelHelper.fragment.findNavController()
+                        this@OrderedItemHelper.fragment.findNavController()
                             .navigate(
-                                R.id.addEditSupplierPaymentFragment,
+                                R.id.addEditOrderedItemFragment,
                                 bundle,
                                 AnimationProvider.slideRightLeftNavOptions()
                             )
@@ -131,9 +150,9 @@ class SupplierPaymentModelHelper(
     override fun fetchList(
         lastDocumentSnapshot: DocumentSnapshot?,
         limit: Long,
-        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+        onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        this.supplierRepository.getSupplierPaymentsList(
+        this.supplierRepository.getOrderedItemsList(
             lastDocumentSnapshot,
             limit,
             onComplete
@@ -146,9 +165,9 @@ class SupplierPaymentModelHelper(
         queryDataType: FirestoreFieldDataType,
         lastDocumentSnapshot: DocumentSnapshot?,
         limit: Long,
-        onComplete: (Int, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
+        onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        this.supplierRepository.getSupplierPaymentsListFiltered(
+        this.supplierRepository.getOrderedItemsListFiltered(
             searchField,
             searchQuery,
             queryDataType,
@@ -159,6 +178,7 @@ class SupplierPaymentModelHelper(
     }
 
     override fun loadFullListOnNewModelAdded(): Boolean {
-        return true
+        return false
     }
+
 }

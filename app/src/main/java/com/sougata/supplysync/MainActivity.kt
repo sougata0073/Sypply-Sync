@@ -1,6 +1,5 @@
 package com.sougata.supplysync
 
-import com.sougata.supplysync.R
 import android.os.Bundle
 import android.view.Menu
 import androidx.activity.enableEdgeToEdge

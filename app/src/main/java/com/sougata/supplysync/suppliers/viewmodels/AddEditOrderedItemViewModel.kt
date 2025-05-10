@@ -6,11 +6,10 @@ import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
 import com.sougata.supplysync.firestore.SupplierRepository
+import com.sougata.supplysync.firestore.util.Action
 import com.sougata.supplysync.models.OrderedItem
-import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.Status
-import java.util.Date
 
 class AddEditOrderedItemViewModel : ViewModel() {
 
@@ -23,8 +22,8 @@ class AddEditOrderedItemViewModel : ViewModel() {
 
     private val supplierRepository = SupplierRepository()
 
-    val orderedItemAddedIndicator = MutableLiveData<Pair<Int, String>>()
-    val orderedItemEditedIndicator = MutableLiveData<Pair<Int, String>>()
+    val orderedItemAddedIndicator = MutableLiveData<Pair<Status, String>>()
+    val orderedItemEditedIndicator = MutableLiveData<Pair<Status, String>>()
 
     fun addOrderedItem(
         itemId: String,
@@ -45,7 +44,7 @@ class AddEditOrderedItemViewModel : ViewModel() {
 
         this.supplierRepository.addUpdateOrderedItem(
             orderedItem,
-            SupplierRepository.TO_ADD
+            Action.TO_ADD
         ) { status, message ->
             this.orderedItemAddedIndicator.postValue(status to message)
         }
@@ -71,7 +70,7 @@ class AddEditOrderedItemViewModel : ViewModel() {
 
         this.supplierRepository.addUpdateOrderedItem(
             orderedItem,
-            SupplierRepository.TO_UPDATE
+            Action.TO_UPDATE
         ) { status, message ->
             this.orderedItemEditedIndicator.postValue(status to message)
         }
@@ -124,8 +123,8 @@ class AddEditOrderedItemViewModel : ViewModel() {
         }
 
         return OrderedItem(
-            itemId = itemId,
-            itemName = itemName,
+            supplierItemId = itemId,
+            supplierItemName = itemName,
             quantity = quantity,
             amount = amount,
             supplierId = supplierId,

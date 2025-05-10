@@ -18,14 +18,11 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 
     var purchaseChartDateRange = ""
 
-    val purchaseChartData = MutableLiveData<Triple<LineData?, Int, String>>()
+    val purchaseChartData = MutableLiveData<Triple<LineData?, Status, String>>()
     var animatePurchaseChart = true
-
-    val numberOfOrdersToReceive = MutableLiveData<Triple<Number, Int, String>>()
 
     init {
         this.loadPast30DaysPurchaseChart()
-        this.loadOrdersToReceive()
     }
 
     fun loadPast30DaysPurchaseChart() {
@@ -34,14 +31,6 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         val endDateMillis = DateTime.getPastDateInMillis(0)
 
         this.loadPurchaseLineChartData(startDateMillis, endDateMillis)
-    }
-
-    fun loadOrdersToReceive() {
-        this.numberOfOrdersToReceive.postValue(Triple(0, Status.STARTED, ""))
-
-        this.supplierRepository.getOrdersToReceive { status, count, message ->
-            this.numberOfOrdersToReceive.postValue(Triple(count, status, message))
-        }
     }
 
     fun loadPurchaseLineChartData(startDateMillis: Long, endDateMillis: Long) {
@@ -93,33 +82,5 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
             }
         }
     }
-
-
-//    fun getLineChartData(context: Context): LineData {
-//
-//        val list = listOf(
-//            Entry(0f, 10F), Entry(1f, 20f), Entry(2f, 5f), Entry(3f, 15f),
-//            Entry(4f, 50f), Entry(5f, 30f), Entry(6f, 25f), Entry(7f, 40f),
-//            Entry(8f, 69f), Entry(9f, 75f), Entry(10f, 50f), Entry(11f, 60f),
-//            Entry(12f, 70f), Entry(13f, 80f), Entry(14f, 90f), Entry(15f, 100f)
-//        )
-//
-//        val lineDataSet = LineDataSet(list, "Amount").apply {
-//            color = context.getColor(R.color.primary_color)
-//            setDrawFilled(true)
-//            fillColor = context.getColor(R.color.primary_color)
-//            setDrawCircles(false)
-//            setDrawValues(false)
-//            valueTextColor = context.getColor(R.color.bw)
-//            valueTextSize = 11f
-//            mode = LineDataSet.Mode.CUBIC_BEZIER
-//
-//            fillDrawable =
-//                AppCompatResources.getDrawable(context, R.drawable.line_chart_gradient_bg)
-//        }
-//
-//        return LineData().apply { addDataSet(lineDataSet) }
-//
-//    }
 
 }

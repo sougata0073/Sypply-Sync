@@ -14,7 +14,7 @@ class ModelSearchViewModel(private val helper: ModelsListHelper) : ViewModel() {
 
     val supplierRepository = SupplierRepository()
 
-    val itemsList = MutableLiveData<Triple<MutableList<Model>?, Int, String>>()
+    val itemsList = MutableLiveData<Triple<MutableList<Model>?, Status, String>>()
     var noMoreElementLeft = false
     var lastDocumentSnapshot: DocumentSnapshot? = null
 
@@ -73,7 +73,7 @@ class ModelSearchViewModel(private val helper: ModelsListHelper) : ViewModel() {
         searchField: String,
         searchQuery: String,
         queryDataType: FirestoreFieldDataType,
-        value: Triple<MutableList<Model>?, Int, String>?
+        value: Triple<MutableList<Model>?, Status, String>?
     ) {
         val limit: Long = 20
         val fetchList = this.helper.getWhichListToFetchFiltered()

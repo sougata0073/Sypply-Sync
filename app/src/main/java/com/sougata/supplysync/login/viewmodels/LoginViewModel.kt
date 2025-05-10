@@ -14,7 +14,7 @@ class LoginViewModel : ViewModel() {
     val email = MutableLiveData("")
     val password = MutableLiveData("")
 
-    val accountLoginIndicator = MutableLiveData<Pair<Int, String>>()
+    val accountLoginIndicator = MutableLiveData<Pair<Status, String>>()
 
     fun onLoginClick(view: View) {
 

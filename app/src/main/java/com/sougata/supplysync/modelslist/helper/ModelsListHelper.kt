@@ -3,12 +3,17 @@ package com.sougata.supplysync.modelslist.helper
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.sougata.supplysync.firestore.CustomerRepository
 import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.models.Model
-import com.sougata.supplysync.modelslist.helper.modelhelpers.OrderedItemModelHelper
-import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierModelHelper
-import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierItemModelHelper
-import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierPaymentModelHelper
+import com.sougata.supplysync.modelslist.helper.modelhelpers.CustomerHelper
+import com.sougata.supplysync.modelslist.helper.modelhelpers.CustomerPaymentHelper
+import com.sougata.supplysync.modelslist.helper.modelhelpers.OrderHelper
+import com.sougata.supplysync.modelslist.helper.modelhelpers.OrderedItemHelper
+import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierHelper
+import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierItemHelper
+import com.sougata.supplysync.modelslist.helper.modelhelpers.SupplierPaymentHelper
+import com.sougata.supplysync.modelslist.helper.modelhelpers.UserItemHelper
 
 class ModelsListHelper(
     private val modelName: String,
@@ -16,28 +21,53 @@ class ModelsListHelper(
 ) {
 
     val supplierRepository by lazy { SupplierRepository() }
+    val customerRepository by lazy { CustomerRepository() }
 
     // Add new helpers to the map
 
     private val orderedItemHelper by lazy {
-        OrderedItemModelHelper(
+        OrderedItemHelper(
             this.fragment,
             this.supplierRepository
         )
     }
     private val supplierHelper by lazy {
-        SupplierModelHelper(this.fragment, this.supplierRepository)
+        SupplierHelper(this.fragment, this.supplierRepository)
     }
     private val supplierItemHelper by lazy {
-        SupplierItemModelHelper(
+        SupplierItemHelper(
             this.fragment,
             this.supplierRepository
         )
     }
     private val supplierPaymentHelper by lazy {
-        SupplierPaymentModelHelper(
+        SupplierPaymentHelper(
             this.fragment,
             this.supplierRepository
+        )
+    }
+    private val customerHelper by lazy {
+        CustomerHelper(
+            this.fragment,
+            this.customerRepository
+        )
+    }
+    private val customerPaymentHelper by lazy {
+        CustomerPaymentHelper(
+            this.fragment,
+            this.customerRepository
+        )
+    }
+    private val orderHelper by lazy {
+        OrderHelper(
+            this.fragment,
+            this.customerRepository
+        )
+    }
+    private val userItemHelper by lazy {
+        UserItemHelper(
+            this.fragment,
+            this.customerRepository
         )
     }
 
@@ -45,7 +75,11 @@ class ModelsListHelper(
         Model.SUPPLIER to this.supplierHelper,
         Model.SUPPLIERS_ITEM to this.supplierItemHelper,
         Model.SUPPLIER_PAYMENT to this.supplierPaymentHelper,
-        Model.ORDERED_ITEM to this.orderedItemHelper
+        Model.ORDERED_ITEM to this.orderedItemHelper,
+        Model.CUSTOMER to this.customerHelper,
+        Model.CUSTOMER_PAYMENT to this.customerPaymentHelper,
+        Model.ORDER to this.orderHelper,
+        Model.USER_ITEM to this.userItemHelper
     )
 
     private fun getHelper(): ModelHelper {

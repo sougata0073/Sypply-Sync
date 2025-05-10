@@ -11,7 +11,6 @@ import com.github.mikephil.charting.utils.ColorTemplate
 import com.sougata.supplysync.R
 import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.pdf.SupplierPdfRepository
-import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.Status
 import kotlinx.coroutines.launch
@@ -21,10 +20,10 @@ class SupplierReportsViewModel(application: Application) : AndroidViewModel(appl
     private val supplierRepository = SupplierRepository()
     private val supplierPdfRepository = SupplierPdfRepository()
 
-    val supplierPaymentsListPdf = MutableLiveData<Triple<Int, ByteArray?, String>>()
-    val orderedItemsListPdf = MutableLiveData<Triple<Int, ByteArray?, String>>()
+    val supplierPaymentsListPdf = MutableLiveData<Triple<Status, ByteArray?, String>>()
+    val orderedItemsListPdf = MutableLiveData<Triple<Status, ByteArray?, String>>()
 
-    val purchasedItemsCompChartData = MutableLiveData<Triple<BarData?, Int, String>>()
+    val purchasedItemsCompChartData = MutableLiveData<Triple<BarData?, Status, String>>()
     val purchasedItemsCompChartXStrings = mutableListOf<String>()
     var animatePurchasedItemsCompChart = true
     var purchasedItemsCompChartDateRange = ""

@@ -3,6 +3,7 @@ package com.sougata.supplysync.firestore
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.sougata.supplysync.firestore.util.Helper
 import com.sougata.supplysync.models.User
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
@@ -10,9 +11,10 @@ import com.sougata.supplysync.util.Status
 class AuthRepository {
 
     private val auth = Firebase.auth
+    private val helper = Helper()
 
     fun createAccount(
-        user: User, password: String, onComplete: (Int, String) -> Unit
+        user: User, password: String, onComplete: (Status, String) -> Unit
     ) {
 
         this.auth.createUserWithEmailAndPassword(user.email, password)
@@ -25,9 +27,7 @@ class AuthRepository {
 
                         user.uid = currentUser.uid
 
-                        val supplierRepository = SupplierRepository()
-
-                        supplierRepository.insertUserToFirestore(user) { status, message ->
+                        this.helper.insertUserToFirestore(user) { status, message ->
 
                             if (status == Status.SUCCESS) {
                                 this.sendEmailVerificationLink { status, message ->
@@ -50,7 +50,7 @@ class AuthRepository {
 
     }
 
-    fun sendEmailVerificationLink(onComplete: (Int, String) -> Unit) {
+    fun sendEmailVerificationLink(onComplete: (Status, String) -> Unit) {
         val currentUser = this.auth.currentUser
 
         currentUser?.sendEmailVerification()?.addOnCompleteListener { emailSendTask ->
@@ -66,7 +66,7 @@ class AuthRepository {
         }
     }
 
-    fun verifyUsersEmail(onComplete: (Int, String) -> Unit) {
+    fun verifyUsersEmail(onComplete: (Status, String) -> Unit) {
 
         val currentUser = this.auth.currentUser
 
@@ -98,7 +98,7 @@ class AuthRepository {
 
 
     fun loginAccount(
-        email: String, password: String, onComplete: (Int, String) -> Unit
+        email: String, password: String, onComplete: (Status, String) -> Unit
     ) {
 
         this.auth.signInWithEmailAndPassword(email, password)
@@ -116,7 +116,7 @@ class AuthRepository {
             }
     }
 
-    fun deleteAccount(email: String, password: String, onComplete: (Int, String) -> Unit) {
+    fun deleteAccount(email: String, password: String, onComplete: (Status, String) -> Unit) {
         val currentUser = this.auth.currentUser
 
         val authCredential = EmailAuthProvider.getCredential(email, password)
