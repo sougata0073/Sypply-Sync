@@ -6,10 +6,10 @@ import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
 import com.sougata.supplysync.firestore.SupplierRepository
-import com.sougata.supplysync.firestore.util.Action
 import com.sougata.supplysync.models.SupplierPayment
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.Status
+import java.util.UUID
 
 class AddEditSupplierPaymentViewModel : ViewModel() {
 
@@ -27,7 +27,12 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
     fun addSupplierPayment(supplierId: String, supplierName: String, view: View) {
 
         val supplierPayment = try {
-            this.processSupplerPayment(supplierId, supplierName)
+            this.processSupplerPayment(
+                UUID.randomUUID().toString(),
+                Timestamp.now(),
+                supplierId,
+                supplierName
+            )
         } catch (e: Exception) {
             Snackbar.make(view, e.message.toString(), Snackbar.LENGTH_SHORT).show()
             return
@@ -35,9 +40,8 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
 
         this.supplierPaymentAddedIndicator.postValue(Status.STARTED to "")
 
-        this.supplierRepository.addUpdateSupplierPayment(
-            supplierPayment,
-            Action.TO_ADD
+        this.supplierRepository.addSupplierPayment(
+            supplierPayment
         ) { status, message ->
             this.supplierPaymentAddedIndicator.postValue(status to message)
         }
@@ -45,13 +49,14 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
     }
 
     fun updateSupplierPayment(
+        supplierPaymentId: String,
+        timestamp: Timestamp,
         supplierId: String,
         supplierName: String,
-        supplierPaymentId: String,
         view: View
     ): SupplierPayment? {
         val supplierPayment = try {
-            this.processSupplerPayment(supplierId, supplierName, supplierPaymentId)
+            this.processSupplerPayment(supplierPaymentId, timestamp, supplierId, supplierName)
         } catch (e: Exception) {
             Snackbar.make(view, e.message.toString(), Snackbar.LENGTH_SHORT).show()
             return null
@@ -59,9 +64,8 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
 
         this.supplierPaymentEditedIndicator.postValue(Status.STARTED to "")
 
-        this.supplierRepository.addUpdateSupplierPayment(
-            supplierPayment,
-            Action.TO_UPDATE
+        this.supplierRepository.updateSupplierPayment(
+            supplierPayment
         ) { status, message ->
             this.supplierPaymentEditedIndicator.postValue(status to message)
         }
@@ -70,9 +74,10 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
     }
 
     private fun processSupplerPayment(
+        supplierPaymentId: String,
+        timestamp: Timestamp,
         supplierId: String,
         supplierName: String,
-        supplierPaymentId: String? = null
     ): SupplierPayment {
         val amountString = this.amount.value.orEmpty()
         val dateString = this.date.value.orEmpty()
@@ -100,12 +105,13 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
         }
 
         return SupplierPayment(
-            amount = amount,
-            paymentTimestamp = paymentTimestamp,
-            note = note,
-            supplierId = supplierId,
-            supplierName = supplierName
-        ).apply { id = supplierPaymentId.orEmpty() }
+            supplierPaymentId, timestamp,
+            amount,
+            paymentTimestamp,
+            note,
+            supplierId,
+            supplierName
+        )
     }
 
 }

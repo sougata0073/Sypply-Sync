@@ -12,10 +12,10 @@ class CommonDataViewModel : ViewModel() {
     private val suppliersRepo = SupplierRepository()
     private val customerRepo = CustomerRepository()
 
-    val purchaseAmountByRange = MutableLiveData<Triple<Number, Status, String>>()
-    val salesAmountByRange = MutableLiveData<Triple<Number, Status, String>>()
-    val numberOfOrdersToReceive = MutableLiveData<Triple<Number, Status, String>>()
-    val numberOfOrdersToDeliver = MutableLiveData<Triple<Number, Status, String>>()
+    val purchaseAmountByRange = MutableLiveData<Triple<Number?, Status, String>>()
+    val salesAmountByRange = MutableLiveData<Triple<Number?, Status, String>>()
+    val numberOfOrdersToReceive = MutableLiveData<Triple<Number?, Status, String>>()
+    val numberOfOrdersToDeliver = MutableLiveData<Triple<Number?, Status, String>>()
 
     var purchaseAmountDateRange = ""
     var salesAmountDateRange = ""

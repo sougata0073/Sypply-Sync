@@ -63,4 +63,9 @@
         android:name="com.sougata.supplysync.pdf.ui.PdfViewerFragment"
         android:label="fragment_pdf_viewer"
         tools:layout="@layout/fragment_pdf_viewer"/>
+    <fragment
+        android:id="@+id/addEditCustomerFragment"
+        android:name="com.sougata.supplysync.customers.ui.AddEditCustomerFragment"
+        android:label="fragment_add_edit_customer"
+        tools:layout="@layout/fragment_add_edit_customer"/>
 </navigation>

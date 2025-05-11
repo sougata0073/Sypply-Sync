@@ -1,5 +1,6 @@
 package com.sougata.supplysync.modelslist.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.firestore.DocumentSnapshot
@@ -117,46 +118,60 @@ class ModelSearchViewModel(private val helper: ModelsListHelper) : ViewModel() {
     }
 
     fun deleteModel(model: Model) {
-        val list = this.itemsList.value?.first
+        val data = this.itemsList.value
+        if (data == null) {
+            return
+        }
+        val prevStatus = data.second
+        val prevMessage = data.third
 
-        if (list == null) {
+        val newList = data.first
+        var deleteIndex = -1
+
+        if (newList == null) {
             return
         }
 
-        for ((i, item) in list.withIndex()) {
+        for ((i, item) in newList.withIndex()) {
             if (item.id == model.id) {
-                list.removeAt(i)
-                this.itemsList.value =
-                    Triple(
-                        list,
-                        Status.SUCCESS,
-                        if (list.isEmpty()) KeysAndMessages.EMPTY_LIST else KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
-                    )
+                deleteIndex = i
                 break
             }
         }
 
-        if (list.isEmpty()) {
-            this.lastDocumentSnapshot = null
-            this.noMoreElementLeft = true
+        if (deleteIndex != -1) {
+            newList.removeAt(deleteIndex)
+            if (newList.isEmpty()) {
+                this.lastDocumentSnapshot = null
+                this.noMoreElementLeft = true
+            }
+            this.itemsList.value =
+                Triple(newList, prevStatus, prevMessage)
         }
     }
 
     fun updateModel(model: Model) {
-        val list = this.itemsList.value?.first
+        val prevData = this.itemsList.value
+        if (prevData == null) {
+            return
+        }
+        val prevStatus = prevData.second
+        val prevMessage = prevData.third
 
-        if (list == null) {
+        val newList = prevData.first
+
+        if (newList == null) {
             return
         }
 
-        for ((i, item) in list.withIndex()) {
+        for ((i, item) in newList.withIndex()) {
             if (item.id == model.id) {
-                list[i] = model
-                this.itemsList.postValue(
-                    Triple(list, Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
-                )
-                return
+                newList[i] = model
+                break
             }
         }
+
+        this.itemsList.value =
+            Triple(newList, prevStatus, prevMessage)
     }
 }

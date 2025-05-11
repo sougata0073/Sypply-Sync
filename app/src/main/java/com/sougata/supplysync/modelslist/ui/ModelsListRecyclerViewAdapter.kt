@@ -20,6 +20,7 @@ class ModelsListRecyclerViewAdapter(
     private var cleanList: MutableList<Model>,
     private var helper: ModelsListHelper,
     private var loadListAgain: MutableLiveData<Boolean>,
+    private var setItemListener: (MutableList<Model>) -> Unit,
     private val extraCallback: ((View, Model) -> Unit)? = null
 ) :
     RecyclerView.Adapter<ModelsListRecyclerViewAdapter.MyViewHolder>() {
@@ -39,7 +40,7 @@ class ModelsListRecyclerViewAdapter(
 
         fun bind(model: Model) {
             if (model !is DummyModel) {
-                helper.getWhatToDoOnBind().invoke(this.binding, model)
+                helper.bind(this.binding, model)
 
                 extraCallback?.invoke(this.binding.root, model)
             }
@@ -112,6 +113,7 @@ class ModelsListRecyclerViewAdapter(
 
     fun setItems(newItemsList: MutableList<Model>) {
         this.cleanList = newItemsList
+        Log.d("TAG2", newItemsList.toString())
 
         if (this.isFilterActive) {
             this.filterList(this.filter)
@@ -143,17 +145,16 @@ class ModelsListRecyclerViewAdapter(
         this.removeLoadingAnimation()
 
         val loadedItemCount = abs(this.prevLoadedItemCount - newItemsList.size)
-        if (loadedItemCount < 10) {
-            this.loadListAgain.value = true
-        } else {
-            this.loadListAgain.value = false
-        }
+        this.loadListAgain.value = loadedItemCount < 10 && this.isFilterActive
         this.prevLoadedItemCount = newItemsList.size
 
         val diffUtil = ModelsListDifUtil(this.itemsList, newItemsList, this.helper)
         val diffResult = DiffUtil.calculateDiff(diffUtil)
         this.itemsList = newItemsList
         diffResult.dispatchUpdatesTo(this)
+
+        this.setItemListener(newItemsList)
+
     }
 
 }

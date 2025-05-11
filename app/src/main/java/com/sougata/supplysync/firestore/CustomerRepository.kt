@@ -9,10 +9,8 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.sougata.supplysync.firestore.util.Action
 import com.sougata.supplysync.firestore.util.FieldNames
-import com.sougata.supplysync.firestore.util.Helper
-import com.sougata.supplysync.firestore.util.ModelMaps
+import com.sougata.supplysync.firestore.util.HelperRepository
 import com.sougata.supplysync.models.Customer
 import com.sougata.supplysync.models.CustomerPayment
 import com.sougata.supplysync.models.Model
@@ -30,25 +28,35 @@ class CustomerRepository {
 
     private val usersCol =
         this.db.collection(FieldNames.UsersCol.SELF_NAME)
+    private val currentUserDoc = this.usersCol.document(this.currentUser.uid)
 
-    private val helper = Helper()
-    private val modelMaps = ModelMaps()
+    private val valuesCol = this.currentUserDoc.collection(FieldNames.ValuesCol.SELF_NAME)
+
+    private val customersCol = this.currentUserDoc
+        .collection(FieldNames.CustomersCol.SELF_NAME)
+    private val userItemsCol =
+        this.currentUserDoc.collection(FieldNames.UserItemsCol.SELF_NAME)
+    private val customerPaymentsCol =
+        this.currentUserDoc
+            .collection(FieldNames.CustomerPaymentsCol.SELF_NAME)
+    private val ordersCol =
+        this.currentUserDoc
+            .collection(FieldNames.OrdersCol.SELF_NAME)
+
+
+    private val helperRepository = HelperRepository()
 
     fun getCustomersList(
         lastDocumentSnapshot: DocumentSnapshot?,
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.CUSTOMER, map, document)
-        }
-
-        this.helper.getAnyModelsList(
+        this.helperRepository.getAnyModelsList(
             firebaseCollectionName = FieldNames.CustomersCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             customSorting = FieldNames.CustomersCol.TIMESTAMP to Query.Direction.ASCENDING,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = Customer::class.java,
             onComplete = onComplete
         )
     }
@@ -61,18 +69,14 @@ class CustomerRepository {
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.CUSTOMER, map, document)
-        }
-
-        this.helper.searchInAnyModelsList(
+        this.helperRepository.searchInAnyModelsList(
             searchField = searchField,
             searchQuery = searchQuery,
             queryDataType = queryDataType,
             firebaseCollectionName = FieldNames.CustomersCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = Customer::class.java,
             onComplete = onComplete
         )
     }
@@ -82,16 +86,12 @@ class CustomerRepository {
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.CUSTOMER_PAYMENT, map, document)
-        }
-
-        this.helper.getAnyModelsList(
+        this.helperRepository.getAnyModelsList(
             firebaseCollectionName = FieldNames.CustomerPaymentsCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             customSorting = FieldNames.CustomerPaymentsCol.PAYMENT_TIMESTAMP to Query.Direction.DESCENDING,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = CustomerPayment::class.java,
             onComplete = onComplete
         )
     }
@@ -104,18 +104,14 @@ class CustomerRepository {
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.CUSTOMER_PAYMENT, map, document)
-        }
-
-        this.helper.searchInAnyModelsList(
+        this.helperRepository.searchInAnyModelsList(
             searchField = searchField,
             searchQuery = searchQuery,
             queryDataType = queryDataType,
             firebaseCollectionName = FieldNames.CustomerPaymentsCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = CustomerPayment::class.java,
             onComplete = onComplete
         )
     }
@@ -125,16 +121,12 @@ class CustomerRepository {
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.ORDER, map, document)
-        }
-
-        this.helper.getAnyModelsList(
+        this.helperRepository.getAnyModelsList(
             firebaseCollectionName = FieldNames.OrdersCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             customSorting = FieldNames.OrdersCol.TIMESTAMP to Query.Direction.DESCENDING,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = Order::class.java,
             onComplete = onComplete
         )
     }
@@ -147,18 +139,14 @@ class CustomerRepository {
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.ORDER, map, document)
-        }
-
-        this.helper.searchInAnyModelsList(
+        this.helperRepository.searchInAnyModelsList(
             searchField = searchField,
             searchQuery = searchQuery,
             queryDataType = queryDataType,
             firebaseCollectionName = FieldNames.OrdersCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = Order::class.java,
             onComplete = onComplete
         )
     }
@@ -168,16 +156,12 @@ class CustomerRepository {
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.USER_ITEM, map, document)
-        }
-
-        this.helper.getAnyModelsList(
+        this.helperRepository.getAnyModelsList(
             firebaseCollectionName = FieldNames.UserItemsCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             customSorting = FieldNames.UserItemsCol.TIMESTAMP to Query.Direction.ASCENDING,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = UserItem::class.java,
             onComplete = onComplete
         )
     }
@@ -190,113 +174,39 @@ class CustomerRepository {
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.USER_ITEM, map, document)
-        }
-
-        this.helper.searchInAnyModelsList(
+        this.helperRepository.searchInAnyModelsList(
             searchField = searchField,
             searchQuery = searchQuery,
             queryDataType = queryDataType,
             firebaseCollectionName = FieldNames.UserItemsCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = UserItem::class.java,
             onComplete = onComplete
         )
     }
 
-    fun addUpdateCustomer(
-        customer: Customer, action: Action, onComplete: (Status, String) -> Unit
+    fun addCustomer(
+        customer: Customer, onComplete: (Status, String) -> Unit
     ) {
-        val customersCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.CustomersCol.SELF_NAME)
-        val valuesCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.ValuesCol.SELF_NAME)
-
-        val customerDoc = mutableMapOf<String, Any>(
-            FieldNames.CustomersCol.NAME to customer.name,
-            FieldNames.CustomersCol.RECEIVABLE_AMOUNT to customer.receivableAmount,
-            FieldNames.CustomersCol.DUE_ORDERS to customer.dueOrders,
-            FieldNames.CustomersCol.PHONE to customer.phone,
-            FieldNames.CustomersCol.EMAIL to customer.email,
-            FieldNames.CustomersCol.NOTE to customer.note,
-            FieldNames.CustomersCol.PROFILE_IMAGE_URL to customer.profileImageUrl
-        )
-
         this.usersCol.firestore.runTransaction {
-            if (action == Action.TO_ADD) {
-                customerDoc.put(
-                    FieldNames.CustomersCol.TIMESTAMP,
-                    FieldValue.serverTimestamp()
-                )
-                it.set(customersCol.document(), customerDoc)
-                it.update(
-                    valuesCol.document(FieldNames.ValuesCol.CustomersCountDoc.SELF_NAME),
-                    mapOf(
-                        FieldNames.ValuesCol.CustomersCountDoc.VALUE to FieldValue.increment(
-                            1
-                        )
+            it.set(customersCol.document(), customer)
+            it.update(
+                valuesCol.document(FieldNames.ValuesCol.CustomersCountDoc.SELF_NAME),
+                mapOf(
+                    FieldNames.ValuesCol.CustomersCountDoc.VALUE to FieldValue.increment(
+                        1
                     )
                 )
-                it.update(
-                    valuesCol.document(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME),
-                    mapOf(
-                        FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.VALUE to FieldValue.increment(
-                            customer.receivableAmount
-                        )
+            )
+            it.update(
+                valuesCol.document(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME),
+                mapOf(
+                    FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.VALUE to FieldValue.increment(
+                        customer.receivableAmount
                     )
                 )
-            } else if (action == Action.TO_UPDATE) {
-                var prevTotalReceivableAmount =
-                    it.get(valuesCol.document(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME))
-                        .getDouble(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.VALUE)
-                        ?: 0.0
-                var prevCustomerReceivableAmount =
-                    it.get(customersCol.document(customer.id))
-                        .getDouble(FieldNames.CustomersCol.RECEIVABLE_AMOUNT) ?: 0.0
-                val newTotalReceivableAmount: Double? =
-                    prevTotalReceivableAmount - prevCustomerReceivableAmount + customer.receivableAmount
-                it.update(customersCol.document(customer.id), customerDoc)
-                it.update(
-                    valuesCol.document(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME),
-                    mapOf(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.VALUE to newTotalReceivableAmount)
-                )
-            }
-        }.addOnCompleteListener {
-            if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
-            } else {
-                onComplete(Status.FAILED, it.exception?.message.toString())
-            }
-        }
-
-    }
-
-    fun addUpdateUserItem(
-        userItem: UserItem, action: Action, onComplete: (Status, String) -> Unit
-    ) {
-        val userItemsCol =
-            this.usersCol.document(this.currentUser.uid)
-                .collection(FieldNames.UserItemsCol.SELF_NAME)
-
-        val userItemDoc = mutableMapOf<String, Any>(
-            FieldNames.UserItemsCol.NAME to userItem.name,
-            FieldNames.UserItemsCol.IN_STOCK to userItem.inStock,
-            FieldNames.UserItemsCol.PRICE to userItem.price,
-            FieldNames.UserItemsCol.DETAILS to userItem.details,
-        )
-
-        this.usersCol.firestore.runTransaction {
-            if (action == Action.TO_ADD) {
-                userItemDoc.put(
-                    FieldNames.UserItemsCol.TIMESTAMP,
-                    FieldValue.serverTimestamp()
-                )
-                it.set(userItemsCol.document(), userItemDoc)
-            } else if (action == Action.TO_UPDATE) {
-                it.update(userItemsCol.document(userItem.id), userItemDoc)
-            }
+            )
         }.addOnCompleteListener {
             if (it.isSuccessful) {
                 onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
@@ -306,32 +216,22 @@ class CustomerRepository {
         }
     }
 
-    fun addUpdateCustomerPayment(
-        customerPayment: CustomerPayment, action: Action, onComplete: (Status, String) -> Unit
-    ) {
-
-        val customerPaymentsCol =
-            this.usersCol.document(this.currentUser.uid)
-                .collection(FieldNames.CustomerPaymentsCol.SELF_NAME)
-
-        val customerPaymentDoc = mutableMapOf<String, Any>(
-            FieldNames.CustomerPaymentsCol.AMOUNT to customerPayment.amount,
-            FieldNames.CustomerPaymentsCol.PAYMENT_TIMESTAMP to customerPayment.paymentTimestamp,
-            FieldNames.CustomerPaymentsCol.NOTE to customerPayment.note,
-            FieldNames.CustomerPaymentsCol.CUSTOMER_ID to customerPayment.customerId,
-            FieldNames.CustomerPaymentsCol.CUSTOMER_NAME to customerPayment.customerName,
-        )
-
+    fun updateCustomer(customer: Customer, onComplete: (Status, String) -> Unit) {
         this.usersCol.firestore.runTransaction {
-            if (action == Action.TO_ADD) {
-                customerPaymentDoc.put(
-                    FieldNames.CustomerPaymentsCol.TIMESTAMP,
-                    FieldValue.serverTimestamp()
-                )
-                it.set(customerPaymentsCol.document(), customerPaymentDoc)
-            } else if (action == Action.TO_UPDATE) {
-                it.update(customerPaymentsCol.document(customerPayment.id), customerPaymentDoc)
-            }
+            var prevTotalReceivableAmount =
+                it.get(valuesCol.document(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME))
+                    .getDouble(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.VALUE)
+                    ?: 0.0
+            var prevCustomerReceivableAmount =
+                it.get(customersCol.document(customer.id))
+                    .getDouble(FieldNames.CustomersCol.RECEIVABLE_AMOUNT) ?: 0.0
+            val newTotalReceivableAmount: Double? =
+                prevTotalReceivableAmount - prevCustomerReceivableAmount + customer.receivableAmount
+            it.update(customersCol.document(customer.id), customer.toMap())
+            it.update(
+                valuesCol.document(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME),
+                mapOf(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.VALUE to newTotalReceivableAmount)
+            )
         }.addOnCompleteListener {
             if (it.isSuccessful) {
                 onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
@@ -339,117 +239,13 @@ class CustomerRepository {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
         }
-
-    }
-
-    fun addUpdateOrder(
-        order: Order, action: Action, onComplete: (Status, String) -> Unit
-    ) {
-        val ordersCol =
-            this.usersCol.document(this.currentUser.uid)
-                .collection(FieldNames.OrdersCol.SELF_NAME)
-        val valuesCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.ValuesCol.SELF_NAME)
-
-        val orderDoc = mutableMapOf<String, Any>(
-            FieldNames.OrdersCol.USER_ITEM_ID to order.userItemId,
-            FieldNames.OrdersCol.USER_ITEM_NAME to order.userItemName,
-            FieldNames.OrdersCol.QUANTITY to order.quantity,
-            FieldNames.OrdersCol.AMOUNT to order.amount,
-            FieldNames.OrdersCol.CUSTOMER_ID to order.customerId,
-            FieldNames.OrdersCol.CUSTOMER_NAME to order.customerName,
-            FieldNames.OrdersCol.DELIVERY_TIMESTAMP to order.deliveryTimestamp,
-            FieldNames.OrdersCol.IS_DELIVERED to order.isDelivered,
-        )
-
-        this.usersCol.firestore.runTransaction {
-            if (action == Action.TO_ADD) {
-                orderDoc.put(
-                    FieldNames.OrdersCol.TIMESTAMP,
-                    FieldValue.serverTimestamp()
-                )
-                it.set(ordersCol.document(), orderDoc)
-                if (!order.isDelivered) {
-                    it.update(
-                        valuesCol.document(FieldNames.ValuesCol.OrdersToDeliverDoc.SELF_NAME),
-                        mapOf(
-                            FieldNames.ValuesCol.OrdersToDeliverDoc.VALUE to FieldValue.increment(
-                                1
-                            )
-                        )
-                    )
-                }
-            } else if (action == Action.TO_UPDATE) {
-                val prevIsDelivered = it.get(ordersCol.document(order.id))
-                    .getBoolean(FieldNames.OrdersCol.IS_DELIVERED) ?: false
-
-                if (prevIsDelivered == true && order.isDelivered == false) {
-                    it.update(
-                        valuesCol.document(FieldNames.ValuesCol.OrdersToDeliverDoc.SELF_NAME),
-                        mapOf(
-                            FieldNames.ValuesCol.OrdersToDeliverDoc.VALUE to FieldValue.increment(
-                                1
-                            )
-                        )
-                    )
-                } else if (prevIsDelivered == false && order.isDelivered == true) {
-                    it.update(
-                        valuesCol.document(FieldNames.ValuesCol.OrdersToDeliverDoc.SELF_NAME),
-                        mapOf(
-                            FieldNames.ValuesCol.OrdersToDeliverDoc.VALUE to FieldValue.increment(
-                                -1
-                            )
-                        )
-                    )
-                }
-                it.update(ordersCol.document(order.id), orderDoc)
-            }
-        }.addOnCompleteListener {
-            if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
-            } else {
-                onComplete(Status.FAILED, it.exception?.message.toString())
-            }
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    fun getOrdersToDeliver(onComplete: (Status, Number, String) -> Unit) {
-        this.helper.getAnyValueFromValuesCol(
-            FieldNames.ValuesCol.OrdersToDeliverDoc.SELF_NAME,
-            FirestoreFieldDataType.NUMBER,
-            onComplete as (Status, Any, String) -> Unit
-        )
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    fun getNumberOfCustomers(onComplete: (Status, Number, String) -> Unit) {
-        this.helper.getAnyValueFromValuesCol(
-            FieldNames.ValuesCol.CustomersCountDoc.SELF_NAME,
-            FirestoreFieldDataType.NUMBER,
-            onComplete as (Status, Any, String) -> Unit
-        )
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    fun getReceivableAmountFromCustomers(onComplete: (Status, Number, String) -> Unit) {
-        this.helper.getAnyValueFromValuesCol(
-            FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME,
-            FirestoreFieldDataType.NUMBER,
-            onComplete as (Status, Any, String) -> Unit
-        )
     }
 
     fun deleteCustomer(customer: Customer, onComplete: (Status, String) -> Unit) {
-        val customersCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.CustomersCol.SELF_NAME)
-        val valuesCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.ValuesCol.SELF_NAME)
-
         this.usersCol.firestore.runTransaction {
-            it.delete(customersCol.document(customer.id))
+            it.delete(this.customersCol.document(customer.id))
             it.update(
-                valuesCol.document(FieldNames.ValuesCol.CustomersCountDoc.SELF_NAME),
+                this.valuesCol.document(FieldNames.ValuesCol.CustomersCountDoc.SELF_NAME),
                 mapOf(
                     FieldNames.ValuesCol.CustomersCountDoc.VALUE to FieldValue.increment(
                         -1
@@ -457,7 +253,7 @@ class CustomerRepository {
                 )
             )
             it.update(
-                valuesCol.document(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME),
+                this.valuesCol.document(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME),
                 mapOf(
                     FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.VALUE to FieldValue.increment(
                         -customer.receivableAmount
@@ -473,12 +269,130 @@ class CustomerRepository {
         }
     }
 
-    fun deleteOrder(order: Order, onComplete: (Status, String) -> Unit) {
-        val ordersCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.OrdersCol.SELF_NAME)
-        val valuesCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.ValuesCol.SELF_NAME)
+    fun addUserItem(userItem: UserItem, onComplete: (Status, String) -> Unit) {
+        this.userItemsCol.document().set(userItem).addOnCompleteListener {
+            if (it.isSuccessful) {
+                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+            } else {
+                onComplete(Status.FAILED, it.exception?.message.toString())
+            }
+        }
+    }
 
+    fun updateUserItem(userItem: UserItem, onComplete: (Status, String) -> Unit) {
+        this.userItemsCol.document(userItem.id).update(userItem.toMap()).addOnCompleteListener {
+            if (it.isSuccessful) {
+                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+            } else {
+                onComplete(Status.FAILED, it.exception?.message.toString())
+            }
+        }
+    }
+
+    fun deleteUserItem(userItem: UserItem, onComplete: (Status, String) -> Unit) {
+        this.userItemsCol.document(userItem.id).delete().addOnCompleteListener {
+            if (it.isSuccessful) {
+                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+            } else {
+                onComplete(Status.FAILED, it.exception?.message.toString())
+            }
+        }
+    }
+
+    fun addCustomerPayment(
+        customerPayment: CustomerPayment, onComplete: (Status, String) -> Unit
+    ) {
+        this.customerPaymentsCol.document().set(customerPayment).addOnCompleteListener {
+            if (it.isSuccessful) {
+                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+            } else {
+                onComplete(Status.FAILED, it.exception?.message.toString())
+            }
+        }
+    }
+
+    fun updateCustomerPayment(
+        customerPayment: CustomerPayment, onComplete: (Status, String) -> Unit
+    ) {
+        this.customerPaymentsCol.document(customerPayment.id).update(customerPayment.toMap())
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                } else {
+                    onComplete(Status.FAILED, it.exception?.message.toString())
+                }
+            }
+    }
+
+    fun deleteCustomerPayment(
+        customerPayment: CustomerPayment,
+        onComplete: (Status, String) -> Unit
+    ) {
+        val customerPaymentsCol = this.usersCol.document(this.currentUser.uid)
+            .collection(FieldNames.CustomerPaymentsCol.SELF_NAME)
+        this.usersCol.firestore.runTransaction {
+            it.delete(customerPaymentsCol.document(customerPayment.id))
+
+        }.addOnCompleteListener {
+            if (it.isSuccessful) {
+                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+            } else {
+                onComplete(Status.FAILED, it.exception?.message.toString())
+            }
+        }
+    }
+
+    fun addOrder(order: Order, onComplete: (Status, String) -> Unit) {
+        this.usersCol.firestore.runTransaction {
+            it.set(ordersCol.document(), order)
+            if (!order.isDelivered) {
+                it.update(
+                    valuesCol.document(FieldNames.ValuesCol.OrdersToDeliverDoc.SELF_NAME),
+                    mapOf(
+                        FieldNames.ValuesCol.OrdersToDeliverDoc.VALUE to FieldValue.increment(
+                            1
+                        )
+                    )
+                )
+            }
+        }.addOnCompleteListener {
+            if (it.isSuccessful) {
+                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+            } else {
+                onComplete(Status.FAILED, it.exception?.message.toString())
+            }
+        }
+    }
+
+    fun updateOrder(order: Order, onComplete: (Status, String) -> Unit) {
+        this.usersCol.firestore.runTransaction {
+            val prevIsDelivered = it.get(this.ordersCol.document(order.id))
+                .getBoolean(FieldNames.OrdersCol.IS_DELIVERED) ?: false
+
+            if (prevIsDelivered == true && order.isDelivered == false) {
+                it.update(
+                    this.valuesCol.document(FieldNames.ValuesCol.OrdersToDeliverDoc.SELF_NAME),
+                    mapOf(
+                        FieldNames.ValuesCol.OrdersToDeliverDoc.VALUE to FieldValue.increment(
+                            1
+                        )
+                    )
+                )
+            } else if (prevIsDelivered == false && order.isDelivered == true) {
+                it.update(
+                    this.valuesCol.document(FieldNames.ValuesCol.OrdersToDeliverDoc.SELF_NAME),
+                    mapOf(
+                        FieldNames.ValuesCol.OrdersToDeliverDoc.VALUE to FieldValue.increment(
+                            -1
+                        )
+                    )
+                )
+            }
+            it.update(this.ordersCol.document(order.id), order.toMap())
+        }
+    }
+
+    fun deleteOrder(order: Order, onComplete: (Status, String) -> Unit) {
         this.usersCol.firestore.runTransaction {
             it.delete(ordersCol.document(order.id))
             if (!order.isDelivered) {
@@ -500,49 +414,33 @@ class CustomerRepository {
         }
     }
 
-    fun deleteCustomerPayment(
-        customerPayment: CustomerPayment,
-        onComplete: (Status, String) -> Unit
-    ) {
-        val customerPaymentsCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.CustomerPaymentsCol.SELF_NAME)
-        this.usersCol.firestore.runTransaction {
-            it.delete(customerPaymentsCol.document(customerPayment.id))
-
-        }.addOnCompleteListener {
-            if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
-            } else {
-                onComplete(Status.FAILED, it.exception?.message.toString())
-            }
-        }
+    fun getOrdersToDeliver(onComplete: (Status, Number?, String) -> Unit) {
+        this.helperRepository.getAnyValueFromValuesCol(
+            FieldNames.ValuesCol.OrdersToDeliverDoc.SELF_NAME,
+            onComplete
+        )
     }
 
-    fun deleteUserItem(userItem: UserItem, onComplete: (Status, String) -> Unit) {
-        val userItemsCol =
-            this.usersCol.document(this.currentUser.uid)
-                .collection(FieldNames.UserItemsCol.SELF_NAME)
+    fun getNumberOfCustomers(onComplete: (Status, Number?, String) -> Unit) {
+        this.helperRepository.getAnyValueFromValuesCol(
+            FieldNames.ValuesCol.CustomersCountDoc.SELF_NAME,
+            onComplete
+        )
+    }
 
-        this.usersCol.firestore.runTransaction {
-            it.delete(userItemsCol.document(userItem.id))
-        }.addOnCompleteListener {
-            if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
-            } else {
-                onComplete(Status.FAILED, it.exception?.message.toString())
-            }
-        }
+    fun getReceivableAmountFromCustomers(onComplete: (Status, Number?, String) -> Unit) {
+        this.helperRepository.getAnyValueFromValuesCol(
+            FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME,
+            onComplete
+        )
     }
 
     fun getSalesAmountByRange(
         startTimestamp: Timestamp,
         endTimestamp: Timestamp,
-        onComplete: (Status, Number, String) -> Unit
+        onComplete: (Status, Number?, String) -> Unit
     ) {
-        val ordersCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.OrdersCol.SELF_NAME)
-
-        val query = ordersCol
+        val query = this.ordersCol
             .whereGreaterThanOrEqualTo(
                 FieldNames.OrdersCol.TIMESTAMP,
                 startTimestamp
@@ -553,12 +451,12 @@ class CustomerRepository {
             ).whereEqualTo(
                 FieldNames.OrdersCol.IS_DELIVERED,
                 true
-            ).aggregate(AggregateField.sum(FieldNames.OrdersCol.AMOUNT))
+            ).aggregate(AggregateField.sum(Order::amount.name))
 
         query.get(AggregateSource.SERVER).addOnCompleteListener {
             if (it.isSuccessful) {
                 val sum =
-                    it.result.get(AggregateField.sum(FieldNames.OrdersCol.AMOUNT)) as? Number
+                    it.result.get(AggregateField.sum(Order::amount.name)) as? Number
 
                 if (sum != null) {
                     onComplete(
@@ -567,10 +465,10 @@ class CustomerRepository {
                         KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
                     )
                 } else {
-                    onComplete(Status.FAILED, 0.0, KeysAndMessages.TASK_FAILED_TO_COMPLETE)
+                    onComplete(Status.FAILED, null, KeysAndMessages.TASK_FAILED_TO_COMPLETE)
                 }
             } else {
-                onComplete(Status.FAILED, 0.0, it.exception?.message.toString())
+                onComplete(Status.FAILED, null, it.exception?.message.toString())
             }
         }
     }

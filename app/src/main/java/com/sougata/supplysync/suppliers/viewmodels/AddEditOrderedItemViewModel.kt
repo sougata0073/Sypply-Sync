@@ -6,10 +6,10 @@ import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.Timestamp
 import com.sougata.supplysync.firestore.SupplierRepository
-import com.sougata.supplysync.firestore.util.Action
 import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.Status
+import java.util.UUID
 
 class AddEditOrderedItemViewModel : ViewModel() {
 
@@ -34,7 +34,14 @@ class AddEditOrderedItemViewModel : ViewModel() {
     ) {
 
         val orderedItem = try {
-            this.processOrderedItem(itemId, itemName, supplierId, supplierName)
+            this.processOrderedItem(
+                UUID.randomUUID().toString(),
+                Timestamp.now(),
+                itemId,
+                itemName,
+                supplierId,
+                supplierName
+            )
         } catch (e: Exception) {
             Snackbar.make(view, e.message.toString(), Snackbar.LENGTH_SHORT).show()
             return
@@ -42,9 +49,8 @@ class AddEditOrderedItemViewModel : ViewModel() {
 
         this.orderedItemAddedIndicator.postValue(Status.STARTED to "")
 
-        this.supplierRepository.addUpdateOrderedItem(
-            orderedItem,
-            Action.TO_ADD
+        this.supplierRepository.addOrderedItem(
+            orderedItem
         ) { status, message ->
             this.orderedItemAddedIndicator.postValue(status to message)
         }
@@ -52,15 +58,23 @@ class AddEditOrderedItemViewModel : ViewModel() {
     }
 
     fun updateOrderedItem(
-        itemId: String,
-        itemName: String,
+        orderedItemId: String,
+        timestamp: Timestamp,
+        supplierItemId: String,
+        supplierItemName: String,
         supplierId: String,
         supplierName: String,
-        orderedItemId: String,
         view: View
     ): OrderedItem? {
         val orderedItem = try {
-            this.processOrderedItem(itemId, itemName, supplierId, supplierName, orderedItemId)
+            this.processOrderedItem(
+                orderedItemId,
+                timestamp,
+                supplierItemId,
+                supplierItemName,
+                supplierId,
+                supplierName
+            )
         } catch (e: Exception) {
             Snackbar.make(view, e.message.toString(), Snackbar.LENGTH_SHORT).show()
             return null
@@ -68,9 +82,8 @@ class AddEditOrderedItemViewModel : ViewModel() {
 
         this.orderedItemEditedIndicator.postValue(Status.STARTED to "")
 
-        this.supplierRepository.addUpdateOrderedItem(
-            orderedItem,
-            Action.TO_UPDATE
+        this.supplierRepository.updateOrderedItem(
+            orderedItem
         ) { status, message ->
             this.orderedItemEditedIndicator.postValue(status to message)
         }
@@ -80,11 +93,12 @@ class AddEditOrderedItemViewModel : ViewModel() {
 
 
     private fun processOrderedItem(
+        orderedItemId: String,
+        timestamp: Timestamp,
         itemId: String,
         itemName: String,
         supplierId: String,
         supplierName: String,
-        orderedItemId: String? = null
     ): OrderedItem {
         val amountString = this.amount.value.orEmpty()
         val quantityString = this.quantity.value.orEmpty()
@@ -123,6 +137,8 @@ class AddEditOrderedItemViewModel : ViewModel() {
         }
 
         return OrderedItem(
+            id = orderedItemId,
+            timestamp = timestamp,
             supplierItemId = itemId,
             supplierItemName = itemName,
             quantity = quantity,
@@ -131,7 +147,7 @@ class AddEditOrderedItemViewModel : ViewModel() {
             supplierName = supplierName,
             orderTimestamp = orderTimestamp,
             isReceived = isReceived
-        ).apply { id = orderedItemId.orEmpty() }
+        )
     }
 
 

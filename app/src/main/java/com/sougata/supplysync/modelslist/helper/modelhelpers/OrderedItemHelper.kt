@@ -26,25 +26,16 @@ import kotlin.reflect.KProperty1
 class OrderedItemHelper(
     private val fragment: Fragment,
     private val supplierRepository: SupplierRepository
-) : ModelHelper {
+) : ModelHelper  {
 
     private val context = this.fragment.requireContext()
 
     override val listHeading: String = "Ordered items"
 
-    @Suppress("UNCHECKED_CAST")
-    override fun getProperties(): Array<KProperty1<Model, *>> {
-        return arrayOf(
-            OrderedItem::supplierItemId, OrderedItem::supplierItemName, OrderedItem::quantity,
-            OrderedItem::amount, OrderedItem::supplierId, OrderedItem::supplierName,
-            OrderedItem::orderTimestamp, OrderedItem::isReceived
-        ) as Array<KProperty1<Model, *>>
-    }
-
     override fun getViewToInflate(
         inflater: LayoutInflater,
         parent: ViewGroup
-    ): ViewDataBinding {
+    ): ItemOrderedItemBinding {
         return ItemOrderedItemBinding.inflate(inflater, parent, false)
     }
 
@@ -80,11 +71,11 @@ class OrderedItemHelper(
 
     override fun getFilterableFields(): Array<Pair<String, (Model) -> Boolean>> {
         return arrayOf(
-            "Received" to { model ->
-                (model as OrderedItem).isReceived
+            "Received" to { orderedItem ->
+                (orderedItem as OrderedItem).isReceived
             },
-            "Not Received" to { model ->
-                (model as OrderedItem).isReceived.not()
+            "Not Received" to { orderedItem ->
+                (orderedItem as OrderedItem).isReceived.not()
             }
         )
     }
@@ -134,7 +125,7 @@ class OrderedItemHelper(
                     .setNeutralButton("Edit") { dialog, _ ->
                         val bundle = Bundle().apply {
                             putBoolean(KeysAndMessages.TO_EDIT_KEY, true)
-                            putParcelable("orderedItem", model)
+                            putParcelable(Model.ORDERED_ITEM, model)
                         }
                         this@OrderedItemHelper.fragment.findNavController()
                             .navigate(
@@ -179,6 +170,30 @@ class OrderedItemHelper(
 
     override fun loadFullListOnNewModelAdded(): Boolean {
         return false
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun getContentComparator(
+        newList: List<Model>,
+        oldList: List<Model>,
+        newPosition: Int,
+        oldPosition: Int
+    ): Boolean {
+        newList as List<OrderedItem>
+        oldList as List<OrderedItem>
+
+        return when {
+            newList[newPosition].timestamp != oldList[oldPosition].timestamp -> false
+            newList[newPosition].supplierItemId != oldList[oldPosition].supplierItemId -> false
+            newList[newPosition].supplierItemName != oldList[oldPosition].supplierItemName -> false
+            newList[newPosition].quantity != oldList[oldPosition].quantity -> false
+            newList[newPosition].amount != oldList[oldPosition].amount -> false
+            newList[newPosition].supplierId != oldList[oldPosition].supplierId -> false
+            newList[newPosition].supplierName != oldList[oldPosition].supplierName -> false
+            newList[newPosition].orderTimestamp != oldList[oldPosition].orderTimestamp -> false
+            newList[newPosition].isReceived != oldList[oldPosition].isReceived -> false
+            else -> true
+        }
     }
 
 }

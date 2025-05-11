@@ -4,10 +4,11 @@ import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
 import com.sougata.supplysync.firestore.SupplierRepository
-import com.sougata.supplysync.firestore.util.Action
 import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.util.Status
+import java.util.UUID
 
 class AddEditSupplierItemViewModel : ViewModel() {
 
@@ -22,7 +23,7 @@ class AddEditSupplierItemViewModel : ViewModel() {
 
     fun addSupplierItem(view: View) {
         val supplierItem = try {
-            this.processSupplierItem()
+            this.processSupplierItem(UUID.randomUUID().toString(), Timestamp.now())
         } catch (e: Exception) {
             Snackbar.make(view, e.message.toString(), Snackbar.LENGTH_SHORT).show()
             return
@@ -30,17 +31,16 @@ class AddEditSupplierItemViewModel : ViewModel() {
 
         this.supplierItemAddedIndicator.postValue(Status.STARTED to "")
 
-        this.supplierRepository.addUpdateSupplierItem(
-            supplierItem,
-            Action.TO_ADD
+        this.supplierRepository.addSupplierItem(
+            supplierItem
         ) { status, message ->
             this.supplierItemAddedIndicator.postValue(status to message)
         }
     }
 
-    fun updateSupplierItem(supplierItemId: String, view: View): SupplierItem? {
+    fun updateSupplierItem(supplierItemId: String, timestamp: Timestamp, view: View): SupplierItem? {
         val supplierItem = try {
-            this.processSupplierItem(supplierItemId)
+            this.processSupplierItem(supplierItemId, timestamp)
         } catch (e: Exception) {
             Snackbar.make(view, e.message.toString(), Snackbar.LENGTH_SHORT).show()
             return null
@@ -48,9 +48,8 @@ class AddEditSupplierItemViewModel : ViewModel() {
 
         this.supplierItemEditedIndicator.postValue(Status.STARTED to "")
 
-        this.supplierRepository.addUpdateSupplierItem(
-            supplierItem,
-            Action.TO_UPDATE
+        this.supplierRepository.updateSupplierItem(
+            supplierItem
         ) { status, message ->
             this.supplierItemEditedIndicator.postValue(status to message)
         }
@@ -58,7 +57,7 @@ class AddEditSupplierItemViewModel : ViewModel() {
     }
 
 
-    private fun processSupplierItem(supplierItemId: String? = null): SupplierItem {
+    private fun processSupplierItem(supplierItemId: String, timestamp: Timestamp): SupplierItem {
         val name = this.name.value.orEmpty()
         val priceString = this.price.value.orEmpty()
         val details = this.details.value.orEmpty()
@@ -77,7 +76,7 @@ class AddEditSupplierItemViewModel : ViewModel() {
             }
         }
 
-        return SupplierItem(name, price, details).apply { id = supplierItemId.orEmpty() }
+        return SupplierItem(supplierItemId, timestamp, name, price, details)
     }
 
 }

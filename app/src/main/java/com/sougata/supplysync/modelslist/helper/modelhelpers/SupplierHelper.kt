@@ -35,19 +35,10 @@ class SupplierHelper(
 
     override val listHeading: String = "All suppliers"
 
-    @Suppress("UNCHECKED_CAST")
-    override fun getProperties(): Array<KProperty1<Model, *>> {
-        return arrayOf(
-            Supplier::name, Supplier::dueAmount, Supplier::phone,
-            Supplier::email, Supplier::note, Supplier::paymentDetails,
-            Supplier::profileImageUrl, Supplier::timestamp
-        ) as Array<KProperty1<Model, *>>
-    }
-
     override fun getViewToInflate(
         inflater: LayoutInflater,
         parent: ViewGroup
-    ): ViewDataBinding {
+    ): ItemSupplierBinding {
         return ItemSupplierBinding.inflate(inflater, parent, false)
     }
 
@@ -140,5 +131,28 @@ class SupplierHelper(
 
     override fun loadFullListOnNewModelAdded(): Boolean {
         return false
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun getContentComparator(
+        newList: List<Model>,
+        oldList: List<Model>,
+        newPosition: Int,
+        oldPosition: Int
+    ): Boolean {
+        newList as List<Supplier>
+        oldList as List<Supplier>
+
+        return when {
+            newList[newPosition].timestamp != oldList[oldPosition].timestamp -> false
+            newList[newPosition].name != oldList[oldPosition].name -> false
+            newList[newPosition].dueAmount != oldList[oldPosition].dueAmount -> false
+            newList[newPosition].phone != oldList[oldPosition].phone -> false
+            newList[newPosition].email != oldList[oldPosition].email -> false
+            newList[newPosition].note != oldList[oldPosition].note -> false
+            newList[newPosition].paymentDetails != oldList[oldPosition].paymentDetails -> false
+            newList[newPosition].profileImageUrl != oldList[oldPosition].profileImageUrl -> false
+            else -> true
+        }
     }
 }

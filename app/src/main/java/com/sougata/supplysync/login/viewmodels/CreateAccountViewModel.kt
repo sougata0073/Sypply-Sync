@@ -5,11 +5,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.navigation.findNavController
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
 import com.sougata.supplysync.R
 import com.sougata.supplysync.firestore.AuthRepository
 import com.sougata.supplysync.models.User
 import com.sougata.supplysync.util.Status
 import com.sougata.supplysync.util.Validations
+import java.util.UUID
 
 class CreateAccountViewModel : ViewModel() {
 
@@ -56,10 +58,10 @@ class CreateAccountViewModel : ViewModel() {
             return
         }
 
-        val user = User(name, email, phone)
+        val user = User(UUID.randomUUID().toString(), Timestamp.now(), name, email, phone)
 
         // When all validation is passed
-        this.accountCreationIndicator.postValue(Triple(user, Status.STARTED, ""))
+        this.accountCreationIndicator.value = Triple(user, Status.STARTED, "")
 
         val authRepository = AuthRepository()
 

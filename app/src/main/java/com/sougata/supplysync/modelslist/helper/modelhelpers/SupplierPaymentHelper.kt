@@ -27,24 +27,16 @@ class SupplierPaymentHelper(
     private val fragment: Fragment,
     private val supplierRepository: SupplierRepository
 ) :
-    ModelHelper {
+    ModelHelper  {
 
     private val context = this.fragment.requireContext()
 
     override val listHeading: String = "Payments sent"
 
-    @Suppress("UNCHECKED_CAST")
-    override fun getProperties(): Array<KProperty1<Model, *>> {
-        return arrayOf(
-            SupplierPayment::amount, SupplierPayment::paymentTimestamp,
-            SupplierPayment::note, SupplierPayment::supplierId, SupplierPayment::timestamp
-        ) as Array<KProperty1<Model, *>>
-    }
-
     override fun getViewToInflate(
         inflater: LayoutInflater,
         parent: ViewGroup
-    ): ViewDataBinding {
+    ): ItemSupplierPaymentBinding {
         return ItemSupplierPaymentBinding.inflate(
             inflater,
             parent,
@@ -116,7 +108,7 @@ class SupplierPaymentHelper(
                     .setNeutralButton("Edit") { dialog, _ ->
                         val bundle = Bundle().apply {
                             putBoolean(KeysAndMessages.TO_EDIT_KEY, true)
-                            putParcelable("supplierPayment", model)
+                            putParcelable(Model.SUPPLIER_PAYMENT, model)
                         }
                         this@SupplierPaymentHelper.fragment.findNavController()
                             .navigate(
@@ -161,5 +153,26 @@ class SupplierPaymentHelper(
 
     override fun loadFullListOnNewModelAdded(): Boolean {
         return true
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun getContentComparator(
+        newList: List<Model>,
+        oldList: List<Model>,
+        newPosition: Int,
+        oldPosition: Int
+    ): Boolean {
+        newList as List<SupplierPayment>
+        oldList as List<SupplierPayment>
+
+        return when {
+            newList[newPosition].timestamp != oldList[oldPosition].timestamp -> false
+            newList[newPosition].amount != oldList[oldPosition].amount -> false
+            newList[newPosition].paymentTimestamp != oldList[oldPosition].paymentTimestamp -> false
+            newList[newPosition].note != oldList[oldPosition].note -> false
+            newList[newPosition].supplierId != oldList[oldPosition].supplierId -> false
+            newList[newPosition].supplierName != oldList[oldPosition].supplierName -> false
+            else -> true
+        }
     }
 }

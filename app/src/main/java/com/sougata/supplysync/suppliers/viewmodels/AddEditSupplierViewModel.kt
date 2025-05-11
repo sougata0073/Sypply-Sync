@@ -4,11 +4,12 @@ import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.Timestamp
 import com.sougata.supplysync.firestore.SupplierRepository
-import com.sougata.supplysync.firestore.util.Action
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.util.Inputs
 import com.sougata.supplysync.util.Status
+import java.util.UUID
 
 class AddEditSupplierViewModel() : ViewModel() {
 
@@ -19,52 +20,51 @@ class AddEditSupplierViewModel() : ViewModel() {
     val paymentDetails = MutableLiveData("")
     val note = MutableLiveData("")
 
-    private val supplierRepository = SupplierRepository()
+    val supplierRepository = SupplierRepository()
 
     val supplierAddedIndicator = MutableLiveData<Pair<Status, String>>()
     val supplierEditedIndicator = MutableLiveData<Pair<Status, String>>()
 
+    var isSupplierAdded = false
+    var isSupplierUpdated = false
+    var isSupplierDeleted = false
 
     fun addSupplier(view: View) {
         val supplier = try {
-            this.processSupplier()
+            this.processSupplier(UUID.randomUUID().toString(), Timestamp.now())
         } catch (e: Exception) {
             Snackbar.make(view, e.message.toString(), Snackbar.LENGTH_SHORT).show()
             return
         }
 
-        this.supplierAddedIndicator.postValue(Status.STARTED to "")
+        this.supplierAddedIndicator.value = Status.STARTED to ""
 
-        supplierRepository.addUpdateSupplier(
-            supplier,
-            Action.TO_ADD
+        this.supplierRepository.addSupplier(
+            supplier
         ) { status, message ->
-            supplierAddedIndicator.postValue(status to message)
+            this.supplierAddedIndicator.value = status to message
         }
-
-
     }
 
-    fun updateSupplier(supplierId: String, view: View): Supplier? {
+    fun updateSupplier(supplierId: String, timestamp: Timestamp, view: View): Supplier? {
         val supplier = try {
-            this.processSupplier(supplierId)
+            this.processSupplier(supplierId, timestamp)
         } catch (e: Exception) {
             Snackbar.make(view, e.message.toString(), Snackbar.LENGTH_SHORT).show()
             return null
         }
 
-        this.supplierEditedIndicator.postValue(Status.STARTED to "")
+        this.supplierEditedIndicator.value = Status.STARTED to ""
 
-        this.supplierRepository.addUpdateSupplier(
-            supplier,
-            Action.TO_UPDATE
+        this.supplierRepository.updateSupplier(
+            supplier
         ) { status, message ->
-            this.supplierEditedIndicator.postValue(status to message)
+            this.supplierEditedIndicator.value = status to message
         }
         return supplier
     }
 
-    private fun processSupplier(supplierId: String? = null): Supplier {
+    private fun processSupplier(supplierId: String, timestamp: Timestamp): Supplier {
         val name = this.name.value.orEmpty()
         val email = this.email.value.orEmpty()
         val phone = this.phone.value.orEmpty()
@@ -87,6 +87,8 @@ class AddEditSupplierViewModel() : ViewModel() {
         }
 
         return Supplier(
+            supplierId,
+            timestamp,
             name,
             dueAmount,
             phone,
@@ -94,14 +96,7 @@ class AddEditSupplierViewModel() : ViewModel() {
             note,
             paymentDetails,
             Inputs.getRandomImageUrl()
-        ).apply { id = supplierId.orEmpty() }
+        )
     }
 
-//    fun getImageExtension(uri: Uri): String? {
-//        val contentResolver = getApplication<Application>().contentResolver
-//        val mimeType = contentResolver.getType(uri)
-//
-//        return MimeTypeMap.getSingleton()
-//            .getExtensionFromMimeType(mimeType)
-//    }
 }

@@ -16,8 +16,8 @@ class SuppliersHomeViewModel : ViewModel() {
 
     val supplierRepository = SupplierRepository()
 
-    val numberOfSuppliers = MutableLiveData<Triple<Number, Status, String>>()
-    val dueAmountToSuppliers = MutableLiveData<Triple<Number, Status, String>>()
+    val numberOfSuppliers = MutableLiveData<Triple<Number?, Status, String>>()
+    val dueAmountToSuppliers = MutableLiveData<Triple<Number?, Status, String>>()
 
     val allApiCallFinished = MutableLiveData(false)
 

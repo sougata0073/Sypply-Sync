@@ -1,8 +1,12 @@
 package com.sougata.supplysync.firestore.util
 
+import com.google.firebase.Timestamp
+
 object FieldNames {
 
     object Commons {
+        const val ID = "id"
+        const val TIMESTAMP = "timestamp"
         const val VALUE = "value"
     }
 

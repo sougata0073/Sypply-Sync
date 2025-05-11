@@ -49,7 +49,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
             } else {
                 val entryList = mutableListOf<Entry>()
 
-                for ((i, value) in list.withIndex()) {
+                for ((i, value) in list!!.withIndex()) {
                     val y = value.toFloat()
                     entryList.add(Entry(i.toFloat(), y))
                 }

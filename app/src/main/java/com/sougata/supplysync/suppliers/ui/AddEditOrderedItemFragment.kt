@@ -13,8 +13,8 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
-import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.databinding.FragmentAddEditOrderedItemBinding
+import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.models.Supplier
@@ -57,10 +57,10 @@ class AddEditOrderedItemFragment : Fragment() {
 
         if (this.toEdit) {
             this.prevOrderedItem = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                requireArguments().getParcelable("orderedItem", OrderedItem::class.java)
+                requireArguments().getParcelable(Model.ORDERED_ITEM, OrderedItem::class.java)
             } else {
                 @Suppress("DEPRECATION")
-                requireArguments().getParcelable("orderedItem")
+                requireArguments().getParcelable(Model.ORDERED_ITEM)
             }!!
 
         }
@@ -169,14 +169,15 @@ class AddEditOrderedItemFragment : Fragment() {
 
                 val supplierItem = this.supplierItem
                 val supplier = this.supplier
-                val orderedItemId = this.prevOrderedItem.id
 
                 this.updatedOrderedItem = this.viewModel.updateOrderedItem(
+
+                    this.prevOrderedItem.id, this.prevOrderedItem.timestamp,
+
                     supplierItem?.id ?: this.prevOrderedItem.supplierItemId,
                     supplierItem?.name ?: this.prevOrderedItem.supplierItemName,
                     supplier?.id ?: this.prevOrderedItem.supplierId,
                     supplier?.name ?: this.prevOrderedItem.supplierName,
-                    orderedItemId,
                     this.binding.root
                 )
             }

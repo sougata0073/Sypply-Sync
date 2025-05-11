@@ -29,7 +29,7 @@ class ModelsListDifUtil(
         newItemPosition: Int
     ): Boolean {
 
-        val isSame = this.helper.getContentComparator()(
+        val isSame = this.helper.getContentComparator(
             this.oldList,
             this.newList,
             oldItemPosition,

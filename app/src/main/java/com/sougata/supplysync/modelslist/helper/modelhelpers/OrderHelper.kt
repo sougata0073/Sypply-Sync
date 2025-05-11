@@ -1,6 +1,7 @@
 package com.sougata.supplysync.modelslist.helper.modelhelpers
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
@@ -21,26 +22,17 @@ import kotlin.reflect.KProperty1
 class OrderHelper(
     private val fragment: Fragment,
     private val customerRepository: CustomerRepository
-) : ModelHelper {
+) : ModelHelper  {
 
     private val context = this.fragment.requireContext()
     private val fragmentManager = this.fragment.parentFragmentManager
 
     override val listHeading = "Orders"
 
-    @Suppress("UNCHECKED_CAST")
-    override fun getProperties(): Array<KProperty1<Model, *>> {
-        return arrayOf(
-            Order::userItemId, Order::userItemName, Order::quantity,
-            Order::amount, Order::customerId, Order::customerName,
-            Order::deliveryTimestamp, Order::isDelivered
-        ) as Array<KProperty1<Model, *>>
-    }
-
     override fun getViewToInflate(
         inflater: LayoutInflater,
         parent: ViewGroup
-    ): ViewDataBinding {
+    ): ItemOrderBinding {
         return ItemOrderBinding.inflate(inflater, parent, false)
     }
 
@@ -71,11 +63,11 @@ class OrderHelper(
 
     override fun getFilterableFields(): Array<Pair<String, (Model) -> Boolean>> {
         return arrayOf(
-            "Delivered" to { model ->
-                (model as Order).isDelivered
+            "Delivered" to { order ->
+                (order as Order).isDelivered
             },
-            "Not delivered" to { model ->
-                (model as Order).isDelivered.not()
+            "Not delivered" to { order ->
+                (order as Order).isDelivered.not()
             }
         )
     }
@@ -142,5 +134,29 @@ class OrderHelper(
 
     override fun loadFullListOnNewModelAdded(): Boolean {
         return true
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun getContentComparator(
+        newList: List<Model>,
+        oldList: List<Model>,
+        newPosition: Int,
+        oldPosition: Int
+    ): Boolean {
+        newList as List<Order>
+        oldList as List<Order>
+
+        return when {
+            newList[newPosition].timestamp != oldList[oldPosition].timestamp -> false
+            newList[newPosition].userItemId != oldList[oldPosition].userItemId -> false
+            newList[newPosition].userItemName != oldList[oldPosition].userItemName -> false
+            newList[newPosition].quantity != oldList[oldPosition].quantity -> false
+            newList[newPosition].amount != oldList[oldPosition].amount -> false
+            newList[newPosition].customerId != oldList[oldPosition].customerId -> false
+            newList[newPosition].customerName != oldList[oldPosition].customerName -> false
+            newList[newPosition].deliveryTimestamp != oldList[oldPosition].deliveryTimestamp -> false
+            newList[newPosition].isDelivered != oldList[oldPosition].isDelivered -> false
+            else -> true
+        }
     }
 }

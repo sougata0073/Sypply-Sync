@@ -60,10 +60,10 @@ class AddEditSupplierPaymentFragment : Fragment() {
 
         if (this.toEdit) {
             this.prevSupplierPayment = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                requireArguments().getParcelable("supplierPayment", SupplierPayment::class.java)
+                requireArguments().getParcelable(Model.SUPPLIER_PAYMENT, SupplierPayment::class.java)
             } else {
                 @Suppress("DEPRECATION")
-                requireArguments().getParcelable("supplierPayment")
+                requireArguments().getParcelable(Model.SUPPLIER_PAYMENT)
             }!!
 
         }
@@ -160,11 +160,12 @@ class AddEditSupplierPaymentFragment : Fragment() {
             } else if (this.toEdit) {
 
                 val supplier = this.supplier
-                val supplierPaymentId = this.prevSupplierPayment.id
+
                 this.updatedSupplierPayment = this.viewModel.updateSupplierPayment(
+                    this.prevSupplierPayment.id, this.prevSupplierPayment.timestamp,
+
                     supplier?.id ?: this.prevSupplierPayment.supplierId,
                     supplier?.name ?: this.prevSupplierPayment.supplierName,
-                    supplierPaymentId,
                     this.binding.root
                 )
 

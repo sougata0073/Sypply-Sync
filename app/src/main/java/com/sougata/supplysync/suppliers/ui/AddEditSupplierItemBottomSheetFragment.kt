@@ -13,6 +13,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.BottomSheetAddEditSupplierItemBinding
 import com.sougata.supplysync.firestore.SupplierRepository
+import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierItemViewModel
 import com.sougata.supplysync.util.KeysAndMessages
@@ -41,7 +42,7 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
         fun getInstance(supplierItem: SupplierItem?, action: String) =
             AddEditSupplierItemBottomSheetFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelable("supplierItem", supplierItem)
+                    putParcelable(Model.SUPPLIERS_ITEM, supplierItem)
                     if (action == KeysAndMessages.TO_ADD_KEY) {
                         putBoolean(KeysAndMessages.TO_ADD_KEY, true)
                     } else if (action == KeysAndMessages.TO_EDIT_KEY) {
@@ -59,10 +60,10 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
 
         if (this.toEdit) {
             this.prevSupplierItem = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                requireArguments().getParcelable("supplierItem", SupplierItem::class.java)
+                requireArguments().getParcelable(Model.SUPPLIERS_ITEM, SupplierItem::class.java)
             } else {
                 @Suppress("DEPRECATION")
-                requireArguments().getParcelable("supplierItem")
+                requireArguments().getParcelable(Model.SUPPLIERS_ITEM)
             }!!
 
         }
@@ -137,11 +138,8 @@ class AddEditSupplierItemBottomSheetFragment : BottomSheetDialogFragment() {
             if (this.toAdd) {
                 this.viewModel.addSupplierItem(this.binding.root)
             } else if (this.toEdit) {
-
-                val supplierId = this.prevSupplierItem.id
-
                 this.updatedSupplierItem = this.viewModel.updateSupplierItem(
-                    supplierId,
+                    this.prevSupplierItem.id, this.prevSupplierItem.timestamp,
                     this.binding.root
                 )
 

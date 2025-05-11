@@ -4,6 +4,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.InputType
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -72,6 +73,13 @@ class ModelsListFragment : Fragment() {
             mutableListOf(),
             this.helper,
             this.loadListAgain,
+            { list ->
+                if (list.isEmpty()) {
+                    this.binding.nothingHereLbl.visibility = View.VISIBLE
+                } else {
+                    this.binding.nothingHereLbl.visibility = View.GONE
+                }
+            },
             this.recyclerViewCallBack
         )
     }
@@ -85,9 +93,6 @@ class ModelsListFragment : Fragment() {
 
     private var searchField: String? = null
     private var currentQueryDataType: FirestoreFieldDataType? = null
-
-    private lateinit var fieldsListSearch: Array<Triple<String, String, FirestoreFieldDataType>>
-    private lateinit var fieldsListFilter: Array<Pair<String, (Model) -> Boolean>>
 
     private val loadListAgain = MutableLiveData(false)
 
@@ -115,8 +120,8 @@ class ModelsListFragment : Fragment() {
 
         this.helper = ModelsListHelper(this.modelName, this)
 
-        this.fieldsListSearch = this.helper.getSearchableFieldPairs()
-        this.fieldsListFilter = this.helper.getFilterableFields()
+//        this.fieldsListSearch = this.helper.getSearchableFieldPairs()
+//        this.fieldsListFilter = this.helper.getFilterableFields()
 
         this.initializeUI()
 
@@ -153,7 +158,7 @@ class ModelsListFragment : Fragment() {
             View.GONE
         }
 
-        this.binding.filterChipsLayout.visibility = if (fieldsListFilter.isEmpty()) {
+        this.binding.filterChipsLayout.visibility = if (this.helper.getFilterableFields().isEmpty()) {
             View.GONE
         } else {
             View.VISIBLE
@@ -196,7 +201,7 @@ class ModelsListFragment : Fragment() {
                 }
             }
 
-            if (this.fieldsListFilter.isNotEmpty()) {
+            if (this.helper.getFilterableFields().isNotEmpty()) {
                 if (!this.binding.filterChipsLayout.isVisible) {
                     this.binding.filterChipsLayout.visibility = View.VISIBLE
                 }
@@ -218,10 +223,8 @@ class ModelsListFragment : Fragment() {
                 }
 
             } else if (it.second == Status.SUCCESS) {
-
                 val list = it.first
-
-                if (list != null && list.isNotEmpty()) {
+                if (list != null) {
                     onSuccessfulListReceived(list)
                 } else {
                     onEmptyOrNullListReceived()
@@ -247,7 +250,7 @@ class ModelsListFragment : Fragment() {
 
                 val list = it.first
 
-                if (list != null && list.isNotEmpty()) {
+                if (list != null) {
                     onSuccessfulListReceived(list)
                 } else {
                     onEmptyOrNullListReceived()
@@ -295,7 +298,7 @@ class ModelsListFragment : Fragment() {
                 val lastItemPosition = layoutManager.findLastCompletelyVisibleItemPosition()
 
                 if (lastItemPosition == itemCount - 1) {
-
+                    Log.d("TAG", "called")
                     loadItemsList()
 
                 } else if (lastItemPosition == itemCount - 5) {
@@ -369,16 +372,13 @@ class ModelsListFragment : Fragment() {
                 currentQueryDataType = null
 
                 binding.searchChipsLayout.visibility = View.GONE
-                if (fieldsListFilter.isNotEmpty()) {
+                if (helper.getFilterableFields().isNotEmpty()) {
                     binding.filterChipsLayout.visibility = View.VISIBLE
                 }
 
                 val list = regularViewModel.itemsList.value?.first
                 if (list != null) {
                     recyclerViewAdapter.setItems(list)
-                    if (list.isNotEmpty()) {
-                        binding.nothingHereLbl.visibility = View.GONE
-                    }
                 }
 
                 false
@@ -387,16 +387,13 @@ class ModelsListFragment : Fragment() {
     }
 
     private fun onSuccessfulListReceived(list: MutableList<Model>) {
-        this.binding.nothingHereLbl.visibility = View.GONE
         this.binding.progressBar.visibility = View.GONE
-        this.recyclerViewAdapter.removeLoadingAnimation()
         this.recyclerViewAdapter.setItems(list)
+
     }
 
     private fun onEmptyOrNullListReceived() {
-        this.binding.nothingHereLbl.visibility = View.VISIBLE
         this.binding.progressBar.visibility = View.GONE
-        this.recyclerViewAdapter.removeLoadingAnimation()
     }
 
     private fun registerFragmentResultListener() {
@@ -476,7 +473,7 @@ class ModelsListFragment : Fragment() {
     }
 
     private fun loadChipsSearch() {
-        for (field in this.fieldsListSearch) {
+        for (field in this.helper.getSearchableFieldPairs()) {
             val chip = this.getDecoratedChip(field.second)
 
             chip.setOnCheckedChangeListener { _, isChecked ->
@@ -501,14 +498,14 @@ class ModelsListFragment : Fragment() {
 
     private fun loadChipsFilter() {
 
-        this.binding.filterChipsLayout.visibility = if (this.fieldsListFilter.isEmpty()) {
+        this.binding.filterChipsLayout.visibility = if (this.helper.getFilterableFields().isEmpty()) {
             View.GONE
             return
         } else {
             View.VISIBLE
         }
 
-        for (field in this.fieldsListFilter) {
+        for (field in this.helper.getFilterableFields()) {
             val chip = this.getDecoratedChip(field.first)
 
             chip.setOnCheckedChangeListener { _, isChecked ->

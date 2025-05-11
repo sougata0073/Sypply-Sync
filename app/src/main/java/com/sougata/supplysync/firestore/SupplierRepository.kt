@@ -9,10 +9,8 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.sougata.supplysync.firestore.util.Action
 import com.sougata.supplysync.firestore.util.FieldNames
-import com.sougata.supplysync.firestore.util.Helper
-import com.sougata.supplysync.firestore.util.ModelMaps
+import com.sougata.supplysync.firestore.util.HelperRepository
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.models.Supplier
@@ -35,29 +33,33 @@ class SupplierRepository {
 
     private val usersCol =
         this.db.collection(FieldNames.UsersCol.SELF_NAME)
+    private val currentUserDoc = this.usersCol.document(this.currentUser.uid)
 
-    private val helper = Helper()
-    private val modelMaps = ModelMaps()
+    private val valuesCol = this.currentUserDoc.collection(FieldNames.ValuesCol.SELF_NAME)
+
+    private val suppliersCol = this.currentUserDoc.collection(FieldNames.SuppliersCol.SELF_NAME)
+    private val supplierItemsCol =
+        this.currentUserDoc.collection(FieldNames.SupplierItemsCol.SELF_NAME)
+    val supplierPaymentsCol =
+        this.currentUserDoc.collection(FieldNames.SupplierPaymentsCol.SELF_NAME)
+    val orderedItemsCol =
+        this.currentUserDoc.collection(FieldNames.OrderedItemsCol.SELF_NAME)
+
+    private val helperRepository = HelperRepository()
 
     fun getSuppliersList(
         lastDocumentSnapshot: DocumentSnapshot?,
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.SUPPLIER, map, document)
-        }
-
-        this.helper.getAnyModelsList(
+        this.helperRepository.getAnyModelsList(
             firebaseCollectionName = FieldNames.SuppliersCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             customSorting = FieldNames.SuppliersCol.TIMESTAMP to Query.Direction.ASCENDING,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = Supplier::class.java,
             onComplete = onComplete
         )
-
     }
 
     fun getSuppliersListFiltered(
@@ -68,18 +70,14 @@ class SupplierRepository {
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.SUPPLIER, map, document)
-        }
-
-        this.helper.searchInAnyModelsList(
+        this.helperRepository.searchInAnyModelsList(
             searchField = searchField,
             searchQuery = searchQuery,
             queryDataType = queryDataType,
             firebaseCollectionName = FieldNames.SuppliersCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = Supplier::class.java,
             onComplete = onComplete
         )
     }
@@ -89,17 +87,12 @@ class SupplierRepository {
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.SUPPLIERS_ITEM, map, document)
-        }
-
-        this.helper.getAnyModelsList(
+        this.helperRepository.getAnyModelsList(
             firebaseCollectionName = FieldNames.SupplierItemsCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             customSorting = FieldNames.SupplierItemsCol.TIMESTAMP to Query.Direction.ASCENDING,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = SupplierItem::class.java,
             onComplete = onComplete
         )
     }
@@ -112,18 +105,14 @@ class SupplierRepository {
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.SUPPLIERS_ITEM, map, document)
-        }
-
-        this.helper.searchInAnyModelsList(
+        this.helperRepository.searchInAnyModelsList(
             searchField = searchField,
             searchQuery = searchQuery,
             queryDataType = queryDataType,
             firebaseCollectionName = FieldNames.SupplierItemsCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = SupplierItem::class.java,
             onComplete = onComplete
         )
     }
@@ -133,16 +122,12 @@ class SupplierRepository {
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.ORDERED_ITEM, map, document)
-        }
-
-        this.helper.getAnyModelsList(
+        this.helperRepository.getAnyModelsList(
             firebaseCollectionName = FieldNames.OrderedItemsCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             customSorting = FieldNames.OrderedItemsCol.TIMESTAMP to Query.Direction.ASCENDING,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = OrderedItem::class.java,
             onComplete = onComplete
         )
     }
@@ -155,18 +140,14 @@ class SupplierRepository {
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.ORDERED_ITEM, map, document)
-        }
-
-        this.helper.searchInAnyModelsList(
+        this.helperRepository.searchInAnyModelsList(
             searchField = searchField,
             searchQuery = searchQuery,
             queryDataType = queryDataType,
             firebaseCollectionName = FieldNames.OrderedItemsCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = OrderedItem::class.java,
             onComplete = onComplete
         )
     }
@@ -176,16 +157,12 @@ class SupplierRepository {
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.SUPPLIER_PAYMENT, map, document)
-        }
-
-        this.helper.getAnyModelsList(
+        this.helperRepository.getAnyModelsList(
             firebaseCollectionName = FieldNames.SupplierPaymentsCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             customSorting = FieldNames.SupplierPaymentsCol.PAYMENT_TIMESTAMP to Query.Direction.DESCENDING,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = SupplierPayment::class.java,
             onComplete = onComplete
         )
     }
@@ -198,126 +175,38 @@ class SupplierRepository {
         limit: Long,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
-        val howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model = { map, document ->
-            this.modelMaps.getMappedModel(Model.SUPPLIER_PAYMENT, map, document)
-        }
-
-        this.helper.searchInAnyModelsList(
+        this.helperRepository.searchInAnyModelsList(
             searchField = searchField,
             searchQuery = searchQuery,
             queryDataType = queryDataType,
             firebaseCollectionName = FieldNames.SupplierPaymentsCol.SELF_NAME,
             lastDocumentSnapshot = lastDocumentSnapshot,
             limit = limit,
-            howToConvert = howToConvert,
+            clazz = SupplierPayment::class.java,
             onComplete = onComplete
         )
     }
 
-    fun addUpdateSupplier(
-        supplier: Supplier, action: Action, onComplete: (Status, String) -> Unit
-    ) {
-
-        val suppliersCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.SuppliersCol.SELF_NAME)
-        val valuesCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.ValuesCol.SELF_NAME)
-
-        val supplierDoc = mutableMapOf<String, Any>(
-            FieldNames.SuppliersCol.NAME to supplier.name,
-            FieldNames.SuppliersCol.DUE_AMOUNT to supplier.dueAmount,
-            FieldNames.SuppliersCol.PHONE to supplier.phone,
-            FieldNames.SuppliersCol.EMAIL to supplier.email,
-            FieldNames.SuppliersCol.NOTE to supplier.note,
-            FieldNames.SuppliersCol.PAYMENT_DETAILS to supplier.paymentDetails,
-            FieldNames.SuppliersCol.PROFILE_IMAGE_URL to supplier.profileImageUrl
-        )
+    fun addSupplier(supplier: Supplier, onComplete: (Status, String) -> Unit) {
 
         this.usersCol.firestore.runTransaction {
-            if (action == Action.TO_ADD) {
-                supplierDoc.put(
-                    FieldNames.SuppliersCol.TIMESTAMP,
-                    FieldValue.serverTimestamp()
-                )
-                it.set(suppliersCol.document(), supplierDoc)
-                it.update(
-                    valuesCol.document(FieldNames.ValuesCol.SuppliersCountDoc.SELF_NAME),
-                    mapOf(
-                        FieldNames.ValuesCol.SuppliersCountDoc.VALUE to FieldValue.increment(
-                            1
-                        )
+            it.set(this.suppliersCol.document(), supplier)
+            it.update(
+                this.valuesCol.document(FieldNames.ValuesCol.SuppliersCountDoc.SELF_NAME),
+                mapOf(
+                    FieldNames.ValuesCol.SuppliersCountDoc.VALUE to FieldValue.increment(
+                        1
                     )
                 )
-                it.update(
-                    valuesCol.document(FieldNames.ValuesCol.SuppliersDueAmountDoc.SELF_NAME),
-                    mapOf(
-                        FieldNames.ValuesCol.SuppliersDueAmountDoc.VALUE to FieldValue.increment(
-                            supplier.dueAmount
-                        )
+            )
+            it.update(
+                this.valuesCol.document(FieldNames.ValuesCol.SuppliersDueAmountDoc.SELF_NAME),
+                mapOf(
+                    FieldNames.ValuesCol.SuppliersDueAmountDoc.VALUE to FieldValue.increment(
+                        supplier.dueAmount
                     )
                 )
-            } else if (action == Action.TO_UPDATE) {
-                var prevTotalDueAmount =
-                    it.get(valuesCol.document(FieldNames.ValuesCol.SuppliersDueAmountDoc.SELF_NAME))
-                        .getDouble(FieldNames.ValuesCol.SuppliersDueAmountDoc.VALUE)
-                        ?: 0.0
-                var prevSupplierDueAmount =
-                    it.get(suppliersCol.document(supplier.id))
-                        .getDouble(FieldNames.SuppliersCol.DUE_AMOUNT) ?: 0.0
-
-                val newTotalDueAmount: Double? =
-                    prevTotalDueAmount - prevSupplierDueAmount + supplier.dueAmount
-
-                it.update(suppliersCol.document(supplier.id), supplierDoc)
-                it.update(
-                    valuesCol.document(FieldNames.ValuesCol.SuppliersDueAmountDoc.SELF_NAME),
-                    mapOf(FieldNames.ValuesCol.SuppliersDueAmountDoc.VALUE to newTotalDueAmount)
-                )
-            }
-        }.addOnCompleteListener {
-            if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
-            } else {
-                onComplete(Status.FAILED, it.exception?.message.toString())
-            }
-        }
-
-    }
-
-    fun addUpdateSupplierItem(
-        supplierItem: SupplierItem, action: Action, onComplete: (Status, String) -> Unit
-    ) {
-
-        val supplierItemsCol =
-            this.usersCol.document(this.currentUser.uid)
-                .collection(FieldNames.SupplierItemsCol.SELF_NAME)
-        val valuesCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.ValuesCol.SELF_NAME)
-
-        val supplierItemDoc = mutableMapOf<String, Any>(
-            FieldNames.SupplierItemsCol.NAME to supplierItem.name,
-            FieldNames.SupplierItemsCol.PRICE to supplierItem.price,
-            FieldNames.SupplierItemsCol.DETAILS to supplierItem.details,
-        )
-
-        this.usersCol.firestore.runTransaction {
-            if (action == Action.TO_ADD) {
-                supplierItemDoc.put(
-                    FieldNames.SupplierItemsCol.TIMESTAMP,
-                    FieldValue.serverTimestamp()
-                )
-                it.set(supplierItemsCol.document(), supplierItemDoc)
-                it.update(
-                    valuesCol.document(FieldNames.ValuesCol.SupplierItemsCountDoc.SELF_NAME),
-                    mapOf(
-                        FieldNames.ValuesCol.SupplierItemsCountDoc.VALUE to FieldValue.increment(
-                            1
-                        )
-                    )
-                )
-            } else if (action == Action.TO_UPDATE) {
-                it.update(supplierItemsCol.document(supplierItem.id), supplierItemDoc)
-            }
+            )
         }.addOnCompleteListener {
             if (it.isSuccessful) {
                 onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
@@ -327,34 +216,25 @@ class SupplierRepository {
         }
     }
 
-    fun addUpdateSupplierPayment(
-        supplierPayment: SupplierPayment,
-        action: Action,
-        onComplete: (Status, String) -> Unit
-    ) {
-
-        val supplierPaymentsCol =
-            this.usersCol.document(this.currentUser.uid)
-                .collection(FieldNames.SupplierPaymentsCol.SELF_NAME)
-
-        val supplierPaymentDoc = mutableMapOf<String, Any>(
-            FieldNames.SupplierPaymentsCol.AMOUNT to supplierPayment.amount,
-            FieldNames.SupplierPaymentsCol.PAYMENT_TIMESTAMP to supplierPayment.paymentTimestamp,
-            FieldNames.SupplierPaymentsCol.NOTE to supplierPayment.note,
-            FieldNames.SupplierPaymentsCol.SUPPLIER_ID to supplierPayment.supplierId,
-            FieldNames.SupplierPaymentsCol.SUPPLIER_NAME to supplierPayment.supplierName
-        )
+    fun updateSupplier(supplier: Supplier, onComplete: (Status, String) -> Unit) {
 
         this.usersCol.firestore.runTransaction {
-            if (action == Action.TO_ADD) {
-                supplierPaymentDoc.put(
-                    FieldNames.SupplierPaymentsCol.TIMESTAMP,
-                    FieldValue.serverTimestamp()
-                )
-                it.set(supplierPaymentsCol.document(), supplierPaymentDoc)
-            } else if (action == Action.TO_UPDATE) {
-                it.update(supplierPaymentsCol.document(supplierPayment.id), supplierPaymentDoc)
-            }
+            var prevTotalDueAmount =
+                it.get(this.valuesCol.document(FieldNames.ValuesCol.SuppliersDueAmountDoc.SELF_NAME))
+                    .getDouble(FieldNames.ValuesCol.SuppliersDueAmountDoc.VALUE)
+                    ?: 0.0
+            var prevSupplierDueAmount =
+                it.get(this.suppliersCol.document(supplier.id))
+                    .getDouble(FieldNames.SuppliersCol.DUE_AMOUNT) ?: 0.0
+
+            val newTotalDueAmount: Double? =
+                prevTotalDueAmount - prevSupplierDueAmount + supplier.dueAmount
+
+            it.update(this.suppliersCol.document(supplier.id), supplier.toMap())
+            it.update(
+                this.valuesCol.document(FieldNames.ValuesCol.SuppliersDueAmountDoc.SELF_NAME),
+                mapOf(FieldNames.ValuesCol.SuppliersDueAmountDoc.VALUE to newTotalDueAmount)
+            )
         }.addOnCompleteListener {
             if (it.isSuccessful) {
                 onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
@@ -362,130 +242,13 @@ class SupplierRepository {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
         }
-
-    }
-
-    fun addUpdateOrderedItem(
-        orderedItem: OrderedItem,
-        action: Action,
-        onComplete: (Status, String) -> Unit
-    ) {
-
-        val orderedItemsCol =
-            this.usersCol.document(this.currentUser.uid)
-                .collection(FieldNames.OrderedItemsCol.SELF_NAME)
-        val valuesCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.ValuesCol.SELF_NAME)
-
-        val orderedItemDoc = mutableMapOf<String, Any>(
-            FieldNames.OrderedItemsCol.ITEM_ID to orderedItem.supplierItemId,
-            FieldNames.OrderedItemsCol.ITEM_NAME to orderedItem.supplierItemName,
-            FieldNames.OrderedItemsCol.QUANTITY to orderedItem.quantity,
-            FieldNames.OrderedItemsCol.AMOUNT to orderedItem.amount,
-            FieldNames.OrderedItemsCol.SUPPLIER_ID to orderedItem.supplierId,
-            FieldNames.OrderedItemsCol.SUPPLIER_NAME to orderedItem.supplierName,
-            FieldNames.OrderedItemsCol.ORDER_TIMESTAMP to orderedItem.orderTimestamp,
-            FieldNames.OrderedItemsCol.IS_RECEIVED to orderedItem.isReceived
-        )
-
-        this.usersCol.firestore.runTransaction {
-
-            if (action == Action.TO_ADD) {
-                orderedItemDoc.put(
-                    FieldNames.OrderedItemsCol.TIMESTAMP,
-                    FieldValue.serverTimestamp()
-                )
-                it.set(orderedItemsCol.document(), orderedItemDoc)
-                if (!orderedItem.isReceived) {
-                    it.update(
-                        valuesCol.document(FieldNames.ValuesCol.OrdersToReceiveDoc.SELF_NAME),
-                        mapOf(
-                            FieldNames.ValuesCol.OrdersToReceiveDoc.VALUE to FieldValue.increment(
-                                1
-                            )
-                        )
-                    )
-                }
-
-            } else if (action == Action.TO_UPDATE) {
-
-                val prevIsReceived =
-                    it.get(orderedItemsCol.document(orderedItem.id))
-                        .getBoolean(FieldNames.OrderedItemsCol.IS_RECEIVED)
-                        ?: false
-
-                if (prevIsReceived == true && orderedItem.isReceived == false) {
-                    it.update(
-                        valuesCol.document(FieldNames.ValuesCol.OrdersToReceiveDoc.SELF_NAME),
-                        mapOf(
-                            FieldNames.ValuesCol.OrdersToReceiveDoc.VALUE to FieldValue.increment(
-                                1
-                            )
-                        )
-                    )
-                } else if (prevIsReceived == false && orderedItem.isReceived == true) {
-                    it.update(
-                        valuesCol.document(FieldNames.ValuesCol.OrdersToReceiveDoc.SELF_NAME),
-                        mapOf(
-                            FieldNames.ValuesCol.OrdersToReceiveDoc.VALUE to FieldValue.increment(
-                                -1
-                            )
-                        )
-                    )
-                }
-                it.update(orderedItemsCol.document(orderedItem.id), orderedItemDoc)
-
-            }
-        }.addOnCompleteListener {
-            if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
-            } else {
-                onComplete(Status.FAILED, it.exception?.message.toString())
-            }
-        }
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    fun getNumberOfSuppliers(onComplete: (Status, Number, String) -> Unit) {
-
-        this.helper.getAnyValueFromValuesCol(
-            FieldNames.ValuesCol.SuppliersCountDoc.SELF_NAME,
-            FirestoreFieldDataType.NUMBER,
-            onComplete as (Status, Any, String) -> Unit
-        )
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    fun getDueAmountToSuppliers(onComplete: (Status, Number, String) -> Unit) {
-
-        this.helper.getAnyValueFromValuesCol(
-            FieldNames.ValuesCol.SuppliersDueAmountDoc.SELF_NAME,
-            FirestoreFieldDataType.NUMBER,
-            onComplete as (Status, Any, String) -> Unit
-        )
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    fun getOrdersToReceive(onComplete: (Status, Number, String) -> Unit) {
-
-        this.helper.getAnyValueFromValuesCol(
-            FieldNames.ValuesCol.OrdersToReceiveDoc.SELF_NAME,
-            FirestoreFieldDataType.NUMBER,
-            onComplete as (Status, Any, String) -> Unit
-        )
     }
 
     fun deleteSupplier(supplier: Supplier, onComplete: (Status, String) -> Unit) {
-
-        val suppliersCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.SuppliersCol.SELF_NAME)
-        val valuesCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.ValuesCol.SELF_NAME)
-
         this.usersCol.firestore.runTransaction {
-            it.delete(suppliersCol.document(supplier.id))
+            it.delete(this.suppliersCol.document(supplier.id))
             it.update(
-                valuesCol.document(FieldNames.ValuesCol.SuppliersCountDoc.SELF_NAME),
+                this.valuesCol.document(FieldNames.ValuesCol.SuppliersCountDoc.SELF_NAME),
                 mapOf(
                     FieldNames.ValuesCol.SuppliersCountDoc.VALUE to FieldValue.increment(
                         -1
@@ -493,7 +256,7 @@ class SupplierRepository {
                 )
             )
             it.update(
-                valuesCol.document(FieldNames.ValuesCol.SuppliersDueAmountDoc.SELF_NAME),
+                this.valuesCol.document(FieldNames.ValuesCol.SuppliersDueAmountDoc.SELF_NAME),
                 mapOf(
                     FieldNames.ValuesCol.SuppliersDueAmountDoc.VALUE to FieldValue.increment(
                         -supplier.dueAmount
@@ -501,28 +264,50 @@ class SupplierRepository {
                 )
             )
         }.addOnCompleteListener {
-
             if (it.isSuccessful) {
                 onComplete(Status.SUCCESS, "Supplier deleted successfully")
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
-
         }
     }
 
-    fun deleteSupplierItem(supplierItem: SupplierItem, onComplete: (Status, String) -> Unit) {
-
-        val supplierItemsCol =
-            this.usersCol.document(this.currentUser.uid)
-                .collection(FieldNames.SupplierItemsCol.SELF_NAME)
-        val valuesCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.ValuesCol.SELF_NAME)
-
+    fun addSupplierItem(supplierItem: SupplierItem, onComplete: (Status, String) -> Unit) {
         this.usersCol.firestore.runTransaction {
-            it.delete(supplierItemsCol.document(supplierItem.id))
+            it.set(this.supplierItemsCol.document(), supplierItem)
             it.update(
-                valuesCol.document(FieldNames.ValuesCol.SupplierItemsCountDoc.SELF_NAME),
+                this.valuesCol.document(FieldNames.ValuesCol.SupplierItemsCountDoc.SELF_NAME),
+                mapOf(
+                    FieldNames.ValuesCol.SupplierItemsCountDoc.VALUE to FieldValue.increment(
+                        1
+                    )
+                )
+            )
+        }.addOnCompleteListener {
+            if (it.isSuccessful) {
+                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+            } else {
+                onComplete(Status.FAILED, it.exception?.message.toString())
+            }
+        }
+    }
+
+    fun updateSupplierItem(supplierItem: SupplierItem, onComplete: (Status, String) -> Unit) {
+        this.supplierItemsCol.document(supplierItem.id).update(supplierItem.toMap())
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                } else {
+                    onComplete(Status.FAILED, it.exception?.message.toString())
+                }
+            }
+    }
+
+    fun deleteSupplierItem(supplierItem: SupplierItem, onComplete: (Status, String) -> Unit) {
+        this.usersCol.firestore.runTransaction {
+            it.delete(this.supplierItemsCol.document(supplierItem.id))
+            it.update(
+                this.valuesCol.document(FieldNames.ValuesCol.SupplierItemsCountDoc.SELF_NAME),
                 mapOf(
                     FieldNames.ValuesCol.SupplierItemsCountDoc.VALUE to FieldValue.increment(
                         -1
@@ -530,50 +315,118 @@ class SupplierRepository {
                 )
             )
         }.addOnCompleteListener {
-
             if (it.isSuccessful) {
                 onComplete(Status.SUCCESS, "Item deleted successfully")
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
-
         }
 
+    }
+
+    fun addSupplierPayment(
+        supplierPayment: SupplierPayment,
+        onComplete: (Status, String) -> Unit
+    ) {
+        this.supplierPaymentsCol.document().set(supplierPayment)
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                } else {
+                    onComplete(Status.FAILED, it.exception?.message.toString())
+                }
+            }
+    }
+
+    fun updateSupplierPayment(
+        supplierPayment: SupplierPayment,
+        onComplete: (Status, String) -> Unit
+    ) {
+        this.supplierPaymentsCol.document(supplierPayment.id)
+            .update(supplierPayment.toMap()).addOnCompleteListener {
+                if (it.isSuccessful) {
+                    onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                } else {
+                    onComplete(Status.FAILED, it.exception?.message.toString())
+                }
+            }
     }
 
     fun deleteSupplierPayment(
         supplierPayment: SupplierPayment,
         onComplete: (Status, String) -> Unit
     ) {
-
-        val supplierPaymentsCol =
-            this.usersCol.document(this.currentUser.uid)
-                .collection(FieldNames.SupplierPaymentsCol.SELF_NAME)
-
-        this.usersCol.firestore.runTransaction {
-            it.delete(supplierPaymentsCol.document(supplierPayment.id))
-        }.addOnCompleteListener {
-
+        this.supplierPaymentsCol.document(supplierPayment.id).delete().addOnCompleteListener {
             if (it.isSuccessful) {
                 onComplete(Status.SUCCESS, "Payment deleted successfully")
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
-
         }
+    }
 
+    fun addOrderedItem(
+        orderedItem: OrderedItem,
+        onComplete: (Status, String) -> Unit
+    ) {
+        this.usersCol.firestore.runTransaction {
+            it.set(this.orderedItemsCol.document(), orderedItem)
+            if (!orderedItem.isReceived) {
+                it.update(
+                    valuesCol.document(FieldNames.ValuesCol.OrdersToReceiveDoc.SELF_NAME),
+                    mapOf(
+                        FieldNames.ValuesCol.OrdersToReceiveDoc.VALUE to FieldValue.increment(
+                            1
+                        )
+                    )
+                )
+            }
+        }.addOnCompleteListener {
+            if (it.isSuccessful) {
+                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+            } else {
+                onComplete(Status.FAILED, it.exception?.message.toString())
+            }
+        }
+    }
+
+    fun updateOrderedItem(
+        orderedItem: OrderedItem,
+        onComplete: (Status, String) -> Unit
+    ) {
+        this.usersCol.firestore.runTransaction {
+            val prevIsReceived =
+                it.get(orderedItemsCol.document(orderedItem.id))
+                    .getBoolean(FieldNames.OrderedItemsCol.IS_RECEIVED)
+                    ?: false
+
+            if (prevIsReceived == true && orderedItem.isReceived == false) {
+                it.update(
+                    valuesCol.document(FieldNames.ValuesCol.OrdersToReceiveDoc.SELF_NAME),
+                    mapOf(
+                        FieldNames.ValuesCol.OrdersToReceiveDoc.VALUE to FieldValue.increment(
+                            1
+                        )
+                    )
+                )
+            } else if (prevIsReceived == false && orderedItem.isReceived == true) {
+                it.update(
+                    valuesCol.document(FieldNames.ValuesCol.OrdersToReceiveDoc.SELF_NAME),
+                    mapOf(
+                        FieldNames.ValuesCol.OrdersToReceiveDoc.VALUE to FieldValue.increment(
+                            -1
+                        )
+                    )
+                )
+            }
+            it.update(orderedItemsCol.document(orderedItem.id), orderedItem.toMap())
+        }
     }
 
     fun deleteOrderedItem(orderedItem: OrderedItem, onComplete: (Status, String) -> Unit) {
 
-        val orderedItemsCol =
-            this.usersCol.document(this.currentUser.uid)
-                .collection(FieldNames.OrderedItemsCol.SELF_NAME)
-        val valuesCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.ValuesCol.SELF_NAME)
-
         this.usersCol.firestore.runTransaction {
-            it.delete(orderedItemsCol.document(orderedItem.id))
+            it.delete(this.orderedItemsCol.document(orderedItem.id))
             if (!orderedItem.isReceived) {
                 it.update(
                     valuesCol.document(FieldNames.ValuesCol.OrdersToReceiveDoc.SELF_NAME),
@@ -593,17 +446,30 @@ class SupplierRepository {
         }
     }
 
+    fun getNumberOfSuppliers(onComplete: (Status, Number?, String) -> Unit) {
+        this.helperRepository.getAnyValueFromValuesCol(
+            FieldNames.ValuesCol.SuppliersCountDoc.SELF_NAME, onComplete
+        )
+    }
+
+    fun getDueAmountToSuppliers(onComplete: (Status, Number?, String) -> Unit) {
+        this.helperRepository.getAnyValueFromValuesCol(
+            FieldNames.ValuesCol.SuppliersDueAmountDoc.SELF_NAME, onComplete
+        )
+    }
+
+    fun getOrdersToReceive(onComplete: (Status, Number?, String) -> Unit) {
+        this.helperRepository.getAnyValueFromValuesCol(
+            FieldNames.ValuesCol.OrdersToReceiveDoc.SELF_NAME, onComplete
+        )
+    }
+
     fun getPurchaseAmountsListByRange(
         startTimestamp: Timestamp,
         endTimestamp: Timestamp,
-        onComplete: (Status, MutableList<Double>, String) -> Unit
+        onComplete: (Status, List<Double>?, String) -> Unit
     ) {
-
-        val orderedItemsCol =
-            this.usersCol.document(this.currentUser.uid)
-                .collection(FieldNames.OrderedItemsCol.SELF_NAME)
-
-        val query = orderedItemsCol
+        val query = this.orderedItemsCol
             .whereGreaterThanOrEqualTo(
                 FieldNames.OrderedItemsCol.ORDER_TIMESTAMP,
                 startTimestamp
@@ -617,45 +483,32 @@ class SupplierRepository {
         query.get().addOnCompleteListener {
 
             if (it.isSuccessful) {
-
                 val resultList = mutableListOf<Double>()
 
-
                 for (doc in it.result.documents) {
-                    val data = doc.data
-
-                    if (doc.exists() && data != null) {
+                    if (doc.exists()) {
                         val amount =
-                            Converters.numberToDouble(data[FieldNames.OrderedItemsCol.AMOUNT] as Number)
+                            Converters.numberToDouble(doc.get(OrderedItem::amount.name) as Number)
                         resultList.add(amount)
                     }
                 }
-
                 onComplete(
                     Status.SUCCESS,
                     resultList,
                     KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
                 )
-
-
             } else {
-                onComplete(Status.FAILED, mutableListOf(), it.exception?.message.toString())
+                onComplete(Status.FAILED, null, it.exception?.message.toString())
             }
-
         }
     }
 
     fun getFrequencyOfOrderedItemsByRange(
         startTimestamp: Timestamp,
         endTimestamp: Timestamp,
-        onComplete: (Status, MutableList<Pair<String, Int>>, String) -> Unit
+        onComplete: (Status, List<Pair<String, Int>>?, String) -> Unit
     ) {
-
-        val orderedItemsCol =
-            this.usersCol.document(this.currentUser.uid)
-                .collection(FieldNames.OrderedItemsCol.SELF_NAME)
-
-        val query = orderedItemsCol
+        val query = this.orderedItemsCol
             .whereGreaterThanOrEqualTo(
                 FieldNames.OrderedItemsCol.ORDER_TIMESTAMP,
                 startTimestamp
@@ -667,50 +520,32 @@ class SupplierRepository {
             .orderBy(FieldNames.OrderedItemsCol.ORDER_TIMESTAMP, Query.Direction.ASCENDING)
 
         query.get().addOnCompleteListener {
-
             if (it.isSuccessful) {
-
                 val map = hashMapOf<String, Int>()
-                val resultList = mutableListOf<Pair<String, Int>>()
-
 
                 for (doc in it.result.documents) {
-                    val data = doc.data
-                    if (doc.exists() && data != null) {
-                        val itemName =
-                            data[FieldNames.OrderedItemsCol.ITEM_NAME] as String
+                    if (doc.exists()) {
+                        val itemName = doc.get(OrderedItem::supplierItemName.name) as String
                         map[itemName] = map.getOrDefault(itemName, 0) + 1
                     }
                 }
-                for (item in map) {
-                    resultList.add(Pair(item.key, item.value))
-                }
-
                 onComplete(
                     Status.SUCCESS,
-                    resultList,
+                    map.toList(),
                     KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
                 )
-
-
             } else {
-                onComplete(Status.FAILED, mutableListOf(), it.exception?.message.toString())
+                onComplete(Status.FAILED, null, it.exception?.message.toString())
             }
-
         }
     }
 
     fun getSupplierPaymentsByRange(
         startTimestamp: Timestamp,
         endTimestamp: Timestamp,
-        onComplete: (Status, MutableList<SupplierPayment>, String) -> Unit
+        onComplete: (Status, List<SupplierPayment>?, String) -> Unit
     ) {
-
-        val supplierPaymentsCol =
-            this.usersCol.document(this.currentUser.uid)
-                .collection(FieldNames.SupplierPaymentsCol.SELF_NAME)
-
-        val query = supplierPaymentsCol
+        val query = this.supplierPaymentsCol
             .whereGreaterThanOrEqualTo(
                 FieldNames.SupplierPaymentsCol.PAYMENT_TIMESTAMP,
                 startTimestamp
@@ -731,47 +566,30 @@ class SupplierRepository {
                 val resultList = mutableListOf<SupplierPayment>()
 
                 for (doc in it.result.documents) {
-                    val data = doc.data
+                    if (doc.exists()) {
 
-                    if (doc.exists() && data != null) {
-                        val supplierPayment = SupplierPayment(
-                            amount = Converters.numberToDouble(data[FieldNames.SupplierPaymentsCol.AMOUNT] as Number),
-                            paymentTimestamp = data[FieldNames.SupplierPaymentsCol.PAYMENT_TIMESTAMP] as Timestamp,
-                            note = data[FieldNames.SupplierPaymentsCol.NOTE] as String,
-                            supplierId = data[FieldNames.SupplierPaymentsCol.SUPPLIER_ID] as String,
-                            supplierName = data[FieldNames.SupplierPaymentsCol.SUPPLIER_NAME] as String
-                        ).apply {
-                            id = doc.id
-                            timestamp =
-                                data[FieldNames.SupplierPaymentsCol.TIMESTAMP] as Timestamp
-                        }
+                        val supplierPayment = doc.toObject(SupplierPayment::class.java)!!
+
                         resultList.add(supplierPayment)
                     }
                 }
-
                 onComplete(
                     Status.SUCCESS,
                     resultList,
                     KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
                 )
-
             } else {
-                onComplete(Status.FAILED, mutableListOf(), it.exception?.message.toString())
+                onComplete(Status.FAILED, null, it.exception?.message.toString())
             }
-
         }
     }
 
     fun getOrderedItemsByRange(
         startTimestamp: Timestamp,
         endTimestamp: Timestamp,
-        onComplete: (Status, MutableList<OrderedItem>, String) -> Unit
+        onComplete: (Status, MutableList<OrderedItem>?, String) -> Unit
     ) {
-        val orderedItemsCol =
-            this.usersCol.document(this.currentUser.uid)
-                .collection(FieldNames.OrderedItemsCol.SELF_NAME)
-
-        val query = orderedItemsCol
+        val query = this.orderedItemsCol
             .whereGreaterThanOrEqualTo(
                 FieldNames.OrderedItemsCol.ORDER_TIMESTAMP,
                 startTimestamp
@@ -789,35 +607,18 @@ class SupplierRepository {
             if (it.isSuccessful) {
                 val resultList = mutableListOf<OrderedItem>()
                 for (doc in it.result.documents) {
-                    val data = doc.data
-
-                    if (doc.exists() && data != null) {
-                        val orderedItem = OrderedItem(
-                            supplierItemId = data[FieldNames.OrderedItemsCol.ITEM_ID] as String,
-                            supplierItemName = data[FieldNames.OrderedItemsCol.ITEM_NAME] as String,
-                            quantity = Converters.numberToInt(data[FieldNames.OrderedItemsCol.QUANTITY] as Number),
-                            amount = Converters.numberToDouble(data[FieldNames.OrderedItemsCol.AMOUNT] as Number),
-                            supplierId = data[FieldNames.OrderedItemsCol.SUPPLIER_ID] as String,
-                            supplierName = data[FieldNames.OrderedItemsCol.SUPPLIER_NAME] as String,
-                            orderTimestamp = data[FieldNames.OrderedItemsCol.ORDER_TIMESTAMP] as Timestamp,
-                            isReceived = data[FieldNames.OrderedItemsCol.IS_RECEIVED] as Boolean
-                        ).apply {
-                            id = doc.id
-                            timestamp =
-                                data[FieldNames.OrderedItemsCol.TIMESTAMP] as Timestamp
-                        }
+                    if (doc.exists()) {
+                        val orderedItem = doc.toObject(OrderedItem::class.java)!!
                         resultList.add(orderedItem)
                     }
                 }
-
                 onComplete(
                     Status.SUCCESS,
                     resultList,
                     KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
                 )
-
             } else {
-                onComplete(Status.FAILED, mutableListOf(), it.exception?.message.toString())
+                onComplete(Status.FAILED, null, it.exception?.message.toString())
             }
         }
     }
@@ -825,17 +626,11 @@ class SupplierRepository {
     suspend fun getCurrentUserDetails(): Triple<Status, User?, String> =
         withContext(Dispatchers.IO) {
             suspendCoroutine { continuation ->
-                usersCol.document(currentUser.uid).get().addOnCompleteListener { task ->
+                currentUserDoc.get().addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         val doc = task.result
-                        val map = doc.data
-                        if (map != null) {
-                            val user = User(
-                                map[FieldNames.UsersCol.NAME] as String,
-                                map[FieldNames.UsersCol.EMAIL] as String,
-                                map[FieldNames.UsersCol.PHONE] as String,
-                                doc.id
-                            )
+                        if (doc.exists()) {
+                            val user = doc.toObject(User::class.java)
                             continuation.resume(Triple(Status.SUCCESS, user, ""))
                         } else {
                             continuation.resume(
@@ -857,13 +652,9 @@ class SupplierRepository {
     fun getPurchaseAmountByRange(
         startTimestamp: Timestamp,
         endTimestamp: Timestamp,
-        onComplete: (Status, Number, String) -> Unit
+        onComplete: (Status, Number?, String) -> Unit
     ) {
-        val orderedItemsCol =
-            this.usersCol.document(this.currentUser.uid)
-                .collection(FieldNames.OrderedItemsCol.SELF_NAME)
-
-        val query = orderedItemsCol
+        val query = this.orderedItemsCol
             .whereGreaterThanOrEqualTo(
                 FieldNames.OrderedItemsCol.ORDER_TIMESTAMP,
                 startTimestamp
@@ -871,12 +662,12 @@ class SupplierRepository {
             .whereLessThanOrEqualTo(
                 FieldNames.OrderedItemsCol.ORDER_TIMESTAMP,
                 endTimestamp
-            ).aggregate(AggregateField.sum(FieldNames.OrderedItemsCol.AMOUNT))
+            ).aggregate(AggregateField.sum(OrderedItem::amount.name))
 
         query.get(AggregateSource.SERVER).addOnCompleteListener {
             if (it.isSuccessful) {
                 val sum =
-                    it.result.get(AggregateField.sum(FieldNames.OrderedItemsCol.AMOUNT)) as? Number
+                    it.result.get(AggregateField.sum(OrderedItem::amount.name)) as? Number
 
                 if (sum != null) {
                     onComplete(
@@ -885,12 +676,11 @@ class SupplierRepository {
                         KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
                     )
                 } else {
-                    onComplete(Status.FAILED, 0.0, KeysAndMessages.TASK_FAILED_TO_COMPLETE)
+                    onComplete(Status.FAILED, null, KeysAndMessages.TASK_FAILED_TO_COMPLETE)
                 }
             } else {
-                onComplete(Status.FAILED, 0.0, it.exception?.message.toString())
+                onComplete(Status.FAILED, null, it.exception?.message.toString())
             }
         }
     }
-
 }

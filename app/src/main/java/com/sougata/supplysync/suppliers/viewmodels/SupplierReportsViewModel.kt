@@ -44,10 +44,9 @@ class SupplierReportsViewModel(application: Application) : AndroidViewModel(appl
             startTimestamp, endTimestamp
         ) { status, list, message ->
             if (status == Status.SUCCESS) {
-
                 this.viewModelScope.launch {
                     supplierPdfRepository.generateSupplierPaymentsPdf(
-                        list,
+                        list!!,
                     ) { status, byteArray, message ->
                         supplierPaymentsListPdf.value = Triple(status, byteArray, message)
                     }
@@ -70,7 +69,7 @@ class SupplierReportsViewModel(application: Application) : AndroidViewModel(appl
             if (status == Status.SUCCESS) {
                 this.viewModelScope.launch {
                     supplierPdfRepository.generateOrderedItemsPdf(
-                        list,
+                        list!!,
                     ) { status, byteArray, message ->
                         orderedItemsListPdf.value = Triple(status, byteArray, message)
                     }
@@ -91,13 +90,11 @@ class SupplierReportsViewModel(application: Application) : AndroidViewModel(appl
             endTimestamp,
         ) { status, list, message ->
             if (status == Status.FAILED) {
-
                 this.purchasedItemsCompChartData.value = Triple(null, status, message)
-
             } else {
                 val barEntryList = mutableListOf<BarEntry>()
 
-                for ((i, value) in list.withIndex()) {
+                for ((i, value) in list!!.withIndex()) {
                     barEntryList.add(BarEntry(i.toFloat(), value.second.toFloat()))
                     purchasedItemsCompChartXStrings.add(value.first)
                 }

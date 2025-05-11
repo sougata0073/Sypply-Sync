@@ -2,10 +2,12 @@ package com.sougata.supplysync.models
 
 import com.google.firebase.Timestamp
 
-open class Model {
+interface Model {
 
-    var id: String = ""
-    var timestamp: Timestamp = Timestamp.now()
+    var id: String
+    var timestamp: Timestamp
+    fun toMap(): Map<String, Any>
+    fun toModel(map: Map<String, Any>): Model
 
     companion object {
         const val SUPPLIER = "Supplier"

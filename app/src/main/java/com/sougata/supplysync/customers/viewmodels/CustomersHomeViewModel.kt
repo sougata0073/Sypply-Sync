@@ -16,9 +16,9 @@ class CustomersHomeViewModel : ViewModel() {
 
     private val customerRepository = CustomerRepository()
 
-    val ordersToDeliver = MutableLiveData<Triple<Number, Status, String>>()
-    val numberOfCustomers = MutableLiveData<Triple<Number, Status, String>>()
-    val receivableAmountFromCustomers = MutableLiveData<Triple<Number, Status, String>>()
+    val ordersToDeliver = MutableLiveData<Triple<Number?, Status, String>>()
+    val numberOfCustomers = MutableLiveData<Triple<Number?, Status, String>>()
+    val receivableAmountFromCustomers = MutableLiveData<Triple<Number?, Status, String>>()
 
     val allApiCallFinished = MutableLiveData(false)
 

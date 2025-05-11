@@ -20,28 +20,17 @@ import kotlin.reflect.KProperty1
 class CustomerPaymentHelper(
     private val fragment: Fragment,
     private val customerRepository: CustomerRepository
-) : ModelHelper {
+) : ModelHelper  {
 
     private val context = this.fragment.requireContext()
     private val fragmentManager = this.fragment.parentFragmentManager
 
     override val listHeading = "Payments received"
 
-    @Suppress("UNCHECKED_CAST")
-    override fun getProperties(): Array<KProperty1<Model, *>> {
-        return arrayOf(
-            CustomerPayment::amount,
-            CustomerPayment::paymentTimestamp,
-            CustomerPayment::note,
-            CustomerPayment::customerId,
-            CustomerPayment::customerName
-        ) as Array<KProperty1<Model, *>>
-    }
-
     override fun getViewToInflate(
         inflater: LayoutInflater,
         parent: ViewGroup
-    ): ViewDataBinding {
+    ): ItemCustomerPaymentBinding {
         return ItemCustomerPaymentBinding.inflate(inflater, parent, false)
     }
 
@@ -124,5 +113,27 @@ class CustomerPaymentHelper(
 
     override fun loadFullListOnNewModelAdded(): Boolean {
         return true
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun getContentComparator(
+        newList: List<Model>,
+        oldList: List<Model>,
+        newPosition: Int,
+        oldPosition: Int
+    ): Boolean {
+
+        newList as List<CustomerPayment>
+        oldList as List<CustomerPayment>
+
+        return when {
+            newList[newPosition].timestamp != oldList[oldPosition].timestamp -> false
+            newList[newPosition].amount != oldList[oldPosition].amount -> false
+            newList[newPosition].paymentTimestamp != oldList[oldPosition].paymentTimestamp -> false
+            newList[newPosition].note != oldList[oldPosition].note -> false
+            newList[newPosition].customerId != oldList[oldPosition].customerId -> false
+            newList[newPosition].customerName != oldList[oldPosition].customerName -> false
+            else -> true
+        }
     }
 }

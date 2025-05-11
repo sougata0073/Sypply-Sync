@@ -1,7 +1,8 @@
-package com.sougata.supplysync.suppliers.ui
+package com.sougata.supplysync.customers.ui
 
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,29 +13,25 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
-import com.sougata.supplysync.databinding.FragmentAddEditSupplierBinding
+import com.sougata.supplysync.customers.viewmodels.AddEditCustomerViewModel
+import com.sougata.supplysync.databinding.FragmentAddEditCustomerBinding
+import com.sougata.supplysync.models.Customer
 import com.sougata.supplysync.models.Model
-import com.sougata.supplysync.models.Supplier
-import com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierViewModel
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 
-class AddEditSupplierFragment : Fragment() {
+class AddEditCustomerFragment : Fragment() {
 
-    private var _binding: FragmentAddEditSupplierBinding? = null
+    private var _binding: FragmentAddEditCustomerBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var viewModel: AddEditSupplierViewModel
+    private lateinit var viewModel: AddEditCustomerViewModel
 
-    private lateinit var prevSupplier: Supplier
-    private var updatedSupplier: Supplier? = null
+    private lateinit var prevCustomer: Customer
+    private var updatedCustomer: Customer? = null
 
     private var toAdd: Boolean = false
     private var toEdit: Boolean = false
-
-//    private lateinit var pickImage: ActivityResultLauncher<PickVisualMediaRequest>
-
-//    private var profileImageUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,11 +40,11 @@ class AddEditSupplierFragment : Fragment() {
         this.toEdit = requireArguments().getBoolean(KeysAndMessages.TO_EDIT_KEY)
 
         if (this.toEdit) {
-            this.prevSupplier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                requireArguments().getParcelable(Model.SUPPLIER, Supplier::class.java)
+            this.prevCustomer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                requireArguments().getParcelable(Model.CUSTOMER, Customer::class.java)
             } else {
                 @Suppress("DEPRECATION")
-                requireArguments().getParcelable(Model.SUPPLIER)
+                requireArguments().getParcelable(Model.CUSTOMER)
             }!!
 
         }
@@ -59,7 +56,7 @@ class AddEditSupplierFragment : Fragment() {
     ): View? {
 
         this._binding =
-            DataBindingUtil.inflate(inflater, R.layout.fragment_add_edit_supplier, container, false)
+            DataBindingUtil.inflate(inflater, R.layout.fragment_add_edit_customer, container, false)
 
         return this.binding.root
     }
@@ -67,20 +64,11 @@ class AddEditSupplierFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        this.viewModel = ViewModelProvider(this)[AddEditSupplierViewModel::class.java]
+        this.viewModel = ViewModelProvider(this)[AddEditCustomerViewModel::class.java]
 
         this.binding.viewModel = this.viewModel
 
         this.binding.lifecycleOwner = this.viewLifecycleOwner
-
-//        this.pickImage = registerForActivityResult(PickVisualMedia()) {
-//            if (it != null) {
-//                Log.d("PhotoPicker", "Selected URI: $it")
-//                this.profileImageUri = it
-//            } else {
-//                Log.d("PhotoPicker", "No media selected")
-//            }
-//        }
 
         this.initializeUI()
 
@@ -90,27 +78,28 @@ class AddEditSupplierFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
 
-        if (this.viewModel.isSupplierAdded) {
+        if (this.viewModel.isCustomerAdded) {
             val bundle = Bundle().apply {
-                putBoolean(KeysAndMessages.DATA_ADDED_KEY, viewModel.isSupplierAdded)
+                putBoolean(KeysAndMessages.DATA_ADDED_KEY, viewModel.isCustomerAdded)
+            }
+            this.parentFragmentManager.setFragmentResult(
+                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
+                bundle
+            )
+            Log.d("TAG", "Added")
+        }
+        if (this.viewModel.isCustomerUpdated) {
+            val bundle = Bundle().apply {
+                putParcelable(KeysAndMessages.DATA_UPDATED_KEY, updatedCustomer)
             }
             this.parentFragmentManager.setFragmentResult(
                 KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
                 bundle
             )
         }
-        if (this.viewModel.isSupplierUpdated) {
+        if (this.viewModel.isCustomerDeleted) {
             val bundle = Bundle().apply {
-                putParcelable(KeysAndMessages.DATA_UPDATED_KEY, updatedSupplier)
-            }
-            this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
-                bundle
-            )
-        }
-        if (this.viewModel.isSupplierDeleted) {
-            val bundle = Bundle().apply {
-                putParcelable(KeysAndMessages.DATA_REMOVED_KEY, prevSupplier)
+                putParcelable(KeysAndMessages.DATA_REMOVED_KEY, prevCustomer)
             }
             this.parentFragmentManager.setFragmentResult(
                 KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT, bundle
@@ -121,24 +110,17 @@ class AddEditSupplierFragment : Fragment() {
     }
 
     private fun initializeUI() {
-
-//        this.binding.profileImage.setOnClickListener {
-//            this.pickImage.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
-//        }
-
-
         this.binding.saveBtn.setOnClickListener {
-
             if (this.toAdd) {
-                this.viewModel.addSupplier(this.binding.root)
+                this.viewModel.addCustomer(this.binding.root)
             } else if (this.toEdit) {
-                this.updatedSupplier = this.viewModel.updateSupplier(
-                    this.prevSupplier.id, this.prevSupplier.timestamp,
-                    this.binding.root
+                val customerId = this.prevCustomer.id
+                val timeStamp = this.prevCustomer.timestamp
+
+                this.updatedCustomer = this.viewModel.updateCustomer(
+                    customerId, timeStamp, this.binding.root
                 )
-
             }
-
         }
 
         this.setUpDeleteButton()
@@ -150,12 +132,12 @@ class AddEditSupplierFragment : Fragment() {
         if (this.toEdit) {
             this.binding.deleteBtn.visibility = View.VISIBLE
             this.viewModel.apply {
-                name.value = prevSupplier.name.toString()
-                email.value = prevSupplier.email.toString()
-                phone.value = prevSupplier.phone.toString()
-                dueAmount.value = prevSupplier.dueAmount.toString()
-                paymentDetails.value = prevSupplier.paymentDetails.toString()
-                note.value = prevSupplier.note.toString()
+                name.value = prevCustomer.name.toString()
+                email.value = prevCustomer.email.toString()
+                phone.value = prevCustomer.phone.toString()
+                receivableAmount.value = prevCustomer.receivableAmount.toString()
+                dueOrders.value = prevCustomer.dueOrders.toString()
+                note.value = prevCustomer.note.toString()
             }
 
         }
@@ -163,11 +145,11 @@ class AddEditSupplierFragment : Fragment() {
 
     private fun registerListeners() {
 
-        this.viewModel.supplierAddedIndicator.observe(this.viewLifecycleOwner) {
-            this.howToObserve(it, "Supplier added successfully")
+        this.viewModel.customerAddedIndicator.observe(this.viewLifecycleOwner) {
+            this.howToObserve(it, "Customer added successfully")
         }
-        this.viewModel.supplierEditedIndicator.observe(this.viewLifecycleOwner) {
-            this.howToObserve(it, "Supplier updated successfully")
+        this.viewModel.customerEditedIndicator.observe(this.viewLifecycleOwner) {
+            this.howToObserve(it, "Customer updated successfully")
         }
 
     }
@@ -179,13 +161,13 @@ class AddEditSupplierFragment : Fragment() {
                 requireContext(),
                 R.style.materialAlertDialogStyle
             ).setTitle("Warning")
-                .setMessage("Are you sure you want to delete this supplier?")
+                .setMessage("Are you sure you want to delete this customer?")
                 .setPositiveButton("Yes") { dialog, _ ->
 
                     this.binding.parentLayout.alpha = 0.5f
                     this.binding.progressBar.visibility = View.VISIBLE
 
-                    this.viewModel.supplierRepository.deleteSupplier(this.prevSupplier) { status, message ->
+                    this.viewModel.customerRepository.deleteCustomer(this.prevCustomer) { status, message ->
 
                         Snackbar.make(
                             requireParentFragment().requireView(),
@@ -195,7 +177,7 @@ class AddEditSupplierFragment : Fragment() {
 
                         if (status == Status.SUCCESS) {
 
-                            this.viewModel.isSupplierDeleted = true
+                            this.viewModel.isCustomerDeleted = true
 
                             findNavController().popBackStack()
 
@@ -231,10 +213,10 @@ class AddEditSupplierFragment : Fragment() {
             ).show()
 
             if (this.toAdd) {
-                this.viewModel.isSupplierAdded = true
+                this.viewModel.isCustomerAdded = true
             }
             if (this.toEdit) {
-                this.viewModel.isSupplierUpdated = true
+                this.viewModel.isCustomerUpdated = true
             }
 
             this.findNavController().popBackStack()

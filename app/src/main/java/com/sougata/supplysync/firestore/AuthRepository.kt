@@ -3,7 +3,7 @@ package com.sougata.supplysync.firestore
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.sougata.supplysync.firestore.util.Helper
+import com.sougata.supplysync.firestore.util.HelperRepository
 import com.sougata.supplysync.models.User
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
@@ -11,7 +11,7 @@ import com.sougata.supplysync.util.Status
 class AuthRepository {
 
     private val auth = Firebase.auth
-    private val helper = Helper()
+    private val helperRepository = HelperRepository()
 
     fun createAccount(
         user: User, password: String, onComplete: (Status, String) -> Unit
@@ -27,7 +27,7 @@ class AuthRepository {
 
                         user.uid = currentUser.uid
 
-                        this.helper.insertUserToFirestore(user) { status, message ->
+                        this.helperRepository.insertUserToFirestore(user) { status, message ->
 
                             if (status == Status.SUCCESS) {
                                 this.sendEmailVerificationLink { status, message ->

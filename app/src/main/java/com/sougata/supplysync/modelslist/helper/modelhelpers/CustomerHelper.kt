@@ -1,23 +1,27 @@
 package com.sougata.supplysync.modelslist.helper.modelhelpers
 
 import android.content.Intent
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.net.toUri
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
+import com.sougata.supplysync.customers.ui.CustomerProfileBottomSheetFragment
 import com.sougata.supplysync.databinding.ItemCustomerBinding
 import com.sougata.supplysync.firestore.CustomerRepository
 import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.models.Customer
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.modelslist.helper.ModelHelper
+import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.FirestoreFieldDataType
+import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
-import kotlin.reflect.KProperty1
 
 class CustomerHelper(
     private val fragment: Fragment,
@@ -28,14 +32,6 @@ class CustomerHelper(
     private val fragmentManager = this.fragment.parentFragmentManager
 
     override val listHeading = "All customers"
-
-    @Suppress("UNCHECKED_CAST")
-    override fun getProperties(): Array<KProperty1<Model, *>> {
-        return arrayOf(
-            Customer::name, Customer::receivableAmount, Customer::dueOrders,
-            Customer::phone, Customer::email, Customer::note, Customer::profileImageUrl
-        ) as Array<KProperty1<Model, *>>
-    }
 
     override fun getViewToInflate(
         inflater: LayoutInflater,
@@ -74,7 +70,14 @@ class CustomerHelper(
     }
 
     override fun getFabClickHandler(): () -> Unit {
-        TODO("Not yet implemented")
+        return {
+            val bundle = Bundle().apply {
+                putBoolean(KeysAndMessages.TO_ADD_KEY, true)
+            }
+            this.fragment.findNavController().navigate(
+                R.id.addEditCustomerFragment, bundle, AnimationProvider.slideRightLeftNavOptions()
+            )
+        }
     }
 
     override fun bind(
@@ -83,7 +86,6 @@ class CustomerHelper(
     ) {
         binding as ItemCustomerBinding
         model as Customer
-
 
         Glide.with(this.context)
             .load(model.profileImageUrl)
@@ -102,7 +104,8 @@ class CustomerHelper(
             }
 
             root.setOnClickListener {
-
+                CustomerProfileBottomSheetFragment.Companion.getInstance(model)
+                    .show(this@CustomerHelper.fragmentManager, "customerProfile")
             }
 
         }
@@ -133,6 +136,30 @@ class CustomerHelper(
 
     override fun loadFullListOnNewModelAdded(): Boolean {
         return false
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun getContentComparator(
+        newList: List<Model>,
+        oldList: List<Model>,
+        newPosition: Int,
+        oldPosition: Int
+    ): Boolean {
+
+        newList as List<Customer>
+        oldList as List<Customer>
+
+        return when {
+            newList[newPosition].timestamp != oldList[oldPosition].timestamp -> false
+            newList[newPosition].name != oldList[oldPosition].name -> false
+            newList[newPosition].receivableAmount != oldList[oldPosition].receivableAmount -> false
+            newList[newPosition].dueOrders != oldList[oldPosition].dueOrders -> false
+            newList[newPosition].phone != oldList[oldPosition].phone -> false
+            newList[newPosition].email != oldList[oldPosition].email -> false
+            newList[newPosition].note != oldList[oldPosition].note -> false
+            newList[newPosition].profileImageUrl != oldList[oldPosition].profileImageUrl -> false
+            else -> true
+        }
     }
 
 }

@@ -11,7 +11,6 @@ import androidx.navigation.fragment.NavHostFragment
 import com.sougata.supplysync.databinding.ActivityMainBinding
 import com.sougata.supplysync.util.AnimationProvider
 
-
 class MainActivity : AppCompatActivity() {
 
     private var _binding: ActivityMainBinding? = null

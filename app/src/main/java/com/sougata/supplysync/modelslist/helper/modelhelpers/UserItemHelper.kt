@@ -27,17 +27,10 @@ class UserItemHelper(
 
     override val listHeading = "Your items"
 
-    @Suppress("UNCHECKED_CAST")
-    override fun getProperties(): Array<KProperty1<Model, *>> {
-        return arrayOf(
-            UserItem::name, UserItem::inStock, UserItem::price, UserItem::details
-        ) as Array<KProperty1<Model, *>>
-    }
-
     override fun getViewToInflate(
         inflater: LayoutInflater,
         parent: ViewGroup
-    ): ViewDataBinding {
+    ): ItemUserItemBinding {
         return ItemUserItemBinding.inflate(inflater, parent, false)
     }
 
@@ -124,5 +117,25 @@ class UserItemHelper(
 
     override fun loadFullListOnNewModelAdded(): Boolean {
         return false
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    override fun getContentComparator(
+        newList: List<Model>,
+        oldList: List<Model>,
+        newPosition: Int,
+        oldPosition: Int
+    ): Boolean {
+        newList as List<UserItem>
+        oldList as List<UserItem>
+
+        return when {
+            newList[newPosition].timestamp != oldList[oldPosition].timestamp -> false
+            newList[newPosition].name != oldList[oldPosition].name -> false
+            newList[newPosition].inStock != oldList[oldPosition].inStock -> false
+            newList[newPosition].price != oldList[oldPosition].price -> false
+            newList[newPosition].details != oldList[oldPosition].details -> false
+            else -> true
+        }
     }
 }

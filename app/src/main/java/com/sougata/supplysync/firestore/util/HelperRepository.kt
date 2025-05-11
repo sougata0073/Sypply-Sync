@@ -1,10 +1,12 @@
 package com.sougata.supplysync.firestore.util
 
+import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.User
@@ -13,11 +15,12 @@ import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
 import kotlin.math.floor
 
-class Helper {
+class HelperRepository {
 
     private val currentUser = Firebase.auth.currentUser!!
     private val db = Firebase.firestore
     private val usersCol = this.db.collection(FieldNames.UsersCol.SELF_NAME)
+    private val currentUserDoc = this.usersCol.document(this.currentUser.uid)
 
     fun insertUserToFirestore(user: User, onComplete: (Status, String) -> Unit) {
 
@@ -45,41 +48,34 @@ class Helper {
 
     }
 
-    fun getAnyModelsList(
+    fun <T: Model> getAnyModelsList(
         firebaseCollectionName: String,
         lastDocumentSnapshot: DocumentSnapshot?,
         customSorting: Pair<String, Query.Direction>,
         limit: Long,
-        howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model,
+        clazz: Class<T>,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
 
-        val col = this.usersCol.document(this.currentUser.uid).collection(firebaseCollectionName)
+        val col = this.currentUserDoc.collection(firebaseCollectionName)
 
         var query = if (lastDocumentSnapshot == null) {
             col.orderBy(customSorting.first, customSorting.second)
         } else {
             col.orderBy(customSorting.first, customSorting.second).startAfter(lastDocumentSnapshot)
-        }
+        }.limit(limit)
 
-        val querySnapshot = if (limit == -1L) {
-            query.get()
-        } else {
-            query.limit(limit).get()
-        }
-
-        querySnapshot.addOnCompleteListener {
+        query.get().addOnCompleteListener {
 
             if (it.isSuccessful) {
 
                 val modelsList = mutableListOf<Model>()
 
-                for (document in it.result.documents) {
+                for (doc in it.result.documents) {
 
-                    val data = document.data
+                    if (doc.exists()) {
+                        val model: Model = doc.toObject(clazz)!!
 
-                    if (data != null && document.exists()) {
-                        val model: Model = howToConvert(data, document)
                         modelsList.add(model)
                     }
                 }
@@ -103,14 +99,14 @@ class Helper {
         }
     }
 
-    fun searchInAnyModelsList(
+    fun <T: Model> searchInAnyModelsList(
         searchField: String,
         searchQuery: String,
         queryDataType: FirestoreFieldDataType,
         firebaseCollectionName: String,
         lastDocumentSnapshot: DocumentSnapshot?,
         limit: Long,
-        howToConvert: (Map<String, Any>, DocumentSnapshot) -> Model,
+        clazz: Class<T>,
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit,
     ) {
 
@@ -139,10 +135,8 @@ class Helper {
 
                 for (document in it.result.documents) {
 
-                    val data = document.data
-
-                    if (data != null && document.exists()) {
-                        val model: Model = howToConvert(data, document)
+                    if (document.exists()) {
+                        val model: T = document.toObject(clazz)!!
                         modelsList.add(model)
                     }
                 }
@@ -158,60 +152,44 @@ class Helper {
                         KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
                     )
                 }
-
             } else {
                 onComplete(
                     Status.FAILED, null, lastDocumentSnapshot, it.exception?.message.toString()
                 )
             }
-
         }
+
     }
 
-    fun getAnyValueFromValuesCol(
+    @Suppress("UNCHECKED_CAST")
+    fun <T> getAnyValueFromValuesCol(
         documentName: String,
-        fieldDataType: FirestoreFieldDataType,
-        onComplete: (Status, Any, String) -> Unit
+        onComplete: (Status, T?, String) -> Unit
     ) {
         val valuesCol =
             this.usersCol.document(this.currentUser.uid).collection(FieldNames.ValuesCol.SELF_NAME)
 
         valuesCol.document(documentName).get().addOnCompleteListener {
             if (it.isSuccessful) {
-                val result = when (fieldDataType) {
-                    FirestoreFieldDataType.STRING -> {
-                        it.result[FieldNames.Commons.VALUE] as? String
-                    }
 
-                    FirestoreFieldDataType.NUMBER -> {
-                        it.result[FieldNames.Commons.VALUE] as? Number
-                    }
+                val result = it.result[FieldNames.Commons.VALUE] as? T
 
-                    FirestoreFieldDataType.TIMESTAMP -> {
-                        it.result[FieldNames.Commons.VALUE] as? Timestamp
-                    }
-
-                    FirestoreFieldDataType.BOOLEAN -> {
-                        it.result[FieldNames.Commons.VALUE] as? Boolean
-                    }
-                }
                 if (result != null) {
                     onComplete(
                         Status.SUCCESS, result, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
                     )
                 } else {
-                    onComplete(Status.FAILED, "-1", KeysAndMessages.EMPTY_LIST)
+                    onComplete(Status.FAILED, null, KeysAndMessages.EMPTY_LIST)
                 }
             } else {
-                onComplete(Status.FAILED, "-1", it.exception?.message.toString())
+                onComplete(Status.FAILED, null, it.exception?.message.toString())
             }
         }
     }
 
     fun createRequiredThings(onComplete: (Status, String) -> Unit) {
 
-        val valuesCol =
-            this.usersCol.document(this.currentUser.uid).collection(FieldNames.ValuesCol.SELF_NAME)
+        val valuesCol = this.currentUserDoc.collection(FieldNames.ValuesCol.SELF_NAME)
 
         this.usersCol.firestore.runTransaction {
 
@@ -224,7 +202,10 @@ class Helper {
             it.set(valuesCol.document(FieldNames.ValuesCol.OrdersToReceiveDoc.SELF_NAME), map)
             it.set(valuesCol.document(FieldNames.ValuesCol.OrdersToDeliverDoc.SELF_NAME), map)
             it.set(valuesCol.document(FieldNames.ValuesCol.CustomersCountDoc.SELF_NAME), map)
-            it.set(valuesCol.document(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME), map)
+            it.set(
+                valuesCol.document(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME),
+                map
+            )
 
         }.addOnCompleteListener {
             if (it.isSuccessful) {
