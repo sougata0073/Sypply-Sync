@@ -17,6 +17,9 @@ data class Customer(
     var profileImageUrl: String,
 
 ): Model, Parcelable {
+
+    constructor() : this("", Timestamp.now(), "", 0.0, 0, "", "", "", "")
+
     override fun toMap(): Map<String, Any> {
         return mapOf(
             "id" to id,

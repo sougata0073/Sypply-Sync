@@ -284,7 +284,7 @@ class AddEditOrderedItemFragment : Fragment() {
 
                 itemName.value = "Item: ${prevOrderedItem.supplierItemName}"
                 supplierName.value = "Supplier: ${prevOrderedItem.supplierName}"
-                isReceived.value = prevOrderedItem.isReceived
+                isReceived.value = prevOrderedItem.received
             }
         }
     }

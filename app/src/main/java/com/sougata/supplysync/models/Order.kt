@@ -15,8 +15,11 @@ data class Order(
     var customerId: String,
     var customerName: String,
     var deliveryTimestamp: Timestamp,
-    var isDelivered: Boolean
+    var delivered: Boolean
 ): Model, Parcelable {
+
+    constructor() : this("", Timestamp.now(), "", "", 0, 0.0, "", "", Timestamp.now(), false)
+
     override fun toMap(): Map<String, Any> {
         return mapOf(
             "id" to id,
@@ -28,7 +31,7 @@ data class Order(
             "customerId" to customerId,
             "customerName" to customerName,
             "deliveryTimestamp" to deliveryTimestamp,
-            "isDelivered" to isDelivered
+            "delivered" to delivered
         )
     }
 
@@ -43,7 +46,7 @@ data class Order(
             customerId = map["customerId"] as String,
             customerName = map["customerName"] as String,
             deliveryTimestamp = map["deliveryTimestamp"] as Timestamp,
-            isDelivered = map["isDelivered"] as Boolean
+            delivered = map["delivered"] as Boolean
         )
     }
 }

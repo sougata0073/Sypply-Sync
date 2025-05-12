@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.util.Pair
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.customers.viewmodels.CustomersHomeViewModel
@@ -79,6 +81,12 @@ class CustomersHomeFragment : Fragment() {
             numberOfCustomers.heading.text = "Number of customers"
             sales.heading.text = "Sales"
             receivableFromCustomers.heading.text = "Receivable amount from Customers"
+        }
+
+        this.binding.sales.calendarBtn.setOnClickListener {
+            this.openDateRangePicker { startDateMillis, endDateMillis ->
+                this.commonDataViewModel.loadSalesAmountByRange(startDateMillis, endDateMillis)
+            }
         }
     }
 
@@ -156,6 +164,24 @@ class CustomersHomeFragment : Fragment() {
             }
 
         }
+    }
+
+    private fun openDateRangePicker(onPositiveButtonClick: (Long, Long) -> Unit) {
+        val datePicker = MaterialDatePicker.Builder.dateRangePicker()
+            .setSelection(
+                Pair(
+                    MaterialDatePicker.thisMonthInUtcMilliseconds(),
+                    MaterialDatePicker.todayInUtcMilliseconds()
+                )
+            )
+            .setInputMode(MaterialDatePicker.INPUT_MODE_TEXT)
+            .setTitleText("Select dates")
+            .build()
+
+        datePicker.addOnPositiveButtonClickListener {
+            onPositiveButtonClick(it.first, it.second)
+        }
+        datePicker.show(this.parentFragmentManager, "dateRangePicker")
     }
 
 

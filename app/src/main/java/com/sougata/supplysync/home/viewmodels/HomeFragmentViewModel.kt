@@ -8,21 +8,27 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.sougata.supplysync.R
+import com.sougata.supplysync.firestore.CustomerRepository
 import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.Status
 
 class HomeFragmentViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val supplierRepository = SupplierRepository()
-
-    var purchaseChartDateRange = ""
+    private val supplierRepo = SupplierRepository()
+    private val customerRepo = CustomerRepository()
 
     val purchaseChartData = MutableLiveData<Triple<LineData?, Status, String>>()
+    var purchaseChartDateRange = ""
     var animatePurchaseChart = true
+
+    val salesChartData = MutableLiveData<Triple<LineData?, Status, String>>()
+    var salesChartDateRange = ""
+    var animateSalesChart = true
 
     init {
         this.loadPast30DaysPurchaseChart()
+        this.loadPast30DaysSaleChart()
     }
 
     fun loadPast30DaysPurchaseChart() {
@@ -33,42 +39,33 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         this.loadPurchaseLineChartData(startDateMillis, endDateMillis)
     }
 
+    fun loadPast30DaysSaleChart() {
+        val startDateMillis = DateTime.getPastDateInMillis(30)
+        val endDateMillis = DateTime.getPastDateInMillis(0)
+
+        this.loadSalesLineChartData(startDateMillis, endDateMillis)
+    }
+
     fun loadPurchaseLineChartData(startDateMillis: Long, endDateMillis: Long) {
         this.purchaseChartData.value = Triple(null, Status.STARTED, "")
 
         var startTimestamp = DateTime.getTimestampFromMillis(startDateMillis)
         var endTimestamp = DateTime.getTimestampFromMillis(endDateMillis)
 
-        this.supplierRepository.getPurchaseAmountsListByRange(
+        this.supplierRepo.getPurchaseAmountListByRange(
             startTimestamp,
             endTimestamp
         ) { status, list, message ->
-
             if (status == Status.FAILED) {
-                this.purchaseChartData.postValue(Triple(null, status, message))
+                this.purchaseChartData.value = Triple(null, status, message)
             } else {
-                val entryList = mutableListOf<Entry>()
 
-                for ((i, value) in list!!.withIndex()) {
-                    val y = value.toFloat()
-                    entryList.add(Entry(i.toFloat(), y))
-                }
-
-                val app = getApplication<Application>()
-
-                val lineDataSet = LineDataSet(entryList, "Amount").apply {
-                    color = app.getColor(R.color.primary_color)
-                    setDrawFilled(true)
-                    fillColor = app.getColor(R.color.primary_color)
-                    setDrawCircles(false)
-                    setDrawValues(false)
-                    valueTextColor = app.getColor(R.color.bw)
-                    valueTextSize = 11f
-                    mode = LineDataSet.Mode.CUBIC_BEZIER
-
-                    fillDrawable =
-                        AppCompatResources.getDrawable(app, R.drawable.line_chart_gradient_bg)
-                }
+                val lineDataSet =
+                    this.getDecoratedLineDataset(
+                        list!!,
+                        R.color.primary_color,
+                        R.drawable.line_chart_gradient_normal
+                    )
 
                 val lineData = LineData().apply { addDataSet(lineDataSet) }
 
@@ -80,6 +77,68 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
                 this.animatePurchaseChart = true
                 this.purchaseChartData.value = Triple(lineData, status, message)
             }
+        }
+    }
+
+    fun loadSalesLineChartData(startDateMillis: Long, endDateMillis: Long) {
+        this.salesChartData.value = Triple(null, Status.STARTED, "")
+
+        var startTimestamp = DateTime.getTimestampFromMillis(startDateMillis)
+        var endTimestamp = DateTime.getTimestampFromMillis(endDateMillis)
+
+        this.customerRepo.getSalesAmountListByRange(
+            startTimestamp,
+            endTimestamp
+        ) { status, list, message ->
+            if (status == Status.FAILED) {
+                this.salesChartData.value = Triple(null, status, message)
+            } else {
+
+                val lineDataSet =
+                    this.getDecoratedLineDataset(
+                        list!!,
+                        R.color.green_profit,
+                        R.drawable.line_chart_gradient_profit
+                    )
+
+                val lineData = LineData().apply { addDataSet(lineDataSet) }
+
+                val startDateString = DateTime.getDateStringFromTimestamp(startTimestamp)
+                val endDateString = DateTime.getDateStringFromTimestamp(endTimestamp)
+
+                this.salesChartDateRange = "From: $startDateString To: $endDateString"
+
+                this.animateSalesChart = true
+                this.salesChartData.value = Triple(lineData, status, message)
+            }
+        }
+    }
+
+    private fun getDecoratedLineDataset(
+        dataList: List<Double>,
+        chartColorId: Int,
+        gradientDrawableId: Int
+    ): LineDataSet {
+        val app = getApplication<Application>()
+
+        val entryList = mutableListOf<Entry>()
+
+        for ((i, value) in dataList.withIndex()) {
+            val y = value.toFloat()
+            entryList.add(Entry(i.toFloat(), y))
+        }
+
+        return LineDataSet(entryList, "Amount").apply {
+            color = app.getColor(chartColorId)
+            setDrawFilled(true)
+            setDrawCircles(false)
+            setDrawValues(false)
+            valueTextColor = app.getColor(R.color.bw)
+            valueTextSize = 11f
+            mode = LineDataSet.Mode.CUBIC_BEZIER
+
+            fillDrawable =
+                AppCompatResources.getDrawable(app, gradientDrawableId)
         }
     }
 

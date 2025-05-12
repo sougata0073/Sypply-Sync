@@ -109,4 +109,6 @@ dependencies {
 
     // PDF viewer
     implementation(libs.android.pdf.viewer)
+
+    implementation("com.github.javafaker:javafaker:1.0.2")
 }

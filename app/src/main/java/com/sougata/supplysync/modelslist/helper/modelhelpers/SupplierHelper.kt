@@ -13,7 +13,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ItemSupplierBinding
 import com.sougata.supplysync.firestore.SupplierRepository
-import com.sougata.supplysync.firestore.util.FieldNames
+import com.sougata.supplysync.firestore.util.FirestoreNames
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.modelslist.helper.ModelHelper
@@ -22,7 +22,6 @@ import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
-import kotlin.reflect.KProperty1
 
 class SupplierHelper(
     private val fragment: Fragment,
@@ -45,17 +44,17 @@ class SupplierHelper(
     override fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
-                FieldNames.SuppliersCol.NAME,
+                Supplier::name.name,
                 "Name",
                 FirestoreFieldDataType.STRING
             ),
             Triple(
-                FieldNames.SuppliersCol.DUE_AMOUNT,
+                Supplier::dueAmount.name,
                 "Due amount",
                 FirestoreFieldDataType.NUMBER
             ),
             Triple(
-                FieldNames.SuppliersCol.EMAIL,
+                Supplier::email.name,
                 "Email",
                 FirestoreFieldDataType.STRING
             ),

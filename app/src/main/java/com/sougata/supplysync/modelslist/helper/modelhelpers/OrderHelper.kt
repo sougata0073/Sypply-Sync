@@ -1,7 +1,6 @@
 package com.sougata.supplysync.modelslist.helper.modelhelpers
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
@@ -9,7 +8,6 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ItemOrderBinding
 import com.sougata.supplysync.firestore.CustomerRepository
-import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.Order
 import com.sougata.supplysync.modelslist.helper.ModelHelper
@@ -17,12 +15,11 @@ import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.Status
-import kotlin.reflect.KProperty1
 
 class OrderHelper(
     private val fragment: Fragment,
     private val customerRepository: CustomerRepository
-) : ModelHelper  {
+) : ModelHelper {
 
     private val context = this.fragment.requireContext()
     private val fragmentManager = this.fragment.parentFragmentManager
@@ -39,23 +36,23 @@ class OrderHelper(
     override fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
-                FieldNames.OrdersCol.USER_ITEM_NAME,
+                Order::userItemName.name,
                 "Item name", FirestoreFieldDataType.STRING
             ),
             Triple(
-                FieldNames.OrdersCol.QUANTITY,
+                Order::quantity.name,
                 "Quantity", FirestoreFieldDataType.NUMBER
             ),
             Triple(
-                FieldNames.OrdersCol.AMOUNT,
+                Order::amount.name,
                 "Amount", FirestoreFieldDataType.NUMBER
             ),
             Triple(
-                FieldNames.OrdersCol.DELIVERY_TIMESTAMP,
+                Order::deliveryTimestamp.name,
                 "Delivery date", FirestoreFieldDataType.TIMESTAMP
             ),
             Triple(
-                FieldNames.OrdersCol.CUSTOMER_NAME,
+                Order::customerName.name,
                 "Customer name", FirestoreFieldDataType.STRING
             )
         )
@@ -64,10 +61,10 @@ class OrderHelper(
     override fun getFilterableFields(): Array<Pair<String, (Model) -> Boolean>> {
         return arrayOf(
             "Delivered" to { order ->
-                (order as Order).isDelivered
+                (order as Order).delivered
             },
             "Not delivered" to { order ->
-                (order as Order).isDelivered.not()
+                (order as Order).delivered.not()
             }
         )
     }
@@ -85,10 +82,11 @@ class OrderHelper(
 
         binding.apply {
             itemName.text = model.userItemName
-            deliveryDate.text = DateTime.getDateStringFromTimestamp(model.deliveryTimestamp)
+            deliveryDate.text =
+                "Delivery date: ${DateTime.getDateStringFromTimestamp(model.deliveryTimestamp)}"
             amount.text = Converters.numberToMoneyString(model.amount)
 
-            if(model.isDelivered) {
+            if (model.delivered) {
                 deliveryStatus.text = "Delivered"
                 deliveryStatus.setTextColor(this@OrderHelper.context.getColor(R.color.green))
             } else {
@@ -155,7 +153,7 @@ class OrderHelper(
             newList[newPosition].customerId != oldList[oldPosition].customerId -> false
             newList[newPosition].customerName != oldList[oldPosition].customerName -> false
             newList[newPosition].deliveryTimestamp != oldList[oldPosition].deliveryTimestamp -> false
-            newList[newPosition].isDelivered != oldList[oldPosition].isDelivered -> false
+            newList[newPosition].delivered != oldList[oldPosition].delivered -> false
             else -> true
         }
     }

@@ -33,6 +33,15 @@ class MainActivity : AppCompatActivity() {
         this.supportActionBar?.title = "Home"
 
         this.setupBottomNav()
+
+        this.binding.toolBar.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.settings -> {
+                    this.navController.navigate(R.id.settingsFragment)
+                }
+            }
+            true
+        }
     }
 
     private fun setupBottomNav() {

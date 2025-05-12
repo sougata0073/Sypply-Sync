@@ -8,14 +8,12 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ItemUserItemBinding
 import com.sougata.supplysync.firestore.CustomerRepository
-import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.UserItem
 import com.sougata.supplysync.modelslist.helper.ModelHelper
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.Status
-import kotlin.reflect.KProperty1
 
 class UserItemHelper(
     private val fragment: Fragment,
@@ -37,13 +35,13 @@ class UserItemHelper(
     override fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
-                FieldNames.UserItemsCol.NAME, "Name", FirestoreFieldDataType.STRING
+                UserItem::name.name, "Name", FirestoreFieldDataType.STRING
             ),
             Triple(
-                FieldNames.UserItemsCol.IN_STOCK, "In stock", FirestoreFieldDataType.BOOLEAN
+                UserItem::inStock.name, "In stock", FirestoreFieldDataType.BOOLEAN
             ),
             Triple(
-                FieldNames.UserItemsCol.PRICE, "Price", FirestoreFieldDataType.NUMBER
+                UserItem::price.name, "Price", FirestoreFieldDataType.NUMBER
             )
         )
     }

@@ -4,9 +4,12 @@ import com.google.firebase.Timestamp
 import java.util.UUID
 
 data class DummyModel(
-    override var id: String = UUID.randomUUID().toString(),
-    override var timestamp: Timestamp = Timestamp.now(),
+    override var id: String,
+    override var timestamp: Timestamp,
 ) : Model {
+
+    constructor() : this("", Timestamp.now())
+
     override fun toMap(): Map<String, Any> {
         return mapOf(
             "id" to id,

@@ -14,7 +14,7 @@ import com.sougata.supplysync.R
 import com.sougata.supplysync.customers.ui.CustomerProfileBottomSheetFragment
 import com.sougata.supplysync.databinding.ItemCustomerBinding
 import com.sougata.supplysync.firestore.CustomerRepository
-import com.sougata.supplysync.firestore.util.FieldNames
+import com.sougata.supplysync.firestore.util.FirestoreNames
 import com.sougata.supplysync.models.Customer
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.modelslist.helper.ModelHelper
@@ -43,22 +43,22 @@ class CustomerHelper(
     override fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
-                FieldNames.CustomersCol.NAME,
+                Customer::name.name,
                 "Name",
                 FirestoreFieldDataType.STRING
             ),
             Triple(
-                FieldNames.CustomersCol.RECEIVABLE_AMOUNT,
+                Customer::receivableAmount.name,
                 "Receivable amount",
                 FirestoreFieldDataType.NUMBER
             ),
             Triple(
-                FieldNames.CustomersCol.DUE_ORDERS,
+                Customer::dueOrders.name,
                 "Due orders",
                 FirestoreFieldDataType.NUMBER
             ),
             Triple(
-                FieldNames.CustomersCol.EMAIL,
+                Customer::email.name,
                 "Email",
                 FirestoreFieldDataType.STRING
             ),

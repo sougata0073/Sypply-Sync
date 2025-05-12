@@ -1,5 +1,6 @@
 package com.sougata.supplysync.sharedviewmodels
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.sougata.supplysync.firestore.CustomerRepository
@@ -37,7 +38,6 @@ class CommonDataViewModel : ViewModel() {
             startTimestamp,
             endTimestamp
         ) { status, amount, message ->
-
             val startDateString = DateTime.getDateStringFromTimestamp(startTimestamp)
             val endDateString = DateTime.getDateStringFromTimestamp(endTimestamp)
             this.purchaseAmountDateRange = "From: $startDateString To: $endDateString"

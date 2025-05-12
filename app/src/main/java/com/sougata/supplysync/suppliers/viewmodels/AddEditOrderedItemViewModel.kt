@@ -146,7 +146,7 @@ class AddEditOrderedItemViewModel : ViewModel() {
             supplierId = supplierId,
             supplierName = supplierName,
             orderTimestamp = orderTimestamp,
-            isReceived = isReceived
+            received = isReceived
         )
     }
 

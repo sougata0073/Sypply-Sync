@@ -42,68 +42,25 @@
             </com.google.android.material.appbar.MaterialToolbar>
 
             <HorizontalScrollView
-                android:id="@+id/filterChipsLayout"
+                android:id="@+id/chipsLayout"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
                 android:background="@color/night_mode_background"
                 android:paddingStart="15dp"
                 android:paddingEnd="15dp"
                 android:scrollbars="none"
-                android:visibility="gone"
                 app:layout_scrollEffect="compress"
                 app:layout_scrollFlags="scroll|enterAlways|snap">
 
                 <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroupFilter"
+                    android:id="@+id/chipGroup"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     app:singleLine="true"
-                    app:singleSelection="true">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginEnd="7dp"
-                        android:fontFamily="@font/acherus_feral_bold"
-                        android:gravity="center_vertical"
-                        android:text="Filters"
-                        android:textColor="@color/bw" />
-
-                </com.google.android.material.chip.ChipGroup>
+                    app:singleSelection="true"/>
 
             </HorizontalScrollView>
 
-            <HorizontalScrollView
-                android:id="@+id/searchChipsLayout"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:background="@color/night_mode_background"
-                android:paddingStart="15dp"
-                android:paddingEnd="15dp"
-                android:scrollbars="none"
-                android:visibility="gone"
-                app:layout_scrollEffect="compress"
-                app:layout_scrollFlags="scroll|enterAlways|snap">
-
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chipGroupSearch"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    app:singleLine="true"
-                    app:singleSelection="true">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:layout_marginEnd="7dp"
-                        android:fontFamily="@font/acherus_feral_bold"
-                        android:gravity="center_vertical"
-                        android:text="Search by"
-                        android:textColor="@color/bw" />
-
-                </com.google.android.material.chip.ChipGroup>
-
-            </HorizontalScrollView>
         </com.google.android.material.appbar.AppBarLayout>
 
         <androidx.recyclerview.widget.RecyclerView

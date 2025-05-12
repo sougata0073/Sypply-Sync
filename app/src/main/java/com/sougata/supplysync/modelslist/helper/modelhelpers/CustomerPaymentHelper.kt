@@ -7,7 +7,7 @@ import androidx.fragment.app.Fragment
 import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.databinding.ItemCustomerPaymentBinding
 import com.sougata.supplysync.firestore.CustomerRepository
-import com.sougata.supplysync.firestore.util.FieldNames
+import com.sougata.supplysync.firestore.util.FirestoreNames
 import com.sougata.supplysync.models.CustomerPayment
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.modelslist.helper.ModelHelper
@@ -15,7 +15,6 @@ import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.Status
-import kotlin.reflect.KProperty1
 
 class CustomerPaymentHelper(
     private val fragment: Fragment,
@@ -37,15 +36,15 @@ class CustomerPaymentHelper(
     override fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
-                FieldNames.CustomerPaymentsCol.AMOUNT,
+                CustomerPayment::amount.name,
                 "Amount", FirestoreFieldDataType.NUMBER
             ),
             Triple(
-                FieldNames.CustomerPaymentsCol.PAYMENT_TIMESTAMP,
+                CustomerPayment::paymentTimestamp.name,
                 "Payment timestamp", FirestoreFieldDataType.TIMESTAMP
             ),
             Triple(
-                FieldNames.CustomerPaymentsCol.CUSTOMER_NAME,
+                CustomerPayment::customerName.name,
                 "Customer name", FirestoreFieldDataType.STRING
             )
         )

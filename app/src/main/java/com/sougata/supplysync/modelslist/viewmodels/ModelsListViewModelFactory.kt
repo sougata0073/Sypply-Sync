@@ -12,11 +12,8 @@ class ModelsListViewModelFactory(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
 
         return when {
-            modelClass.isAssignableFrom(ModelsListRegularViewModel::class.java) ->
-                ModelsListRegularViewModel(this.modelsListHelper) as T
-
-            modelClass.isAssignableFrom(ModelSearchViewModel::class.java) ->
-                ModelSearchViewModel(this.modelsListHelper) as T
+            modelClass.isAssignableFrom(ModelsListViewModel::class.java) ->
+                ModelsListViewModel(this.modelsListHelper) as T
 
             else -> throw IllegalArgumentException("ViewModel Not Found")
         }

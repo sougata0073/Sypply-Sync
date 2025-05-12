@@ -11,7 +11,6 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ItemOrderedItemBinding
 import com.sougata.supplysync.firestore.SupplierRepository
-import com.sougata.supplysync.firestore.util.FieldNames
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.modelslist.helper.ModelHelper
@@ -21,7 +20,6 @@ import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.KeysAndMessages
 import com.sougata.supplysync.util.Status
-import kotlin.reflect.KProperty1
 
 class OrderedItemHelper(
     private val fragment: Fragment,
@@ -42,27 +40,27 @@ class OrderedItemHelper(
     override fun getSearchableFieldPairs(): Array<Triple<String, String, FirestoreFieldDataType>> {
         return arrayOf(
             Triple(
-                FieldNames.OrderedItemsCol.ITEM_NAME,
+                OrderedItem::supplierItemName.name,
                 "Item name",
                 FirestoreFieldDataType.STRING
             ),
             Triple(
-                FieldNames.OrderedItemsCol.QUANTITY,
+                OrderedItem::quantity.name,
                 "Quantity",
                 FirestoreFieldDataType.NUMBER
             ),
             Triple(
-                FieldNames.OrderedItemsCol.AMOUNT,
+                OrderedItem::amount.name,
                 "Amount",
                 FirestoreFieldDataType.NUMBER
             ),
             Triple(
-                FieldNames.OrderedItemsCol.SUPPLIER_NAME,
+                OrderedItem::supplierName.name,
                 "Supplier name",
                 FirestoreFieldDataType.STRING
             ),
             Triple(
-                FieldNames.OrderedItemsCol.ORDER_TIMESTAMP,
+                OrderedItem::orderTimestamp.name,
                 "Order time",
                 FirestoreFieldDataType.TIMESTAMP
             )
@@ -72,10 +70,10 @@ class OrderedItemHelper(
     override fun getFilterableFields(): Array<Pair<String, (Model) -> Boolean>> {
         return arrayOf(
             "Received" to { orderedItem ->
-                (orderedItem as OrderedItem).isReceived
+                (orderedItem as OrderedItem).received
             },
             "Not Received" to { orderedItem ->
-                (orderedItem as OrderedItem).isReceived.not()
+                (orderedItem as OrderedItem).received.not()
             }
         )
     }
@@ -103,7 +101,7 @@ class OrderedItemHelper(
             date.text = DateTime.getDateStringFromTimestamp(model.orderTimestamp)
             amount.text = Converters.numberToMoneyString(model.amount)
 
-            if (model.isReceived) {
+            if (model.received) {
                 receiveStatus.text = "Received"
                 receiveStatus.setTextColor(this@OrderedItemHelper.context.getColor(R.color.green))
             } else {
@@ -191,7 +189,7 @@ class OrderedItemHelper(
             newList[newPosition].supplierId != oldList[oldPosition].supplierId -> false
             newList[newPosition].supplierName != oldList[oldPosition].supplierName -> false
             newList[newPosition].orderTimestamp != oldList[oldPosition].orderTimestamp -> false
-            newList[newPosition].isReceived != oldList[oldPosition].isReceived -> false
+            newList[newPosition].received != oldList[oldPosition].received -> false
             else -> true
         }
     }

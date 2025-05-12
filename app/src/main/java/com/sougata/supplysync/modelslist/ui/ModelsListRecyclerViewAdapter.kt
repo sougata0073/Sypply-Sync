@@ -17,17 +17,13 @@ import com.sougata.supplysync.modelslist.helper.ModelsListHelper
 import kotlin.math.abs
 
 class ModelsListRecyclerViewAdapter(
-    private var cleanList: MutableList<Model>,
+    private var itemsList: MutableList<Model>,
     private var helper: ModelsListHelper,
     private var loadListAgain: MutableLiveData<Boolean>,
-    private var setItemListener: (MutableList<Model>) -> Unit,
     private val extraCallback: ((View, Model) -> Unit)? = null
 ) :
     RecyclerView.Adapter<ModelsListRecyclerViewAdapter.MyViewHolder>() {
 
-    private var itemsList = this.cleanList.toMutableList()
-    private var isFilterActive = false
-    private lateinit var filter: (Model) -> Boolean
     private var prevLoadedItemCount = 0
 
     private val viewTypeLoading = 0
@@ -90,7 +86,7 @@ class ModelsListRecyclerViewAdapter(
     }
 
     fun addLoadingAnimation() {
-        if (this.itemsList.isNotEmpty() && this.itemsList.last() !is DummyModel) {
+        if (this.itemsList.isNotEmpty() && !this.itemsList.contains(this.dummyModel)) {
             this.itemsList.add(this.dummyModel)
             this.notifyItemInserted(this.itemsList.size - 1)
         }
@@ -100,61 +96,25 @@ class ModelsListRecyclerViewAdapter(
         val removedIndex = this.itemsList.indexOf(this.dummyModel)
         if (removedIndex != -1) {
             this.itemsList.removeAt(removedIndex)
-            notifyItemRemoved(removedIndex)
+            this.notifyItemRemoved(removedIndex)
         }
     }
 
-    fun removeAllItems() {
-        val prevSize = this.itemsList.size
-        this.cleanList.clear()
-        this.itemsList.clear()
-        notifyItemRangeRemoved(0, prevSize)
-    }
-
-    fun setItems(newItemsList: MutableList<Model>) {
-        this.cleanList = newItemsList
-        Log.d("TAG2", newItemsList.toString())
-
-        if (this.isFilterActive) {
-            this.filterList(this.filter)
-        } else {
-            this.setItemsHelper(this.cleanList)
-        }
-    }
-
-    fun filterList(filter: (Model) -> Boolean) {
-        this.isFilterActive = true
-        this.filter = filter
-        val newList = this.cleanList.filter {
-            if (it !is DummyModel) {
-                filter(it)
-            } else {
-                false
-            }
-        }.toMutableList()
-
-        this.setItemsHelper(newList)
-    }
-
-    fun clearFilter() {
-        this.isFilterActive = false
-        this.setItemsHelper(this.cleanList)
-    }
-
-    fun setItemsHelper(newItemsList: MutableList<Model>) {
+    fun setItems(newItemsList: List<Model>) {
         this.removeLoadingAnimation()
 
-        val loadedItemCount = abs(this.prevLoadedItemCount - newItemsList.size)
-        this.loadListAgain.value = loadedItemCount < 10 && this.isFilterActive
+        val newItemsCount = abs(this.prevLoadedItemCount - newItemsList.size)
         this.prevLoadedItemCount = newItemsList.size
+
+        if(newItemsCount < 10) {
+            this.loadListAgain.value = true
+        } else {
+            this.loadListAgain.value = false
+        }
 
         val diffUtil = ModelsListDifUtil(this.itemsList, newItemsList, this.helper)
         val diffResult = DiffUtil.calculateDiff(diffUtil)
-        this.itemsList = newItemsList
+        this.itemsList = newItemsList.toMutableList()
         diffResult.dispatchUpdatesTo(this)
-
-        this.setItemListener(newItemsList)
-
     }
-
 }

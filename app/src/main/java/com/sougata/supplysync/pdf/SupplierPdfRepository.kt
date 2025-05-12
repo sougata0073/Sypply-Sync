@@ -123,7 +123,7 @@ class SupplierPdfRepository {
                         """
                         Quantity: ${oi.quantity}
                         Amount: ${Converters.numberToMoneyString(oi.amount)}
-                        Received: ${if (oi.isReceived) "Yes" else "No"}
+                        Received: ${if (oi.received) "Yes" else "No"}
                         """.trimIndent()
 
                     listOf(

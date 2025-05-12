@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
     <LinearLayout
@@ -14,7 +15,7 @@
         android:paddingEnd="20dp"
         android:paddingBottom="40dp">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
@@ -25,11 +26,15 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:ellipsize="end"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:text="Heading"
                 android:textColor="@color/bw"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/calendarBtn"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/calendarBtn"
@@ -37,9 +42,13 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:src="@drawable/ic_calendar" />
+                android:src="@drawable/ic_calendar"
+                app:layout_constraintBottom_toBottomOf="@id/heading"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/heading"
+                app:layout_constraintTop_toTopOf="@id/heading" />
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <TextView
             android:id="@+id/dateRange"
@@ -48,9 +57,9 @@
             android:layout_marginTop="5dp"
             android:ellipsize="end"
             android:maxLines="2"
-            tools:text="From: 01-04-2025 To: 01-05-2025"
             android:textColor="@color/grey"
-            android:textSize="14sp" />
+            android:textSize="14sp"
+            tools:text="From: 01-04-2025 To: 01-05-2025" />
 
         <TextView
             android:id="@+id/value"
@@ -59,7 +68,7 @@
             android:layout_marginTop="5dp"
             android:ellipsize="end"
             android:fontFamily="@font/acherus_feral_bold"
-            android:maxLines="1"
+            android:maxLines="2"
             android:text="0"
             android:textColor="@color/bw"
             android:textSize="35sp"

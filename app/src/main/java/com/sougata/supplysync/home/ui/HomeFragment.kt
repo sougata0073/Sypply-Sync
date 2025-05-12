@@ -1,6 +1,7 @@
 package com.sougata.supplysync.home.ui
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,13 +45,15 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         this.viewModel = ViewModelProvider(this)[HomeFragmentViewModel::class.java]
-        this.commonDataViewModel = ViewModelProvider(requireActivity())[CommonDataViewModel::class.java]
+        this.commonDataViewModel =
+            ViewModelProvider(requireActivity())[CommonDataViewModel::class.java]
 
         this.binding.viewModel = this.viewModel
 
         this.binding.lifecycleOwner = this.viewLifecycleOwner
 
         this.setUpLineCHart(this.binding.purchaseChart.lineChart)
+        this.setUpLineCHart(this.binding.salesChart.lineChart)
 
         this.initializeUI()
 
@@ -86,6 +89,12 @@ class HomeFragment : Fragment() {
             purchaseChart.heading.text = "Purchase chart"
         }
 
+        this.binding.salesByRange.calendarBtn.setOnClickListener {
+            this.openDateRangePicker { startDateMillis, endDateMillis ->
+                this.commonDataViewModel.loadSalesAmountByRange(startDateMillis, endDateMillis)
+            }
+        }
+
         this.binding.purchaseByRange.calendarBtn.setOnClickListener {
             this.openDateRangePicker { startDateMillis, endDateMillis ->
                 this.commonDataViewModel.loadPurchaseAmountByRange(startDateMillis, endDateMillis)
@@ -95,6 +104,12 @@ class HomeFragment : Fragment() {
         this.binding.purchaseChart.calendarBtn.setOnClickListener {
             this.openDateRangePicker { startDateMillis, endDateMillis ->
                 this.viewModel.loadPurchaseLineChartData(startDateMillis, endDateMillis)
+            }
+        }
+
+        this.binding.salesChart.calendarBtn.setOnClickListener {
+            this.openDateRangePicker { startDateMillis, endDateMillis ->
+                this.viewModel.loadSalesLineChartData(startDateMillis, endDateMillis)
             }
         }
     }
@@ -108,6 +123,20 @@ class HomeFragment : Fragment() {
             } else if (it.second == Status.SUCCESS) {
 
                 this.binding.ordersToReceive.value.text = it.first.toString()
+
+            } else if (it.second == Status.FAILED) {
+                Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
+            }
+        }
+
+        this.commonDataViewModel.salesAmountByRange.observe(this.viewLifecycleOwner) {
+            if (it.second == Status.STARTED) {
+
+            } else if (it.second == Status.SUCCESS) {
+
+                this.binding.salesByRange.value.text = Converters.numberToMoneyString(it.first)
+                this.binding.salesByRange.dateRange.text =
+                    this.commonDataViewModel.salesAmountDateRange
 
             } else if (it.second == Status.FAILED) {
                 Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
@@ -158,6 +187,7 @@ class HomeFragment : Fragment() {
         }
 
         this.registerPurchaseChartListener()
+        this.registerSalesChartListener()
 
     }
 
@@ -165,9 +195,7 @@ class HomeFragment : Fragment() {
         this.viewModel.purchaseChartData.observe(this.viewLifecycleOwner) {
 
             if (it.second == Status.STARTED) {
-
                 this.binding.purchaseChart.progressBar.visibility = View.VISIBLE
-
             } else if (it.second == Status.SUCCESS) {
 
                 this.binding.purchaseChart.lineChart.apply {
@@ -186,7 +214,7 @@ class HomeFragment : Fragment() {
 
                     this.visibility = View.VISIBLE
 
-                    if (viewModel.animatePurchaseChart == true) {
+                    if (viewModel.animatePurchaseChart) {
                         animateY(1000)
                         viewModel.animatePurchaseChart = false
                     }
@@ -196,9 +224,46 @@ class HomeFragment : Fragment() {
                 this.binding.purchaseChart.dateRange.text = this.viewModel.purchaseChartDateRange
 
             } else if (it.second == Status.FAILED) {
+                this.binding.purchaseChart.progressBar.visibility = View.GONE
                 Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
             }
 
+        }
+    }
+
+    private fun registerSalesChartListener() {
+        this.viewModel.salesChartData.observe(this.viewLifecycleOwner) {
+            if (it.second == Status.STARTED) {
+                this.binding.salesChart.progressBar.visibility = View.VISIBLE
+            } else if (it.second == Status.SUCCESS) {
+                this.binding.salesChart.lineChart.apply {
+                    this.data = it.first
+
+                    this.axisLeft.valueFormatter = object : IndexAxisValueFormatter() {
+                        override fun getFormattedValue(value: Float): String? {
+                            return Converters.getShortedNumberString(value.toDouble())
+                        }
+                    }
+
+                    this.setVisibleXRangeMaximum(15f)
+
+                    this.notifyDataSetChanged()
+
+                    this.visibility = View.VISIBLE
+
+                    if (viewModel.animateSalesChart) {
+                        animateY(1000)
+                        viewModel.animateSalesChart = false
+                    }
+                }
+
+                this.binding.salesChart.progressBar.visibility = View.GONE
+                this.binding.salesChart.dateRange.text = this.viewModel.salesChartDateRange
+
+            } else if (it.second == Status.FAILED) {
+                this.binding.salesChart.progressBar.visibility = View.GONE
+                Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
+            }
         }
     }
 

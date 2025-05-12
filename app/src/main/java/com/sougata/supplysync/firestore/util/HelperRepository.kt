@@ -1,12 +1,10 @@
 package com.sougata.supplysync.firestore.util
 
-import com.google.android.gms.tasks.Task
-import com.google.firebase.Timestamp
+import android.util.Log
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.firestore.toObject
 import com.google.firebase.ktx.Firebase
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.User
@@ -19,36 +17,10 @@ class HelperRepository {
 
     private val currentUser = Firebase.auth.currentUser!!
     private val db = Firebase.firestore
-    private val usersCol = this.db.collection(FieldNames.UsersCol.SELF_NAME)
+    private val usersCol = this.db.collection(FirestoreNames.Col.USERS)
     private val currentUserDoc = this.usersCol.document(this.currentUser.uid)
 
-    fun insertUserToFirestore(user: User, onComplete: (Status, String) -> Unit) {
-
-        val userDoc = mapOf(
-            FieldNames.UsersCol.NAME to user.name,
-            FieldNames.UsersCol.EMAIL to user.email,
-            FieldNames.UsersCol.PHONE to user.phone
-        )
-
-        usersCol.document(user.uid).set(userDoc).addOnCompleteListener {
-            if (it.isSuccessful) {
-
-                this.createRequiredThings { status, message ->
-                    if (status == Status.SUCCESS) {
-                        onComplete(Status.SUCCESS, "User successfully added")
-                    } else if (status == Status.FAILED) {
-                        onComplete(Status.FAILED, message)
-                    }
-                }
-
-            } else {
-                onComplete(Status.FAILED, it.exception?.message.toString())
-            }
-        }
-
-    }
-
-    fun <T: Model> getAnyModelsList(
+    fun <T : Model> getAnyModelsList(
         firebaseCollectionName: String,
         lastDocumentSnapshot: DocumentSnapshot?,
         customSorting: Pair<String, Query.Direction>,
@@ -74,13 +46,14 @@ class HelperRepository {
                 for (doc in it.result.documents) {
 
                     if (doc.exists()) {
+//                        Log.d("TAG", doc.data.toString())
                         val model: Model = doc.toObject(clazz)!!
 
                         modelsList.add(model)
                     }
                 }
 
-                if (it.result.documents.isEmpty()) {
+                if (modelsList.isEmpty()) {
                     // When no more data is there
                     onComplete(Status.SUCCESS, modelsList, null, KeysAndMessages.EMPTY_LIST)
                 } else {
@@ -99,7 +72,7 @@ class HelperRepository {
         }
     }
 
-    fun <T: Model> searchInAnyModelsList(
+    fun <T : Model> searchInAnyModelsList(
         searchField: String,
         searchQuery: String,
         queryDataType: FirestoreFieldDataType,
@@ -167,12 +140,12 @@ class HelperRepository {
         onComplete: (Status, T?, String) -> Unit
     ) {
         val valuesCol =
-            this.usersCol.document(this.currentUser.uid).collection(FieldNames.ValuesCol.SELF_NAME)
+            this.usersCol.document(this.currentUser.uid).collection(FirestoreNames.Col.VALUES)
 
         valuesCol.document(documentName).get().addOnCompleteListener {
             if (it.isSuccessful) {
 
-                val result = it.result[FieldNames.Commons.VALUE] as? T
+                val result = it.result[FirestoreNames.ValuesDoc.Fields.VALUE] as? T
 
                 if (result != null) {
                     onComplete(
@@ -187,33 +160,4 @@ class HelperRepository {
         }
     }
 
-    fun createRequiredThings(onComplete: (Status, String) -> Unit) {
-
-        val valuesCol = this.currentUserDoc.collection(FieldNames.ValuesCol.SELF_NAME)
-
-        this.usersCol.firestore.runTransaction {
-
-            // Add value fields here
-            val map = mapOf(FieldNames.Commons.VALUE to 0)
-
-            it.set(valuesCol.document(FieldNames.ValuesCol.SuppliersCountDoc.SELF_NAME), map)
-            it.set(valuesCol.document(FieldNames.ValuesCol.SuppliersDueAmountDoc.SELF_NAME), map)
-            it.set(valuesCol.document(FieldNames.ValuesCol.SupplierItemsCountDoc.SELF_NAME), map)
-            it.set(valuesCol.document(FieldNames.ValuesCol.OrdersToReceiveDoc.SELF_NAME), map)
-            it.set(valuesCol.document(FieldNames.ValuesCol.OrdersToDeliverDoc.SELF_NAME), map)
-            it.set(valuesCol.document(FieldNames.ValuesCol.CustomersCountDoc.SELF_NAME), map)
-            it.set(
-                valuesCol.document(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME),
-                map
-            )
-
-        }.addOnCompleteListener {
-            if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
-            } else {
-                onComplete(Status.FAILED, it.exception?.message.toString())
-            }
-        }
-
-    }
 }

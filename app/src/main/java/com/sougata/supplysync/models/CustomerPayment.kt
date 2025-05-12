@@ -14,6 +14,9 @@ data class CustomerPayment(
     var customerId: String,
     var customerName: String
 ): Model, Parcelable {
+
+    constructor() : this("", Timestamp.now(), 0.0, Timestamp.now(), "", "", "")
+
     override fun toMap(): Map<String, Any> {
         return mapOf(
             "id" to id,

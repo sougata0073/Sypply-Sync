@@ -11,7 +11,6 @@ import android.view.ViewGroup
 import android.widget.EditText
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.SearchView
-import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
@@ -24,9 +23,9 @@ import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentModelsListBinding
 import com.sougata.supplysync.models.Model
+import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.modelslist.helper.ModelsListHelper
-import com.sougata.supplysync.modelslist.viewmodels.ModelSearchViewModel
-import com.sougata.supplysync.modelslist.viewmodels.ModelsListRegularViewModel
+import com.sougata.supplysync.modelslist.viewmodels.ModelsListViewModel
 import com.sougata.supplysync.modelslist.viewmodels.ModelsListViewModelFactory
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.FirestoreFieldDataType
@@ -40,17 +39,11 @@ class ModelsListFragment : Fragment() {
 
     private val viewModelFactory by lazy { ModelsListViewModelFactory(this.helper) }
 
-    private val regularViewModel by lazy {
+    private val viewModel by lazy {
         ViewModelProvider(
             this,
             this.viewModelFactory
-        )[ModelsListRegularViewModel::class.java]
-    }
-    private val searchViewModel by lazy {
-        ViewModelProvider(
-            this,
-            this.viewModelFactory
-        )[ModelSearchViewModel::class.java]
+        )[ModelsListViewModel::class.java]
     }
 
     private val recyclerViewCallBack = { view: View, model: Model ->
@@ -73,13 +66,6 @@ class ModelsListFragment : Fragment() {
             mutableListOf(),
             this.helper,
             this.loadListAgain,
-            { list ->
-                if (list.isEmpty()) {
-                    this.binding.nothingHereLbl.visibility = View.VISIBLE
-                } else {
-                    this.binding.nothingHereLbl.visibility = View.GONE
-                }
-            },
             this.recyclerViewCallBack
         )
     }
@@ -95,6 +81,9 @@ class ModelsListFragment : Fragment() {
     private var currentQueryDataType: FirestoreFieldDataType? = null
 
     private val loadListAgain = MutableLiveData(false)
+
+    private lateinit var fieldsListSearch: Array<Triple<String, String, FirestoreFieldDataType>>
+    private lateinit var fieldsListFilter: Array<Pair<String, (Model) -> Boolean>>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -120,8 +109,8 @@ class ModelsListFragment : Fragment() {
 
         this.helper = ModelsListHelper(this.modelName, this)
 
-//        this.fieldsListSearch = this.helper.getSearchableFieldPairs()
-//        this.fieldsListFilter = this.helper.getFilterableFields()
+        this.fieldsListSearch = this.helper.getSearchableFieldPairs()
+        this.fieldsListFilter = this.helper.getFilterableFields()
 
         this.initializeUI()
 
@@ -134,7 +123,7 @@ class ModelsListFragment : Fragment() {
         val bundle = Bundle().apply {
             putBoolean(
                 KeysAndMessages.DATA_ADDED_KEY,
-                regularViewModel.isModelAdded || regularViewModel.isModelUpdated || regularViewModel.isModelRemoved
+                viewModel.isModelAdded || viewModel.isModelUpdated || viewModel.isModelRemoved
             )
         }
         this.parentFragmentManager.setFragmentResult(
@@ -148,21 +137,11 @@ class ModelsListFragment : Fragment() {
 
     private fun initializeUI() {
 
+        if (this.viewModel.isSearchClicked) {
+            this.loadChipsSearch()
+        }
+
         this.loadChipsFilter()
-
-        this.loadChipsSearch()
-
-        this.binding.searchChipsLayout.visibility = if (searchViewModel.isSearchClicked) {
-            View.VISIBLE
-        } else {
-            View.GONE
-        }
-
-        this.binding.filterChipsLayout.visibility = if (this.helper.getFilterableFields().isEmpty()) {
-            View.GONE
-        } else {
-            View.VISIBLE
-        }
 
         this.setUpToolBar()
 
@@ -175,9 +154,7 @@ class ModelsListFragment : Fragment() {
 
     private fun registerSubscribers() {
 
-        this.registerAppBarOffSetListener()
-        this.registerRegularViewModelListListener()
-        this.registerSearchViewModelListListener()
+        this.registerListListener()
         this.registerFragmentResultListener()
 
         this.loadListAgain.observe(this.viewLifecycleOwner) {
@@ -185,81 +162,49 @@ class ModelsListFragment : Fragment() {
                 this.loadItemsList()
             }
         }
-
     }
 
-    private fun registerAppBarOffSetListener() {
-        this.binding.appBarLayout.addOnOffsetChangedListener { _, _ ->
-
-            if (this.searchViewModel.isSearchClicked) {
-                if (!this.binding.searchChipsLayout.isVisible) {
-                    this.binding.searchChipsLayout.visibility = View.VISIBLE
-                }
-            } else {
-                if (this.binding.searchChipsLayout.isVisible) {
-                    this.binding.searchChipsLayout.visibility = View.GONE
-                }
-            }
-
-            if (this.helper.getFilterableFields().isNotEmpty()) {
-                if (!this.binding.filterChipsLayout.isVisible) {
-                    this.binding.filterChipsLayout.visibility = View.VISIBLE
-                }
-            } else {
-                if (this.binding.filterChipsLayout.isVisible) {
-                    this.binding.filterChipsLayout.visibility = View.GONE
-                }
-            }
-        }
-    }
-
-    private fun registerRegularViewModelListListener() {
-        this.regularViewModel.itemsList.observe(this.viewLifecycleOwner) {
+    private fun registerListListener() {
+        this.viewModel.itemsList.observe(this.viewLifecycleOwner) {
             if (it.second == Status.STARTED) {
 
-                if (regularViewModel.isFirstTimeListLoaded) {
+                if (this.viewModel.isFirstTimeListLoad) {
                     this.binding.progressBar.visibility = View.VISIBLE
-                    regularViewModel.isFirstTimeListLoaded = false
+                    this.viewModel.isFirstTimeListLoad = false
                 }
 
             } else if (it.second == Status.SUCCESS) {
-                val list = it.first
-                if (list != null) {
-                    onSuccessfulListReceived(list)
+                this.binding.progressBar.visibility = View.GONE
+
+                Log.d("TAG3", this.viewModel.isModelRemoved.toString())
+
+                var s = ""
+                for (item in it.first) {
+                    try {
+                        item as Supplier
+                        s += item.name + "  "
+                    } catch (_: Exception) {
+                        Log.d("TAG", item.toString())
+                    }
+                }
+//                Log.d("list", s)
+
+                this.recyclerViewAdapter.setItems(it.first)
+
+                if (recyclerViewAdapter.itemCount == 0) {
+                    this.binding.nothingHereLbl.visibility = View.VISIBLE
                 } else {
-                    onEmptyOrNullListReceived()
+                    this.binding.nothingHereLbl.visibility = View.GONE
                 }
 
             } else if (it.second == Status.FAILED) {
-                Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(
+                    requireView(),
+                    KeysAndMessages.SOMETHING_WENT_WRONG,
+                    Snackbar.LENGTH_SHORT
+                ).show()
             }
 
-        }
-    }
-
-    private fun registerSearchViewModelListListener() {
-        this.searchViewModel.itemsList.observe(this.viewLifecycleOwner) {
-            if (it.second == Status.STARTED) {
-
-                if (searchViewModel.isFirstTimeListLoaded) {
-                    this.binding.progressBar.visibility = View.VISIBLE
-                    searchViewModel.isFirstTimeListLoaded = false
-                }
-
-            } else if (it.second == Status.SUCCESS) {
-
-                val list = it.first
-
-                if (list != null) {
-                    onSuccessfulListReceived(list)
-                } else {
-                    onEmptyOrNullListReceived()
-                    this.recyclerViewAdapter.removeAllItems()
-                }
-
-            } else if (it.second == Status.FAILED) {
-                Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
-            }
         }
     }
 
@@ -298,18 +243,11 @@ class ModelsListFragment : Fragment() {
                 val lastItemPosition = layoutManager.findLastCompletelyVisibleItemPosition()
 
                 if (lastItemPosition == itemCount - 1) {
-                    Log.d("TAG", "called")
                     loadItemsList()
-
-                } else if (lastItemPosition == itemCount - 5) {
-                    if (searchViewModel.isSearchActive) {
-                        if (!searchViewModel.noMoreElementLeft) {
-                            recyclerViewAdapter.addLoadingAnimation()
-                        }
-                    } else {
-                        if (!regularViewModel.noMoreElementLeft) {
-                            recyclerViewAdapter.addLoadingAnimation()
-                        }
+                }
+                if (lastItemPosition == itemCount - 5) {
+                    if (!viewModel.noMoreItem) {
+                        recyclerViewAdapter.addLoadingAnimation()
                     }
                 }
             }
@@ -331,12 +269,10 @@ class ModelsListFragment : Fragment() {
         this.binding.searchView.apply {
 
             searchViewEditText = findViewById<EditText>(androidx.appcompat.R.id.search_src_text)
-
             searchViewEditText.setTextColor(requireContext().getColor(R.color.bw))
 
             setOnSearchClickListener {
-                searchViewModel.isSearchClicked = true
-                binding.searchChipsLayout.visibility = View.VISIBLE
+                activateSearchClick()
             }
 
             setOnQueryTextListener(
@@ -345,7 +281,7 @@ class ModelsListFragment : Fragment() {
                         val field = searchField
                         val dataType = currentQueryDataType
                         if (field != null && dataType != null) {
-                            searchViewModel.loadItemsList(field, query.orEmpty(), dataType)
+                            viewModel.loadItemsList(Triple(field, query.orEmpty(), dataType))
                         } else {
                             Snackbar.make(
                                 requireView(),
@@ -358,7 +294,7 @@ class ModelsListFragment : Fragment() {
 
                     override fun onQueryTextChange(newText: String?): Boolean {
                         if (!newText.isNullOrEmpty()) {
-                            searchViewModel.isSearchActive = true
+                            activateSearch()
                         }
                         return false
                     }
@@ -366,34 +302,14 @@ class ModelsListFragment : Fragment() {
             )
 
             setOnCloseListener {
-                searchViewModel.isSearchActive = false
-                searchViewModel.isSearchClicked = false
                 searchField = null
                 currentQueryDataType = null
 
-                binding.searchChipsLayout.visibility = View.GONE
-                if (helper.getFilterableFields().isNotEmpty()) {
-                    binding.filterChipsLayout.visibility = View.VISIBLE
-                }
-
-                val list = regularViewModel.itemsList.value?.first
-                if (list != null) {
-                    recyclerViewAdapter.setItems(list)
-                }
+                closeSearch()
 
                 false
             }
         }
-    }
-
-    private fun onSuccessfulListReceived(list: MutableList<Model>) {
-        this.binding.progressBar.visibility = View.GONE
-        this.recyclerViewAdapter.setItems(list)
-
-    }
-
-    private fun onEmptyOrNullListReceived() {
-        this.binding.progressBar.visibility = View.GONE
     }
 
     private fun registerFragmentResultListener() {
@@ -401,7 +317,7 @@ class ModelsListFragment : Fragment() {
             KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT, this.viewLifecycleOwner
         ) { requestKey, bundle ->
 
-            this.regularViewModel.isModelAdded = bundle.getBoolean(KeysAndMessages.DATA_ADDED_KEY)
+            this.viewModel.isModelAdded = bundle.getBoolean(KeysAndMessages.DATA_ADDED_KEY)
 
             val removedModel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 bundle.getParcelable(KeysAndMessages.DATA_REMOVED_KEY, Model::class.java)
@@ -417,7 +333,7 @@ class ModelsListFragment : Fragment() {
                 bundle.getParcelable(KeysAndMessages.DATA_UPDATED_KEY)
             }
 
-            if (this.regularViewModel.isModelAdded) {
+            if (this.viewModel.isModelAdded) {
                 this.onModelAdded()
             }
 
@@ -433,46 +349,46 @@ class ModelsListFragment : Fragment() {
     }
 
     private fun loadItemsList() {
-        if (this.searchViewModel.isSearchActive) {
-            if (!this.searchViewModel.noMoreElementLeft) {
-                this.searchViewModel.loadItemsList(
-                    this.searchViewModel.prevSearchField,
-                    this.searchViewModel.prevSearchQuery,
-                    this.searchViewModel.prevQueryDataType
+        if (this.viewModel.isSearchActive) {
+            if (!this.viewModel.noMoreItem) {
+                this.viewModel.loadItemsList(
+                    Triple(
+                        this.viewModel.prevSearchField,
+                        this.viewModel.prevSearchQuery,
+                        this.viewModel.prevQueryDataType
+                    )
                 )
             }
         } else {
-            if (!this.regularViewModel.noMoreElementLeft) {
-                this.regularViewModel.loadItemsList()
+            if (!this.viewModel.noMoreItem) {
+                this.viewModel.loadItemsList()
             }
         }
     }
 
     private fun onModelAdded() {
-        this.regularViewModel.isModelAdded = true
-        this.regularViewModel.loadLastAddedData()
-        if (this.searchViewModel.isSearchActive) {
-            this.searchViewModel.loadLastAddedData()
-        }
+        this.viewModel.isModelAdded = true
+        this.viewModel.loadLastAddedModel()
     }
 
     private fun onModelUpdated(newModel: Model) {
-        this.regularViewModel.isModelUpdated = true
-        this.regularViewModel.updateModel(newModel)
-        if (this.searchViewModel.isSearchActive) {
-            this.searchViewModel.updateModel(newModel)
-        }
+        this.viewModel.isModelUpdated = true
+        this.viewModel.updateModel(newModel)
     }
 
     private fun onModelDeleted(model: Model) {
-        this.regularViewModel.isModelRemoved = true
-        this.regularViewModel.deleteModel(model)
-        if (this.searchViewModel.isSearchActive) {
-            this.searchViewModel.deleteModel(model)
-        }
+        this.viewModel.isModelRemoved = true
+        viewModel.deleteModel(model)
     }
 
     private fun loadChipsSearch() {
+
+        if (this.fieldsListSearch.isEmpty()) {
+            return
+        }
+
+        this.binding.chipGroup.addView(this.getDecoratedMarkerChip("Search by"))
+
         for (field in this.helper.getSearchableFieldPairs()) {
             val chip = this.getDecoratedChip(field.second)
 
@@ -492,30 +408,66 @@ class ModelsListFragment : Fragment() {
                     currentQueryDataType = null
                 }
             }
-            this.binding.chipGroupSearch.addView(chip)
+            this.binding.chipGroup.addView(chip)
         }
     }
 
     private fun loadChipsFilter() {
 
-        this.binding.filterChipsLayout.visibility = if (this.helper.getFilterableFields().isEmpty()) {
-            View.GONE
+        if (this.fieldsListFilter.isEmpty()) {
             return
-        } else {
-            View.VISIBLE
         }
+
+        this.binding.chipGroup.addView(this.getDecoratedMarkerChip("Filters"))
 
         for (field in this.helper.getFilterableFields()) {
             val chip = this.getDecoratedChip(field.first)
 
             chip.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
-                    recyclerViewAdapter.filterList { model -> field.second(model) }
+                    viewModel.activateFilter { field.second(it) }
                 } else {
-                    recyclerViewAdapter.clearFilter()
+                    viewModel.closeFilter()
                 }
             }
-            this.binding.chipGroupFilter.addView(chip)
+            this.binding.chipGroup.addView(chip)
+        }
+    }
+
+    private fun removeAllChips() {
+        this.binding.chipGroup.removeAllViews()
+    }
+
+    private fun activateSearchClick() {
+        this.viewModel.activateSearchClick()
+        this.removeAllChips()
+        this.loadChipsSearch()
+    }
+
+    private fun activateSearch() {
+        this.viewModel.activateSearch()
+    }
+
+    private fun closeSearch() {
+        this.viewModel.closeSearch()
+        this.removeAllChips()
+        this.loadChipsFilter()
+    }
+
+    private fun getDecoratedMarkerChip(chipName: String): Chip {
+        return Chip(requireContext()).apply {
+            isCheckable = false
+            isClickable = false
+            isFocusable = false
+            layoutParams = ViewGroup.MarginLayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            text = chipName
+            chipStrokeWidth = 0f
+            chipBackgroundColor =
+                requireContext().getColorStateList(R.color.night_mode_background)
+            setTextColor(requireContext().getColor(R.color.bw))
         }
     }
 

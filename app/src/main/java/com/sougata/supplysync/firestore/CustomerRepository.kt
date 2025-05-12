@@ -9,7 +9,7 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
-import com.sougata.supplysync.firestore.util.FieldNames
+import com.sougata.supplysync.firestore.util.FirestoreNames
 import com.sougata.supplysync.firestore.util.HelperRepository
 import com.sougata.supplysync.models.Customer
 import com.sougata.supplysync.models.CustomerPayment
@@ -26,22 +26,16 @@ class CustomerRepository {
     private val currentUser = Firebase.auth.currentUser!!
     private val db = Firebase.firestore
 
-    private val usersCol =
-        this.db.collection(FieldNames.UsersCol.SELF_NAME)
+    private val usersCol = this.db.collection(FirestoreNames.Col.USERS)
     private val currentUserDoc = this.usersCol.document(this.currentUser.uid)
 
-    private val valuesCol = this.currentUserDoc.collection(FieldNames.ValuesCol.SELF_NAME)
+    private val valuesCol = this.currentUserDoc.collection(FirestoreNames.Col.VALUES)
 
-    private val customersCol = this.currentUserDoc
-        .collection(FieldNames.CustomersCol.SELF_NAME)
-    private val userItemsCol =
-        this.currentUserDoc.collection(FieldNames.UserItemsCol.SELF_NAME)
+    private val customersCol = this.currentUserDoc.collection(FirestoreNames.Col.CUSTOMERS)
+    private val userItemsCol = this.currentUserDoc.collection(FirestoreNames.Col.USER_ITEMS)
     private val customerPaymentsCol =
-        this.currentUserDoc
-            .collection(FieldNames.CustomerPaymentsCol.SELF_NAME)
-    private val ordersCol =
-        this.currentUserDoc
-            .collection(FieldNames.OrdersCol.SELF_NAME)
+        this.currentUserDoc.collection(FirestoreNames.Col.CUSTOMER_PAYMENTS)
+    private val ordersCol = this.currentUserDoc.collection(FirestoreNames.Col.ORDERS)
 
 
     private val helperRepository = HelperRepository()
@@ -52,9 +46,9 @@ class CustomerRepository {
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
         this.helperRepository.getAnyModelsList(
-            firebaseCollectionName = FieldNames.CustomersCol.SELF_NAME,
+            firebaseCollectionName = FirestoreNames.Col.CUSTOMERS,
             lastDocumentSnapshot = lastDocumentSnapshot,
-            customSorting = FieldNames.CustomersCol.TIMESTAMP to Query.Direction.ASCENDING,
+            customSorting = Customer::timestamp.name to Query.Direction.ASCENDING,
             limit = limit,
             clazz = Customer::class.java,
             onComplete = onComplete
@@ -73,7 +67,7 @@ class CustomerRepository {
             searchField = searchField,
             searchQuery = searchQuery,
             queryDataType = queryDataType,
-            firebaseCollectionName = FieldNames.CustomersCol.SELF_NAME,
+            firebaseCollectionName = FirestoreNames.Col.CUSTOMERS,
             lastDocumentSnapshot = lastDocumentSnapshot,
             limit = limit,
             clazz = Customer::class.java,
@@ -87,9 +81,9 @@ class CustomerRepository {
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
         this.helperRepository.getAnyModelsList(
-            firebaseCollectionName = FieldNames.CustomerPaymentsCol.SELF_NAME,
+            firebaseCollectionName = FirestoreNames.Col.CUSTOMER_PAYMENTS,
             lastDocumentSnapshot = lastDocumentSnapshot,
-            customSorting = FieldNames.CustomerPaymentsCol.PAYMENT_TIMESTAMP to Query.Direction.DESCENDING,
+            customSorting = CustomerPayment::paymentTimestamp.name to Query.Direction.DESCENDING,
             limit = limit,
             clazz = CustomerPayment::class.java,
             onComplete = onComplete
@@ -108,7 +102,7 @@ class CustomerRepository {
             searchField = searchField,
             searchQuery = searchQuery,
             queryDataType = queryDataType,
-            firebaseCollectionName = FieldNames.CustomerPaymentsCol.SELF_NAME,
+            firebaseCollectionName = FirestoreNames.Col.CUSTOMER_PAYMENTS,
             lastDocumentSnapshot = lastDocumentSnapshot,
             limit = limit,
             clazz = CustomerPayment::class.java,
@@ -122,9 +116,9 @@ class CustomerRepository {
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
         this.helperRepository.getAnyModelsList(
-            firebaseCollectionName = FieldNames.OrdersCol.SELF_NAME,
+            firebaseCollectionName = FirestoreNames.Col.ORDERS,
             lastDocumentSnapshot = lastDocumentSnapshot,
-            customSorting = FieldNames.OrdersCol.TIMESTAMP to Query.Direction.DESCENDING,
+            customSorting = Order::timestamp.name to Query.Direction.DESCENDING,
             limit = limit,
             clazz = Order::class.java,
             onComplete = onComplete
@@ -143,7 +137,7 @@ class CustomerRepository {
             searchField = searchField,
             searchQuery = searchQuery,
             queryDataType = queryDataType,
-            firebaseCollectionName = FieldNames.OrdersCol.SELF_NAME,
+            firebaseCollectionName = FirestoreNames.Col.ORDERS,
             lastDocumentSnapshot = lastDocumentSnapshot,
             limit = limit,
             clazz = Order::class.java,
@@ -157,9 +151,9 @@ class CustomerRepository {
         onComplete: (Status, MutableList<Model>?, DocumentSnapshot?, String) -> Unit
     ) {
         this.helperRepository.getAnyModelsList(
-            firebaseCollectionName = FieldNames.UserItemsCol.SELF_NAME,
+            firebaseCollectionName = FirestoreNames.Col.USER_ITEMS,
             lastDocumentSnapshot = lastDocumentSnapshot,
-            customSorting = FieldNames.UserItemsCol.TIMESTAMP to Query.Direction.ASCENDING,
+            customSorting = UserItem::timestamp.name to Query.Direction.ASCENDING,
             limit = limit,
             clazz = UserItem::class.java,
             onComplete = onComplete
@@ -178,7 +172,7 @@ class CustomerRepository {
             searchField = searchField,
             searchQuery = searchQuery,
             queryDataType = queryDataType,
-            firebaseCollectionName = FieldNames.UserItemsCol.SELF_NAME,
+            firebaseCollectionName = FirestoreNames.Col.USER_ITEMS,
             lastDocumentSnapshot = lastDocumentSnapshot,
             limit = limit,
             clazz = UserItem::class.java,
@@ -190,19 +184,19 @@ class CustomerRepository {
         customer: Customer, onComplete: (Status, String) -> Unit
     ) {
         this.usersCol.firestore.runTransaction {
-            it.set(customersCol.document(), customer)
+            it.set(customersCol.document(customer.id), customer)
             it.update(
-                valuesCol.document(FieldNames.ValuesCol.CustomersCountDoc.SELF_NAME),
+                valuesCol.document(FirestoreNames.ValuesDoc.CUSTOMERS_COUNT),
                 mapOf(
-                    FieldNames.ValuesCol.CustomersCountDoc.VALUE to FieldValue.increment(
+                    FirestoreNames.ValuesDoc.Fields.VALUE to FieldValue.increment(
                         1
                     )
                 )
             )
             it.update(
-                valuesCol.document(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME),
+                valuesCol.document(FirestoreNames.ValuesDoc.RECEIVABLE_AMOUNT_FROM_CUSTOMERS),
                 mapOf(
-                    FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.VALUE to FieldValue.increment(
+                    FirestoreNames.ValuesDoc.Fields.VALUE to FieldValue.increment(
                         customer.receivableAmount
                     )
                 )
@@ -219,18 +213,18 @@ class CustomerRepository {
     fun updateCustomer(customer: Customer, onComplete: (Status, String) -> Unit) {
         this.usersCol.firestore.runTransaction {
             var prevTotalReceivableAmount =
-                it.get(valuesCol.document(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME))
-                    .getDouble(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.VALUE)
+                it.get(valuesCol.document(FirestoreNames.ValuesDoc.RECEIVABLE_AMOUNT_FROM_CUSTOMERS))
+                    .getDouble(FirestoreNames.ValuesDoc.Fields.VALUE)
                     ?: 0.0
             var prevCustomerReceivableAmount =
                 it.get(customersCol.document(customer.id))
-                    .getDouble(FieldNames.CustomersCol.RECEIVABLE_AMOUNT) ?: 0.0
+                    .getDouble(Customer::receivableAmount.name) ?: 0.0
             val newTotalReceivableAmount: Double? =
                 prevTotalReceivableAmount - prevCustomerReceivableAmount + customer.receivableAmount
             it.update(customersCol.document(customer.id), customer.toMap())
             it.update(
-                valuesCol.document(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME),
-                mapOf(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.VALUE to newTotalReceivableAmount)
+                valuesCol.document(FirestoreNames.ValuesDoc.RECEIVABLE_AMOUNT_FROM_CUSTOMERS),
+                mapOf(FirestoreNames.ValuesDoc.Fields.VALUE to newTotalReceivableAmount)
             )
         }.addOnCompleteListener {
             if (it.isSuccessful) {
@@ -245,17 +239,17 @@ class CustomerRepository {
         this.usersCol.firestore.runTransaction {
             it.delete(this.customersCol.document(customer.id))
             it.update(
-                this.valuesCol.document(FieldNames.ValuesCol.CustomersCountDoc.SELF_NAME),
+                this.valuesCol.document(FirestoreNames.ValuesDoc.CUSTOMERS_COUNT),
                 mapOf(
-                    FieldNames.ValuesCol.CustomersCountDoc.VALUE to FieldValue.increment(
+                    FirestoreNames.ValuesDoc.Fields.VALUE to FieldValue.increment(
                         -1
                     )
                 )
             )
             it.update(
-                this.valuesCol.document(FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME),
+                this.valuesCol.document(FirestoreNames.ValuesDoc.RECEIVABLE_AMOUNT_FROM_CUSTOMERS),
                 mapOf(
-                    FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.VALUE to FieldValue.increment(
+                    FirestoreNames.ValuesDoc.Fields.VALUE to FieldValue.increment(
                         -customer.receivableAmount
                     )
                 )
@@ -270,7 +264,7 @@ class CustomerRepository {
     }
 
     fun addUserItem(userItem: UserItem, onComplete: (Status, String) -> Unit) {
-        this.userItemsCol.document().set(userItem).addOnCompleteListener {
+        this.userItemsCol.document(userItem.id).set(userItem).addOnCompleteListener {
             if (it.isSuccessful) {
                 onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
@@ -302,13 +296,14 @@ class CustomerRepository {
     fun addCustomerPayment(
         customerPayment: CustomerPayment, onComplete: (Status, String) -> Unit
     ) {
-        this.customerPaymentsCol.document().set(customerPayment).addOnCompleteListener {
-            if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
-            } else {
-                onComplete(Status.FAILED, it.exception?.message.toString())
+        this.customerPaymentsCol.document(customerPayment.id).set(customerPayment)
+            .addOnCompleteListener {
+                if (it.isSuccessful) {
+                    onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                } else {
+                    onComplete(Status.FAILED, it.exception?.message.toString())
+                }
             }
-        }
     }
 
     fun updateCustomerPayment(
@@ -329,7 +324,7 @@ class CustomerRepository {
         onComplete: (Status, String) -> Unit
     ) {
         val customerPaymentsCol = this.usersCol.document(this.currentUser.uid)
-            .collection(FieldNames.CustomerPaymentsCol.SELF_NAME)
+            .collection(FirestoreNames.Col.CUSTOMER_PAYMENTS)
         this.usersCol.firestore.runTransaction {
             it.delete(customerPaymentsCol.document(customerPayment.id))
 
@@ -344,12 +339,12 @@ class CustomerRepository {
 
     fun addOrder(order: Order, onComplete: (Status, String) -> Unit) {
         this.usersCol.firestore.runTransaction {
-            it.set(ordersCol.document(), order)
-            if (!order.isDelivered) {
+            it.set(ordersCol.document(order.id), order)
+            if (!order.delivered) {
                 it.update(
-                    valuesCol.document(FieldNames.ValuesCol.OrdersToDeliverDoc.SELF_NAME),
+                    valuesCol.document(FirestoreNames.ValuesDoc.ORDERS_TO_DELIVER),
                     mapOf(
-                        FieldNames.ValuesCol.OrdersToDeliverDoc.VALUE to FieldValue.increment(
+                        FirestoreNames.ValuesDoc.Fields.VALUE to FieldValue.increment(
                             1
                         )
                     )
@@ -367,22 +362,22 @@ class CustomerRepository {
     fun updateOrder(order: Order, onComplete: (Status, String) -> Unit) {
         this.usersCol.firestore.runTransaction {
             val prevIsDelivered = it.get(this.ordersCol.document(order.id))
-                .getBoolean(FieldNames.OrdersCol.IS_DELIVERED) ?: false
+                .getBoolean(Order::delivered.name) ?: false
 
-            if (prevIsDelivered == true && order.isDelivered == false) {
+            if (prevIsDelivered == true && order.delivered == false) {
                 it.update(
-                    this.valuesCol.document(FieldNames.ValuesCol.OrdersToDeliverDoc.SELF_NAME),
+                    this.valuesCol.document(FirestoreNames.ValuesDoc.ORDERS_TO_DELIVER),
                     mapOf(
-                        FieldNames.ValuesCol.OrdersToDeliverDoc.VALUE to FieldValue.increment(
+                        FirestoreNames.ValuesDoc.Fields.VALUE to FieldValue.increment(
                             1
                         )
                     )
                 )
-            } else if (prevIsDelivered == false && order.isDelivered == true) {
+            } else if (prevIsDelivered == false && order.delivered == true) {
                 it.update(
-                    this.valuesCol.document(FieldNames.ValuesCol.OrdersToDeliverDoc.SELF_NAME),
+                    this.valuesCol.document(FirestoreNames.ValuesDoc.ORDERS_TO_DELIVER),
                     mapOf(
-                        FieldNames.ValuesCol.OrdersToDeliverDoc.VALUE to FieldValue.increment(
+                        FirestoreNames.ValuesDoc.Fields.VALUE to FieldValue.increment(
                             -1
                         )
                     )
@@ -395,11 +390,11 @@ class CustomerRepository {
     fun deleteOrder(order: Order, onComplete: (Status, String) -> Unit) {
         this.usersCol.firestore.runTransaction {
             it.delete(ordersCol.document(order.id))
-            if (!order.isDelivered) {
+            if (!order.delivered) {
                 it.update(
-                    valuesCol.document(FieldNames.ValuesCol.OrdersToDeliverDoc.SELF_NAME),
+                    valuesCol.document(FirestoreNames.ValuesDoc.ORDERS_TO_DELIVER),
                     mapOf(
-                        FieldNames.ValuesCol.OrdersToDeliverDoc.VALUE to FieldValue.increment(
+                        FirestoreNames.ValuesDoc.Fields.VALUE to FieldValue.increment(
                             -1
                         )
                     )
@@ -416,23 +411,62 @@ class CustomerRepository {
 
     fun getOrdersToDeliver(onComplete: (Status, Number?, String) -> Unit) {
         this.helperRepository.getAnyValueFromValuesCol(
-            FieldNames.ValuesCol.OrdersToDeliverDoc.SELF_NAME,
+            FirestoreNames.ValuesDoc.ORDERS_TO_DELIVER,
             onComplete
         )
     }
 
     fun getNumberOfCustomers(onComplete: (Status, Number?, String) -> Unit) {
         this.helperRepository.getAnyValueFromValuesCol(
-            FieldNames.ValuesCol.CustomersCountDoc.SELF_NAME,
+            FirestoreNames.ValuesDoc.CUSTOMERS_COUNT,
             onComplete
         )
     }
 
     fun getReceivableAmountFromCustomers(onComplete: (Status, Number?, String) -> Unit) {
         this.helperRepository.getAnyValueFromValuesCol(
-            FieldNames.ValuesCol.ReceivableAmountFromCustomersDoc.SELF_NAME,
+            FirestoreNames.ValuesDoc.RECEIVABLE_AMOUNT_FROM_CUSTOMERS,
             onComplete
         )
+    }
+
+    fun getSalesAmountListByRange(
+        startTimestamp: Timestamp,
+        endTimestamp: Timestamp,
+        onComplete: (Status, List<Double>?, String) -> Unit
+    ) {
+        val query = this.ordersCol
+            .whereGreaterThanOrEqualTo(
+                Order::deliveryTimestamp.name,
+                startTimestamp
+            )
+            .whereLessThanOrEqualTo(
+                Order::deliveryTimestamp.name,
+                endTimestamp
+            )
+            .orderBy(Order::deliveryTimestamp.name, Query.Direction.ASCENDING)
+
+        query.get().addOnCompleteListener {
+            if (it.isSuccessful) {
+
+                val resultList = mutableListOf<Double>()
+
+                for (doc in it.result.documents) {
+                    if (doc.exists()) {
+                        val amount =
+                            Converters.numberToDouble(doc.get(Order::amount.name) as Number)
+                        resultList.add(amount)
+                    }
+                }
+                onComplete(
+                    Status.SUCCESS,
+                    resultList,
+                    KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                )
+            } else {
+                onComplete(Status.FAILED, null, it.exception?.message.toString())
+            }
+        }
     }
 
     fun getSalesAmountByRange(
@@ -441,16 +475,17 @@ class CustomerRepository {
         onComplete: (Status, Number?, String) -> Unit
     ) {
         val query = this.ordersCol
+            .whereEqualTo(
+                Order::delivered.name,
+                false
+            )
             .whereGreaterThanOrEqualTo(
-                FieldNames.OrdersCol.TIMESTAMP,
+                Order::timestamp.name,
                 startTimestamp
             )
             .whereLessThanOrEqualTo(
-                FieldNames.OrdersCol.TIMESTAMP,
+                Order::timestamp.name,
                 endTimestamp
-            ).whereEqualTo(
-                FieldNames.OrdersCol.IS_DELIVERED,
-                true
             ).aggregate(AggregateField.sum(Order::amount.name))
 
         query.get(AggregateSource.SERVER).addOnCompleteListener {

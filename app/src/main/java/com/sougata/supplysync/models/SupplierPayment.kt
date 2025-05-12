@@ -14,7 +14,10 @@ data class SupplierPayment(
     var note: String,
     var supplierId: String,
     var supplierName: String
-): Model, Parcelable {
+) : Model, Parcelable {
+
+    constructor() : this("", Timestamp.now(), 0.0, Timestamp.now(), "", "", "")
+
     override fun toMap(): Map<String, Any> {
         return mapOf(
             "id" to id,

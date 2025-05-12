@@ -13,6 +13,9 @@ data class User(
     var phone: String,
     var uid: String = ""
 ): Model, Parcelable {
+
+    constructor() : this("", Timestamp.now(), "", "", "", "")
+
     override fun toMap(): Map<String, Any> {
         return mapOf(
             "id" to id,
