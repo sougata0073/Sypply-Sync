@@ -20,10 +20,11 @@ class AddEditCustomerViewModel : ViewModel() {
     val dueOrders = MutableLiveData("")
     val note = MutableLiveData("")
 
-    val customerRepository = CustomerRepository()
+    private val customerRepository = CustomerRepository()
 
     val customerAddedIndicator = MutableLiveData<Pair<Status, String>>()
     val customerEditedIndicator = MutableLiveData<Pair<Status, String>>()
+    val customerDeletedIndicator = MutableLiveData<Pair<Status, String>>()
 
     var isCustomerAdded = false
     var isCustomerUpdated = false
@@ -59,6 +60,14 @@ class AddEditCustomerViewModel : ViewModel() {
         }
 
         return customer
+    }
+
+    fun deleteCustomer(customer: Customer) {
+        this.customerDeletedIndicator.value = Status.STARTED to ""
+
+        this.customerRepository.deleteCustomer(customer) { status, message ->
+            this.customerDeletedIndicator.value = status to message
+        }
     }
 
     private fun processCustomer(customerId: String, timeStamp: Timestamp): Customer {

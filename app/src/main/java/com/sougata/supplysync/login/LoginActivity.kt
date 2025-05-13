@@ -10,7 +10,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ActivityLogInBinding
 import com.sougata.supplysync.firestore.AuthRepository
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
+import com.sougata.supplysync.util.Messages
 import com.sougata.supplysync.util.Status
 
 class LoginActivity : AppCompatActivity() {
@@ -26,7 +27,7 @@ class LoginActivity : AppCompatActivity() {
 
         this._binding = DataBindingUtil.setContentView(this, R.layout.activity_log_in)
 
-        this.reasonToBeHere = intent.getStringExtra(KeysAndMessages.REASON).toString()
+        this.reasonToBeHere = intent.getStringExtra(Keys.REASON).toString()
 
         this.setupIfOnlyEmailIsNotVerified()
     }
@@ -38,7 +39,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setupIfOnlyEmailIsNotVerified() {
-        if (this.reasonToBeHere == KeysAndMessages.EMAIL_IS_NOT_VERIFIED) {
+        if (this.reasonToBeHere == Messages.EMAIL_IS_NOT_VERIFIED) {
 
             this.binding.main.alpha = 0.5f
             this.binding.progressBar.visibility = View.VISIBLE

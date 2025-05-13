@@ -24,6 +24,7 @@ class AddEditOrderedItemViewModel : ViewModel() {
 
     val orderedItemAddedIndicator = MutableLiveData<Pair<Status, String>>()
     val orderedItemEditedIndicator = MutableLiveData<Pair<Status, String>>()
+    val orderedItemDeletedIndicator = MutableLiveData<Pair<Status, String>>()
 
     fun addOrderedItem(
         itemId: String,
@@ -47,12 +48,12 @@ class AddEditOrderedItemViewModel : ViewModel() {
             return
         }
 
-        this.orderedItemAddedIndicator.postValue(Status.STARTED to "")
+        this.orderedItemAddedIndicator.value = Status.STARTED to ""
 
         this.supplierRepository.addOrderedItem(
             orderedItem
         ) { status, message ->
-            this.orderedItemAddedIndicator.postValue(status to message)
+            this.orderedItemAddedIndicator.value = status to message
         }
 
     }
@@ -80,15 +81,27 @@ class AddEditOrderedItemViewModel : ViewModel() {
             return null
         }
 
-        this.orderedItemEditedIndicator.postValue(Status.STARTED to "")
+        this.orderedItemEditedIndicator.value = Status.STARTED to ""
 
         this.supplierRepository.updateOrderedItem(
             orderedItem
         ) { status, message ->
-            this.orderedItemEditedIndicator.postValue(status to message)
+            this.orderedItemEditedIndicator.value = status to message
         }
 
         return orderedItem
+    }
+
+    fun deleteOrderedItem(
+        orderedItem: OrderedItem
+    ) {
+        this.orderedItemDeletedIndicator.value = Status.STARTED to ""
+        
+        this.supplierRepository.deleteOrderedItem(
+            orderedItem
+        ) { status, message ->
+            this.orderedItemDeletedIndicator.value = status to message
+        }
     }
 
 
@@ -119,7 +132,7 @@ class AddEditOrderedItemViewModel : ViewModel() {
         try {
             amount = amountString.toDouble()
         } catch (_: Exception) {
-            throw Exception("Invalid due amount")
+            throw Exception("Invalid amount")
         }
 
         try {

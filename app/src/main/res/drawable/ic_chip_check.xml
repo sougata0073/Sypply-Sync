@@ -3,11 +3,11 @@
     android:width="24dp"
     android:height="24dp"
     android:autoMirrored="true"
-    android:tint="@color/bw"
+    android:tint="@color/chip_check_selected"
     android:viewportWidth="24"
     android:viewportHeight="24">
     <path
-        android:fillColor="@color/bw"
+        android:fillColor="@color/chip_check_selected"
         android:pathData="M9.189,15.939l-3.127,-3.128l-1.061,1.061l4.189,4.189l9,-9l-1.061,-1.061z"
         android:strokeWidth="1"
         android:strokeColor="#00000000" />

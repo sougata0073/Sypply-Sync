@@ -14,7 +14,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentAddEditOrderedItemBinding
-import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.OrderedItem
 import com.sougata.supplysync.models.Supplier
@@ -22,7 +21,7 @@ import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.suppliers.viewmodels.AddEditOrderedItemViewModel
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.DateTime
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -47,13 +46,11 @@ class AddEditOrderedItemFragment : Fragment() {
     private var isOrderedItemUpdated = false
     private var isOrderedItemDeleted = false
 
-    private val supplierRepository = SupplierRepository()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        this.toAdd = requireArguments().getBoolean(KeysAndMessages.TO_ADD_KEY)
-        this.toEdit = requireArguments().getBoolean(KeysAndMessages.TO_EDIT_KEY)
+        this.toAdd = requireArguments().getBoolean(Keys.TO_ADD)
+        this.toEdit = requireArguments().getBoolean(Keys.TO_EDIT)
 
         if (this.toEdit) {
             this.prevOrderedItem = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -99,31 +96,31 @@ class AddEditOrderedItemFragment : Fragment() {
 
         if (this.isOrderedItemAdded) {
             val bundle = Bundle().apply {
-                putBoolean(KeysAndMessages.DATA_ADDED_KEY, isOrderedItemAdded)
+                putBoolean(Keys.DATA_ADDED, isOrderedItemAdded)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
+                Keys.RECENT_DATA_CHANGED_ADD_EDIT,
                 bundle
             )
         }
 
         if (this.isOrderedItemUpdated) {
             val bundle = Bundle().apply {
-                putParcelable(KeysAndMessages.DATA_UPDATED_KEY, updatedOrderedItem)
+                putParcelable(Keys.DATA_UPDATED, updatedOrderedItem)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
+                Keys.RECENT_DATA_CHANGED_ADD_EDIT,
                 bundle
             )
         }
 
         if (this.isOrderedItemDeleted) {
             val bundle = Bundle().apply {
-                putParcelable(KeysAndMessages.DATA_REMOVED_KEY, prevOrderedItem)
+                putParcelable(Keys.DATA_REMOVED, prevOrderedItem)
             }
 
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
+                Keys.RECENT_DATA_CHANGED_ADD_EDIT,
                 bundle
             )
         }
@@ -133,28 +130,127 @@ class AddEditOrderedItemFragment : Fragment() {
 
     private fun initializeUI() {
 
-        if (this.toAdd) {
-            this.binding.deleteBtn.visibility = View.INVISIBLE
+        if (this.toEdit) {
+            this.viewModel.apply {
+
+                amount.value = prevOrderedItem.amount.toString()
+                quantity.value = prevOrderedItem.quantity.toString()
+
+                val dateString = DateTime.getDateStringFromTimestamp(prevOrderedItem.timestamp)
+
+                date.value = dateString
+
+                itemName.value = "Item: ${prevOrderedItem.supplierItemName}"
+                supplierName.value = "Supplier: ${prevOrderedItem.supplierName}"
+                isReceived.value = prevOrderedItem.received
+            }
         }
 
+        this.setUpCalendarButton()
+        this.setUpDeleteButton()
+        this.setUpSaveButton()
+        this.setUpOpenItemsListButton()
+        this.setUpOpenSuppliersListButton()
+    }
+
+    private fun registerListeners() {
+        this.viewModel.orderedItemAddedIndicator.observe(this.viewLifecycleOwner) {
+            if (it.first == Status.SUCCESS) {
+                this.isOrderedItemAdded = true
+            }
+            observe(it, "Ordered item added successfully")
+        }
+        this.viewModel.orderedItemEditedIndicator.observe(this.viewLifecycleOwner) {
+            if (it.first == Status.SUCCESS) {
+                this.isOrderedItemUpdated = true
+            }
+            observe(it, "Ordered item updated successfully")
+        }
+        this.viewModel.orderedItemDeletedIndicator.observe(this.viewLifecycleOwner) {
+            if (it.first == Status.SUCCESS) {
+                this.isOrderedItemDeleted = true
+            }
+            observe(it, "Ordered item deleted successfully")
+        }
+        this.parentFragmentManager.setFragmentResultListener(
+            Keys.ITEM_SELECTED,
+            this
+        )
+        { requestKey, bundle ->
+            val model = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                bundle.getParcelable(
+                    Keys.MODEL,
+                    Model::class.java
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                bundle.getParcelable(Keys.MODEL)
+            }
+            if (model is SupplierItem) {
+                this.supplierItem = model
+                this.viewModel.itemName.value = "Item: ${supplierItem?.name}"
+            }
+            if (model is Supplier) {
+                this.supplier = model
+                this.viewModel.supplierName.value = "Supplier: ${supplier?.name}"
+            }
+        }
+    }
+
+    private fun setUpCalendarButton() {
+        this.binding.calendarBtn.setOnClickListener {
+            val datePicker =
+                MaterialDatePicker.Builder.datePicker()
+                    .setTitleText("Select date")
+                    .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                    .build()
+
+            datePicker.addOnPositiveButtonClickListener {
+                val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+                val selectedDate = dateFormat.format(Date(it))
+
+                this.viewModel.date.value = selectedDate
+            }
+            datePicker.show(this.parentFragmentManager, "datePicker")
+        }
+    }
+
+    private fun setUpDeleteButton() {
+        if (this.toAdd) {
+            this.binding.deleteBtn.visibility = View.INVISIBLE
+        } else if (this.toEdit) {
+            this.binding.deleteBtn.apply {
+                visibility = View.VISIBLE
+                setOnClickListener {
+                    MaterialAlertDialogBuilder(
+                        requireContext(),
+                        R.style.materialAlertDialogStyle
+                    ).setTitle("Warning")
+                        .setMessage("Are you sure you want to delete this item?")
+                        .setPositiveButton("Yes") { dialog, _ ->
+                            viewModel.deleteOrderedItem(prevOrderedItem)
+                        }
+                        .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+                        .show()
+                }
+            }
+        }
+    }
+
+    private fun setUpSaveButton() {
         this.binding.saveBtn.setOnClickListener {
             if (this.toAdd) {
-
                 val supplierItem = this.supplierItem
                 val supplier = this.supplier
 
                 if (supplierItem == null) {
-
                     Snackbar.make(
                         this.binding.root, "Select an item first", Snackbar.LENGTH_SHORT
                     ).show()
-
                 } else if (supplier == null) {
-
                     Snackbar.make(
                         this.binding.root, "Select a supplier first", Snackbar.LENGTH_SHORT
                     ).show()
-
                 } else {
                     this.viewModel.addOrderedItem(
                         supplierItem.id,
@@ -164,9 +260,7 @@ class AddEditOrderedItemFragment : Fragment() {
                         this.binding.root
                     )
                 }
-
             } else if (this.toEdit) {
-
                 val supplierItem = this.supplierItem
                 val supplier = this.supplier
 
@@ -182,12 +276,14 @@ class AddEditOrderedItemFragment : Fragment() {
                 )
             }
         }
+    }
 
+    private fun setUpOpenItemsListButton() {
         this.binding.openItemsListBtn.setOnClickListener {
 
             val bundle = Bundle().apply {
-                putString(KeysAndMessages.MODEL_NAME_KEY, Model.SUPPLIERS_ITEM)
-                putBoolean(KeysAndMessages.IS_SELECT_ONLY_KEY, true)
+                putString(Keys.MODEL_NAME, Model.SUPPLIER_ITEM)
+                putBoolean(Keys.SELECT_ONLY, true)
             }
 
             findNavController().navigate(
@@ -197,12 +293,14 @@ class AddEditOrderedItemFragment : Fragment() {
             )
 
         }
+    }
 
+    private fun setUpOpenSuppliersListButton() {
         this.binding.openSuppliersListBtn.setOnClickListener {
 
             val bundle = Bundle().apply {
-                putString(KeysAndMessages.MODEL_NAME_KEY, Model.SUPPLIER)
-                putBoolean(KeysAndMessages.IS_SELECT_ONLY_KEY, true)
+                putString(Keys.MODEL_NAME, Model.SUPPLIER)
+                putBoolean(Keys.SELECT_ONLY, true)
             }
 
             findNavController().navigate(
@@ -212,121 +310,9 @@ class AddEditOrderedItemFragment : Fragment() {
             )
 
         }
-
-        this.binding.calendarBtn.setOnClickListener {
-
-            val datePicker =
-                MaterialDatePicker.Builder.datePicker()
-                    .setTitleText("Select date")
-//                    .setTheme(R.style.materialDatePickerStyle)
-                    .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
-                    .build()
-
-            datePicker.addOnPositiveButtonClickListener {
-                val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-                val selectedDate = dateFormat.format(Date(it))
-
-                this.viewModel.date.value = selectedDate
-            }
-
-            datePicker.show(this.parentFragmentManager, "datePicker")
-
-        }
-
-        this.binding.deleteBtn.setOnClickListener {
-
-            MaterialAlertDialogBuilder(
-                requireContext(),
-                R.style.materialAlertDialogStyle
-            ).setTitle("Warning")
-                .setMessage("Are you sure you want to delete this item?")
-                .setPositiveButton("Yes") { dialog, _ ->
-
-                    this.binding.parentLayout.alpha = 0.5f
-                    this.binding.progressBar.visibility = View.VISIBLE
-
-                    this.supplierRepository.deleteOrderedItem(this.prevOrderedItem) { status, message ->
-
-                        Snackbar.make(
-                            requireParentFragment().requireView(),
-                            message,
-                            Snackbar.LENGTH_SHORT
-                        ).show()
-
-                        if (status == Status.SUCCESS) {
-
-                            this.isOrderedItemDeleted = true
-
-                            findNavController().popBackStack()
-
-                        } else if (status == Status.FAILED) {
-                            this.binding.parentLayout.alpha = 1f
-                            this.binding.progressBar.visibility = View.GONE
-                        }
-
-                    }
-                }
-                .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
-                .show()
-
-        }
-
-        if (this.toEdit) {
-            this.binding.deleteBtn.visibility = View.VISIBLE
-            this.viewModel.apply {
-
-                amount.value = prevOrderedItem.amount.toString()
-                quantity.value = prevOrderedItem.quantity.toString()
-
-                val dateString = DateTime.getDateStringFromTimestamp(prevOrderedItem.timestamp)
-
-                date.value = dateString
-
-                itemName.value = "Item: ${prevOrderedItem.supplierItemName}"
-                supplierName.value = "Supplier: ${prevOrderedItem.supplierName}"
-                isReceived.value = prevOrderedItem.received
-            }
-        }
     }
 
-    private fun registerListeners() {
-        this.viewModel.orderedItemAddedIndicator.observe(this.viewLifecycleOwner) {
-            howToObserve(it, "Ordered item added successfully")
-        }
-        this.viewModel.orderedItemEditedIndicator.observe(this.viewLifecycleOwner) {
-            howToObserve(it, "Ordered item updated successfully")
-        }
-
-        this.parentFragmentManager.setFragmentResultListener(
-            KeysAndMessages.ITEM_SELECTED_KEY,
-            this
-        )
-        { requestKey, bundle ->
-
-            val model = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                bundle.getParcelable(
-                    KeysAndMessages.MODEL_KEY,
-                    Model::class.java
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                bundle.getParcelable(KeysAndMessages.MODEL_KEY)
-            }
-
-            if (model is SupplierItem) {
-                this.supplierItem = model
-                this.viewModel.itemName.value = "Item: ${supplierItem?.name}"
-            }
-            if (model is Supplier) {
-                this.supplier = model
-                this.viewModel.supplierName.value = "Supplier: ${supplier?.name}"
-            }
-
-
-        }
-    }
-
-    private fun howToObserve(observedData: Pair<Status, String>, successMessage: String) {
+    private fun observe(observedData: Pair<Status, String>, successMessage: String) {
         if (observedData.first == Status.STARTED) {
 
             this.binding.apply {
@@ -344,17 +330,9 @@ class AddEditOrderedItemFragment : Fragment() {
                 Snackbar.LENGTH_SHORT
             ).show()
 
-            if (this.toAdd) {
-                this.isOrderedItemAdded = true
-            }
-            if (this.toEdit) {
-                this.isOrderedItemUpdated = true
-            }
-
             findNavController().popBackStack()
 
         } else if (observedData.first == Status.FAILED) {
-
             this.binding.apply {
 
                 saveBtn.isClickable = true
@@ -362,11 +340,9 @@ class AddEditOrderedItemFragment : Fragment() {
                 parentLayout.alpha = 1F
 
             }
-
             Snackbar.make(
                 requireParentFragment().requireView(), observedData.second, Snackbar.LENGTH_SHORT
             ).show()
-
         }
     }
 }

@@ -73,4 +73,14 @@
         android:name="com.sougata.supplysync.settings.ui.SettingsFragment"
         android:label="fragment_settings"
         tools:layout="@layout/fragment_settings"/>
+    <fragment
+        android:id="@+id/addEditCustomerPaymentFragment"
+        android:name="com.sougata.supplysync.customers.ui.AddEditCustomerPaymentFragment"
+        android:label="fragment_add_edit_customer_payment"
+        tools:layout="@layout/fragment_add_edit_customer_payment"/>
+    <fragment
+        android:id="@+id/addEditOrderFragment"
+        android:name="com.sougata.supplysync.customers.ui.AddEditOrderFragment"
+        android:label="fragment_add_edit_order"
+        tools:layout="@layout/fragment_add_edit_order"/>
 </navigation>

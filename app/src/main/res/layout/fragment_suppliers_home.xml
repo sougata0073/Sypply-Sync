@@ -50,14 +50,24 @@
                     app:layout_constraintTop_toTopOf="@id/ordersToReceive" />
 
                 <include
-                    android:id="@+id/dueToSuppliers"
-                    layout="@layout/value_representer_big"
+                    android:id="@+id/purchase"
+                    layout="@layout/value_representer_big_date_range"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     app:layout_constraintEnd_toEndOf="@id/numberOfSuppliers"
                     app:layout_constraintStart_toStartOf="@id/ordersToReceive"
-                    app:layout_constraintTop_toBottomOf="@id/ordersToReceive" />
+                    app:layout_constraintTop_toBottomOf="@id/numberOfSuppliers" />
+
+                <include
+                    android:id="@+id/dueToSuppliers"
+                    layout="@layout/value_representer_big"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintEnd_toEndOf="@id/purchase"
+                    app:layout_constraintStart_toStartOf="@id/purchase"
+                    app:layout_constraintTop_toBottomOf="@id/purchase" />
 
                 <LinearLayout
                     android:id="@+id/buttonsLayout"

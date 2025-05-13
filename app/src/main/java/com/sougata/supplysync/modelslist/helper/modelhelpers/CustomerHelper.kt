@@ -14,13 +14,12 @@ import com.sougata.supplysync.R
 import com.sougata.supplysync.customers.ui.CustomerProfileBottomSheetFragment
 import com.sougata.supplysync.databinding.ItemCustomerBinding
 import com.sougata.supplysync.firestore.CustomerRepository
-import com.sougata.supplysync.firestore.util.FirestoreNames
 import com.sougata.supplysync.models.Customer
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.modelslist.helper.ModelHelper
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.FirestoreFieldDataType
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 
 class CustomerHelper(
@@ -72,7 +71,7 @@ class CustomerHelper(
     override fun getFabClickHandler(): () -> Unit {
         return {
             val bundle = Bundle().apply {
-                putBoolean(KeysAndMessages.TO_ADD_KEY, true)
+                putBoolean(Keys.TO_ADD, true)
             }
             this.fragment.findNavController().navigate(
                 R.id.addEditCustomerFragment, bundle, AnimationProvider.slideRightLeftNavOptions()

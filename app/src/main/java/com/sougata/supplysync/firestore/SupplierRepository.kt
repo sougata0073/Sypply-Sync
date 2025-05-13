@@ -18,8 +18,9 @@ import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.models.SupplierPayment
 import com.sougata.supplysync.models.User
 import com.sougata.supplysync.util.Converters
+import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.FirestoreFieldDataType
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Messages
 import com.sougata.supplysync.util.Status
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -209,7 +210,7 @@ class SupplierRepository {
             )
         }.addOnCompleteListener {
             if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
@@ -237,7 +238,7 @@ class SupplierRepository {
             )
         }.addOnCompleteListener {
             if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
@@ -285,7 +286,7 @@ class SupplierRepository {
             )
         }.addOnCompleteListener {
             if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
@@ -296,7 +297,7 @@ class SupplierRepository {
         this.supplierItemsCol.document(supplierItem.id).update(supplierItem.toMap())
             .addOnCompleteListener {
                 if (it.isSuccessful) {
-                    onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                    onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
                 } else {
                     onComplete(Status.FAILED, it.exception?.message.toString())
                 }
@@ -331,7 +332,7 @@ class SupplierRepository {
         this.supplierPaymentsCol.document(supplierPayment.id).set(supplierPayment)
             .addOnCompleteListener {
                 if (it.isSuccessful) {
-                    onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                    onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
                 } else {
                     onComplete(Status.FAILED, it.exception?.message.toString())
                 }
@@ -345,7 +346,7 @@ class SupplierRepository {
         this.supplierPaymentsCol.document(supplierPayment.id)
             .update(supplierPayment.toMap()).addOnCompleteListener {
                 if (it.isSuccessful) {
-                    onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                    onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
                 } else {
                     onComplete(Status.FAILED, it.exception?.message.toString())
                 }
@@ -383,7 +384,7 @@ class SupplierRepository {
             }
         }.addOnCompleteListener {
             if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
@@ -422,7 +423,7 @@ class SupplierRepository {
             it.update(orderedItemsCol.document(orderedItem.id), orderedItem.toMap())
         }.addOnCompleteListener {
             if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
@@ -501,7 +502,48 @@ class SupplierRepository {
                 onComplete(
                     Status.SUCCESS,
                     resultList,
-                    KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                    Messages.TASK_COMPLETED_SUCCESSFULLY
+                )
+            } else {
+                onComplete(Status.FAILED, null, it.exception?.message.toString())
+            }
+        }
+    }
+
+    fun getPurchaseAmountListByRange2(
+        startTimestamp: Timestamp,
+        endTimestamp: Timestamp,
+        onComplete: (Status, List<Pair<Double, String>>?, String) -> Unit
+    ) {
+        val query = this.orderedItemsCol
+            .whereGreaterThanOrEqualTo(
+                OrderedItem::orderTimestamp.name,
+                startTimestamp
+            )
+            .whereLessThanOrEqualTo(
+                OrderedItem::orderTimestamp.name,
+                endTimestamp
+            )
+            .orderBy(OrderedItem::orderTimestamp.name, Query.Direction.ASCENDING)
+
+        query.get().addOnCompleteListener {
+
+            if (it.isSuccessful) {
+                val resultList = mutableListOf<Pair<Double, String>>()
+
+                for (doc in it.result.documents) {
+                    if (doc.exists()) {
+                        val amount =
+                            Converters.numberToDouble(doc.get(OrderedItem::amount.name) as Number)
+                        val date =
+                            DateTime.getDateStringFromTimestamp(doc.get(OrderedItem::orderTimestamp.name) as Timestamp)
+                        resultList.add(amount to date)
+                    }
+                }
+                onComplete(
+                    Status.SUCCESS,
+                    resultList,
+                    Messages.TASK_COMPLETED_SUCCESSFULLY
                 )
             } else {
                 onComplete(Status.FAILED, null, it.exception?.message.toString())
@@ -538,7 +580,7 @@ class SupplierRepository {
                 onComplete(
                     Status.SUCCESS,
                     map.toList(),
-                    KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                    Messages.TASK_COMPLETED_SUCCESSFULLY
                 )
             } else {
                 onComplete(Status.FAILED, null, it.exception?.message.toString())
@@ -582,7 +624,7 @@ class SupplierRepository {
                 onComplete(
                     Status.SUCCESS,
                     resultList,
-                    KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                    Messages.TASK_COMPLETED_SUCCESSFULLY
                 )
             } else {
                 onComplete(Status.FAILED, null, it.exception?.message.toString())
@@ -621,7 +663,7 @@ class SupplierRepository {
                 onComplete(
                     Status.SUCCESS,
                     resultList,
-                    KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                    Messages.TASK_COMPLETED_SUCCESSFULLY
                 )
             } else {
                 onComplete(Status.FAILED, null, it.exception?.message.toString())
@@ -679,10 +721,10 @@ class SupplierRepository {
                     onComplete(
                         Status.SUCCESS,
                         Converters.numberToDouble(sum),
-                        KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                        Messages.TASK_COMPLETED_SUCCESSFULLY
                     )
                 } else {
-                    onComplete(Status.FAILED, null, KeysAndMessages.TASK_FAILED_TO_COMPLETE)
+                    onComplete(Status.FAILED, null, Messages.TASK_FAILED_TO_COMPLETE)
                 }
             } else {
                 onComplete(Status.FAILED, null, it.exception?.message.toString())

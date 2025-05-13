@@ -23,6 +23,7 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
 
     val supplierPaymentAddedIndicator = MutableLiveData<Pair<Status, String>>()
     val supplierPaymentEditedIndicator = MutableLiveData<Pair<Status, String>>()
+    val supplierPaymentDeletedIndicator = MutableLiveData<Pair<Status, String>>()
 
     fun addSupplierPayment(supplierId: String, supplierName: String, view: View) {
 
@@ -38,12 +39,12 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
             return
         }
 
-        this.supplierPaymentAddedIndicator.postValue(Status.STARTED to "")
+        this.supplierPaymentAddedIndicator.value = Status.STARTED to ""
 
         this.supplierRepository.addSupplierPayment(
             supplierPayment
         ) { status, message ->
-            this.supplierPaymentAddedIndicator.postValue(status to message)
+            this.supplierPaymentAddedIndicator.value = status to message
         }
 
     }
@@ -62,15 +63,23 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
             return null
         }
 
-        this.supplierPaymentEditedIndicator.postValue(Status.STARTED to "")
+        this.supplierPaymentEditedIndicator.value = Status.STARTED to ""
 
         this.supplierRepository.updateSupplierPayment(
             supplierPayment
         ) { status, message ->
-            this.supplierPaymentEditedIndicator.postValue(status to message)
+            this.supplierPaymentEditedIndicator.value = status to message
         }
 
         return supplierPayment
+    }
+    
+    fun deleteSupplierPayment(supplierPayment: SupplierPayment) {
+        this.supplierPaymentDeletedIndicator.value = Status.STARTED to ""
+
+        this.supplierRepository.deleteSupplierPayment(supplierPayment) { status, message ->
+            this.supplierPaymentDeletedIndicator.value = status to message
+        }
     }
 
     private fun processSupplerPayment(
@@ -93,7 +102,7 @@ class AddEditSupplierPaymentViewModel : ViewModel() {
         try {
             amount = amountString.toDouble()
         } catch (_: Exception) {
-            throw Exception("Invalid due amount")
+            throw Exception("Invalid amount")
         }
 
         var paymentTimestamp: Timestamp

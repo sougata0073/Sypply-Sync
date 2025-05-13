@@ -12,7 +12,7 @@ interface Model {
     companion object {
         const val SUPPLIER = "Supplier"
         const val USER = "User"
-        const val SUPPLIERS_ITEM = "Supplier item"
+        const val SUPPLIER_ITEM = "Supplier item"
         const val SUPPLIER_PAYMENT = "Supplier payment"
         const val ORDERED_ITEM = "Ordered item"
         const val CUSTOMER = "Customer"

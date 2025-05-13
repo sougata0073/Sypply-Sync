@@ -9,7 +9,7 @@ import com.sougata.supplysync.R
 import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.util.AnimationProvider
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 
 class SuppliersHomeViewModel : ViewModel() {
@@ -58,7 +58,7 @@ class SuppliersHomeViewModel : ViewModel() {
     fun onSuppliersListClick(view: View) {
 
         val bundle = Bundle().apply {
-            putString(KeysAndMessages.MODEL_NAME_KEY, Model.SUPPLIER)
+            putString(Keys.MODEL_NAME, Model.SUPPLIER)
         }
 
         view.findNavController()
@@ -68,7 +68,7 @@ class SuppliersHomeViewModel : ViewModel() {
     fun onItemsListClick(view: View) {
 
         val bundle = Bundle().apply {
-            putString(KeysAndMessages.MODEL_NAME_KEY, Model.SUPPLIERS_ITEM)
+            putString(Keys.MODEL_NAME, Model.SUPPLIER_ITEM)
         }
 
         view.findNavController()
@@ -82,7 +82,7 @@ class SuppliersHomeViewModel : ViewModel() {
     fun onPaymentsListClick(view: View) {
 
         val bundle = Bundle().apply {
-            putString(KeysAndMessages.MODEL_NAME_KEY, Model.SUPPLIER_PAYMENT)
+            putString(Keys.MODEL_NAME, Model.SUPPLIER_PAYMENT)
         }
 
         view.findNavController()
@@ -95,7 +95,7 @@ class SuppliersHomeViewModel : ViewModel() {
 
     fun onOrderedItemsClick(view: View) {
         val bundle = Bundle().apply {
-            putString(KeysAndMessages.MODEL_NAME_KEY, Model.ORDERED_ITEM)
+            putString(Keys.MODEL_NAME, Model.ORDERED_ITEM)
         }
 
         view.findNavController()

@@ -1,5 +1,6 @@
 package com.sougata.supplysync.modelslist.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -30,8 +31,13 @@ class ModelsListViewModel(private val helper: ModelsListHelper) : ViewModel() {
     var lastDocSearch: DocumentSnapshot? = null
 
     var prevSearchQuery = ""
+
     var prevSearchField = ""
     var prevQueryDataType = FirestoreFieldDataType.STRING
+
+    var currSearchField: String? = null
+    var currQueryDataType: FirestoreFieldDataType? = null
+    var currSelectedChipIndexSearch: Int? = null
 
     // Clean
     val itemsList = MutableLiveData<Pair<List<Model>, Status>>()
@@ -58,6 +64,8 @@ class ModelsListViewModel(private val helper: ModelsListHelper) : ViewModel() {
 
     val loadFullListOnNewModelAdded = this.helper.getLoadFullListOnNewModelAdded()
 
+
+    var currSelectedChipIndexFilter: Int? = null
 
     init {
         this.viewModelScope.launch {
@@ -157,9 +165,6 @@ class ModelsListViewModel(private val helper: ModelsListHelper) : ViewModel() {
     }
 
     fun closeSearch() {
-        if (!this.isSearchActive) {
-            return
-        }
 
         this.isFirstTimeListLoadSearch = true
         this.isSearchActive = false
@@ -348,20 +353,6 @@ class ModelsListViewModel(private val helper: ModelsListHelper) : ViewModel() {
     }
 
     fun loadLastAddedModel() {
-        if (this.isSearchActive) {
-            if (this.loadFullListOnNewModelAdded) {
-                this.isFirstTimeListLoadSearch = true
-                this.noMoreItemSearch = false
-                this.lastDocSearch = null
-                this.itemsListSearch = null
-                this.itemsList.value = Pair(mutableListOf(), Status.NO_CHANGE)
-            }
-            this.loadItemsListSearch(
-                this.prevSearchField,
-                this.prevSearchQuery,
-                this.prevQueryDataType
-            )
-        }
         if (this.loadFullListOnNewModelAdded) {
             this.isFirstTimeListLoadNormal = true
             this.noMoreItemNormal = false

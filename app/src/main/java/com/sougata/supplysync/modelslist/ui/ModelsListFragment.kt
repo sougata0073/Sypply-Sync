@@ -23,13 +23,13 @@ import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentModelsListBinding
 import com.sougata.supplysync.models.Model
-import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.modelslist.helper.ModelsListHelper
 import com.sougata.supplysync.modelslist.viewmodels.ModelsListViewModel
 import com.sougata.supplysync.modelslist.viewmodels.ModelsListViewModelFactory
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.FirestoreFieldDataType
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
+import com.sougata.supplysync.util.Messages
 import com.sougata.supplysync.util.Status
 
 class ModelsListFragment : Fragment() {
@@ -50,10 +50,10 @@ class ModelsListFragment : Fragment() {
         if (this.isSelectOnly) {
             view.setOnClickListener {
                 val bundle = Bundle().apply {
-                    putParcelable(KeysAndMessages.MODEL_KEY, model as Parcelable)
+                    putParcelable(Keys.MODEL, model as Parcelable)
                 }
                 this.parentFragmentManager.setFragmentResult(
-                    KeysAndMessages.ITEM_SELECTED_KEY,
+                    Keys.ITEM_SELECTED,
                     bundle
                 )
                 this.findNavController().popBackStack()
@@ -77,19 +77,18 @@ class ModelsListFragment : Fragment() {
 
     private lateinit var searchViewEditText: EditText
 
-    private var searchField: String? = null
-    private var currentQueryDataType: FirestoreFieldDataType? = null
-
     private val loadListAgain = MutableLiveData(false)
 
     private lateinit var fieldsListSearch: Array<Triple<String, String, FirestoreFieldDataType>>
     private lateinit var fieldsListFilter: Array<Pair<String, (Model) -> Boolean>>
 
+    private lateinit var fabAnimator: AnimationProvider
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        this.modelName = requireArguments().getString(KeysAndMessages.MODEL_NAME_KEY)!!
-        this.isSelectOnly = requireArguments().getBoolean(KeysAndMessages.IS_SELECT_ONLY_KEY)
+        this.modelName = requireArguments().getString(Keys.MODEL_NAME)!!
+        this.isSelectOnly = requireArguments().getBoolean(Keys.SELECT_ONLY)
 
     }
 
@@ -122,12 +121,12 @@ class ModelsListFragment : Fragment() {
 
         val bundle = Bundle().apply {
             putBoolean(
-                KeysAndMessages.DATA_ADDED_KEY,
+                Keys.DATA_ADDED,
                 viewModel.isModelAdded || viewModel.isModelUpdated || viewModel.isModelRemoved
             )
         }
         this.parentFragmentManager.setFragmentResult(
-            KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+            Keys.RECENT_DATA_CHANGED,
             bundle
         )
 
@@ -136,6 +135,7 @@ class ModelsListFragment : Fragment() {
 
 
     private fun initializeUI() {
+        this.setUpSearchView()
 
         if (this.viewModel.isSearchClicked) {
             this.loadChipsSearch()
@@ -149,7 +149,6 @@ class ModelsListFragment : Fragment() {
 
         this.setUpFab()
 
-        this.setUpSearchView()
     }
 
     private fun registerSubscribers() {
@@ -176,19 +175,6 @@ class ModelsListFragment : Fragment() {
             } else if (it.second == Status.SUCCESS) {
                 this.binding.progressBar.visibility = View.GONE
 
-                Log.d("TAG3", this.viewModel.isModelRemoved.toString())
-
-                var s = ""
-                for (item in it.first) {
-                    try {
-                        item as Supplier
-                        s += item.name + "  "
-                    } catch (_: Exception) {
-                        Log.d("TAG", item.toString())
-                    }
-                }
-//                Log.d("list", s)
-
                 this.recyclerViewAdapter.setItems(it.first)
 
                 if (recyclerViewAdapter.itemCount == 0) {
@@ -200,7 +186,7 @@ class ModelsListFragment : Fragment() {
             } else if (it.second == Status.FAILED) {
                 Snackbar.make(
                     requireView(),
-                    KeysAndMessages.SOMETHING_WENT_WRONG,
+                    Messages.SOMETHING_WENT_WRONG,
                     Snackbar.LENGTH_SHORT
                 ).show()
             }
@@ -225,17 +211,16 @@ class ModelsListFragment : Fragment() {
 
         this.binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
 
-            private val fabAnimator = AnimationProvider(binding.fab)
             private val layoutManager = binding.recyclerView.layoutManager as LinearLayoutManager
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
 
-                if (!isSelectOnly) {
+                if (!isSelectOnly && !viewModel.isSearchClicked) {
                     if (dy > 0) { // When scroll up
-                        this.fabAnimator.slideDownFadeForScroll()
+                        fabAnimator.slideDownFadeForScroll()
                     } else if (dy < 0) { // When scroll down
-                        this.fabAnimator.slideUpFadeForScroll()
+                        fabAnimator.slideUpFadeForScroll()
                     }
                 }
 
@@ -256,6 +241,7 @@ class ModelsListFragment : Fragment() {
     }
 
     private fun setUpFab() {
+        this.fabAnimator = AnimationProvider(this.binding.fab)
         if (this.isSelectOnly) {
             this.binding.fab.visibility = View.GONE
         } else {
@@ -278,8 +264,8 @@ class ModelsListFragment : Fragment() {
             setOnQueryTextListener(
                 object : SearchView.OnQueryTextListener {
                     override fun onQueryTextSubmit(query: String?): Boolean {
-                        val field = searchField
-                        val dataType = currentQueryDataType
+                        val field = viewModel.currSearchField
+                        val dataType = viewModel.currQueryDataType
                         if (field != null && dataType != null) {
                             viewModel.loadItemsList(Triple(field, query.orEmpty(), dataType))
                         } else {
@@ -302,8 +288,9 @@ class ModelsListFragment : Fragment() {
             )
 
             setOnCloseListener {
-                searchField = null
-                currentQueryDataType = null
+                viewModel.currSearchField = null
+                viewModel.currQueryDataType = null
+                viewModel.currSelectedChipIndexSearch = null
 
                 closeSearch()
 
@@ -314,23 +301,23 @@ class ModelsListFragment : Fragment() {
 
     private fun registerFragmentResultListener() {
         this.parentFragmentManager.setFragmentResultListener(
-            KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT, this.viewLifecycleOwner
+            Keys.RECENT_DATA_CHANGED_ADD_EDIT, this.viewLifecycleOwner
         ) { requestKey, bundle ->
 
-            this.viewModel.isModelAdded = bundle.getBoolean(KeysAndMessages.DATA_ADDED_KEY)
+            this.viewModel.isModelAdded = bundle.getBoolean(Keys.DATA_ADDED)
 
             val removedModel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                bundle.getParcelable(KeysAndMessages.DATA_REMOVED_KEY, Model::class.java)
+                bundle.getParcelable(Keys.DATA_REMOVED, Model::class.java)
             } else {
                 @Suppress("DEPRECATION")
-                bundle.getParcelable(KeysAndMessages.DATA_REMOVED_KEY)
+                bundle.getParcelable(Keys.DATA_REMOVED)
             }
 
             val updatedModel = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                bundle.getParcelable(KeysAndMessages.DATA_UPDATED_KEY, Model::class.java)
+                bundle.getParcelable(Keys.DATA_UPDATED, Model::class.java)
             } else {
                 @Suppress("DEPRECATION")
-                bundle.getParcelable(KeysAndMessages.DATA_UPDATED_KEY)
+                bundle.getParcelable(Keys.DATA_UPDATED)
             }
 
             if (this.viewModel.isModelAdded) {
@@ -389,25 +376,44 @@ class ModelsListFragment : Fragment() {
 
         this.binding.chipGroup.addView(this.getDecoratedMarkerChip("Search by"))
 
-        for (field in this.helper.getSearchableFieldPairs()) {
+        for ((i, field) in this.fieldsListSearch.withIndex()) {
             val chip = this.getDecoratedChip(field.second)
 
             chip.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
-                    searchField = field.first
-                    currentQueryDataType = field.third
-                    searchViewEditText.text.clear()
+                    chip.apply {
+                        chipBackgroundColor =
+                            requireContext().getColorStateList(R.color.chip_bg_selected)
+                        setTextColor(requireContext().getColor(R.color.chip_text_selected))
+                    }
 
-                    if (currentQueryDataType == FirestoreFieldDataType.NUMBER) {
-                        searchViewEditText.inputType = InputType.TYPE_CLASS_NUMBER
+                    this.viewModel.currSearchField = field.first
+                    this.viewModel.currQueryDataType = field.third
+                    this.viewModel.currSelectedChipIndexSearch = i
+                    this.searchViewEditText.text.clear()
+
+                    if (this.viewModel.currQueryDataType == FirestoreFieldDataType.NUMBER) {
+                        this.searchViewEditText.inputType = InputType.TYPE_CLASS_NUMBER
                     } else {
-                        searchViewEditText.inputType = InputType.TYPE_CLASS_TEXT
+                        this.searchViewEditText.inputType = InputType.TYPE_CLASS_TEXT
                     }
                 } else {
-                    searchField = null
-                    currentQueryDataType = null
+                    chip.apply {
+                        chipBackgroundColor =
+                            requireContext().getColorStateList(R.color.active_non_active_button_color)
+                        setTextColor(requireContext().getColor(R.color.bw))
+                    }
+
+                    this.viewModel.currSearchField = null
+                    this.viewModel.currQueryDataType = null
+                    this.viewModel.currSelectedChipIndexSearch = null
                 }
             }
+
+            if (this.viewModel.currSelectedChipIndexSearch != null && i == this.viewModel.currSelectedChipIndexSearch) {
+                chip.isChecked = true
+            }
+
             this.binding.chipGroup.addView(chip)
         }
     }
@@ -420,16 +426,37 @@ class ModelsListFragment : Fragment() {
 
         this.binding.chipGroup.addView(this.getDecoratedMarkerChip("Filters"))
 
-        for (field in this.helper.getFilterableFields()) {
+        for ((i, field) in this.fieldsListFilter.withIndex()) {
             val chip = this.getDecoratedChip(field.first)
 
             chip.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
+                    chip.apply {
+                        chipBackgroundColor =
+                            requireContext().getColorStateList(R.color.chip_bg_selected)
+                        setTextColor(requireContext().getColor(R.color.chip_text_selected))
+                    }
+
+                    this.viewModel.currSelectedChipIndexFilter = i
+
                     viewModel.activateFilter { field.second(it) }
                 } else {
+                    chip.apply {
+                        chipBackgroundColor =
+                            requireContext().getColorStateList(R.color.active_non_active_button_color)
+                        setTextColor(requireContext().getColor(R.color.bw))
+                    }
+
+                    this.viewModel.currSelectedChipIndexFilter = null
+
                     viewModel.closeFilter()
                 }
             }
+
+            if (this.viewModel.currSelectedChipIndexFilter != null && this.viewModel.currSelectedChipIndexFilter == i) {
+                chip.isChecked = true
+            }
+
             this.binding.chipGroup.addView(chip)
         }
     }
@@ -439,6 +466,7 @@ class ModelsListFragment : Fragment() {
     }
 
     private fun activateSearchClick() {
+        this.fabAnimator.slideDownFadeForScroll()
         this.viewModel.activateSearchClick()
         this.removeAllChips()
         this.loadChipsSearch()
@@ -449,6 +477,7 @@ class ModelsListFragment : Fragment() {
     }
 
     private fun closeSearch() {
+        this.fabAnimator.slideUpFadeForScroll()
         this.viewModel.closeSearch()
         this.removeAllChips()
         this.loadChipsFilter()

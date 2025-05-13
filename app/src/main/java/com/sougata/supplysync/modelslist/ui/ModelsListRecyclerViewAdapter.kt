@@ -106,7 +106,7 @@ class ModelsListRecyclerViewAdapter(
         val newItemsCount = abs(this.prevLoadedItemCount - newItemsList.size)
         this.prevLoadedItemCount = newItemsList.size
 
-        if(newItemsCount < 10) {
+        if(newItemsCount < 10 && newItemsCount != 0) {
             this.loadListAgain.value = true
         } else {
             this.loadListAgain.value = false

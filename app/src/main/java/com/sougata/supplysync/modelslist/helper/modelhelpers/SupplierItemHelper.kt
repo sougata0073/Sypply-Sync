@@ -11,7 +11,6 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ItemSupplierItemBinding
 import com.sougata.supplysync.firestore.SupplierRepository
-import com.sougata.supplysync.firestore.util.FirestoreNames
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.modelslist.helper.ModelHelper
@@ -19,7 +18,7 @@ import com.sougata.supplysync.suppliers.ui.AddEditSupplierItemBottomSheetFragmen
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.FirestoreFieldDataType
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 
 class SupplierItemHelper(
@@ -61,14 +60,11 @@ class SupplierItemHelper(
 
     override fun getFabClickHandler(): () -> Unit {
         return {
-            val bundle = Bundle().apply {
-                putBoolean(KeysAndMessages.TO_ADD_KEY, true)
-            }
-            this.fragment.findNavController().navigate(
-                R.id.addEditSupplierPaymentFragment,
-                bundle,
-                AnimationProvider.slideRightLeftNavOptions()
+            AddEditSupplierItemBottomSheetFragment.Companion.getInstance(
+                null,
+                Keys.TO_ADD
             )
+                .show(this@SupplierItemHelper.fragmentManager, "supplierItemAdd")
         }
     }
 
@@ -84,21 +80,26 @@ class SupplierItemHelper(
             details.text = model.details
             price.text = Converters.numberToMoneyString(model.price)
 
+            val message = """
+                Name: ${model.name}
+                Price: ${Converters.numberToMoneyString(model.price)}
+                Details: ${model.details}
+            """.trimIndent()
+
             root.setOnClickListener {
                 MaterialAlertDialogBuilder(
                     this@SupplierItemHelper.context,
                     R.style.materialAlertDialogStyle
                 )
-                    .setTitle(model.name)
-                    .setMessage(model.details)
+                    .setMessage(message)
                     .setPositiveButton("Close") { dialog, _ -> dialog.dismiss() }
                     .setNeutralButton("Edit") { dialog, _ ->
 
                         AddEditSupplierItemBottomSheetFragment.Companion.getInstance(
                             model,
-                            KeysAndMessages.TO_EDIT_KEY
+                            Keys.TO_EDIT
                         )
-                            .show(this@SupplierItemHelper.fragmentManager, "supplierItemAdd")
+                            .show(this@SupplierItemHelper.fragmentManager, "supplierItemEdit")
 
                     }.show()
             }

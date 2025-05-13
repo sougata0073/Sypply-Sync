@@ -8,7 +8,8 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.sougata.supplysync.login.LoginActivity
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
+import com.sougata.supplysync.util.Messages
 
 class AuthVerificationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +23,7 @@ class AuthVerificationActivity : AppCompatActivity() {
         if (currentUser == null) {
 
             val bundle = Bundle().apply {
-                putString(KeysAndMessages.REASON, KeysAndMessages.USER_NOT_FOUND)
+                putString(Keys.REASON, Messages.USER_NOT_FOUND)
             }
 
             startActivity(Intent(this, LoginActivity::class.java), bundle)
@@ -31,7 +32,7 @@ class AuthVerificationActivity : AppCompatActivity() {
         } else if (!currentUser.isEmailVerified) {
 
             val bundle = Bundle().apply {
-                putString(KeysAndMessages.REASON, KeysAndMessages.EMAIL_IS_NOT_VERIFIED)
+                putString(Keys.REASON, Messages.EMAIL_IS_NOT_VERIFIED)
             }
 
             val intent = Intent(this, LoginActivity::class.java).apply {

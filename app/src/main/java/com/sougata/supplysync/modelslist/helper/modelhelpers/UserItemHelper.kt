@@ -4,8 +4,10 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
+import com.sougata.supplysync.customers.ui.AddEditUserItemBottomSheetFragment
 import com.sougata.supplysync.databinding.ItemUserItemBinding
 import com.sougata.supplysync.firestore.CustomerRepository
 import com.sougata.supplysync.models.Model
@@ -13,6 +15,7 @@ import com.sougata.supplysync.models.UserItem
 import com.sougata.supplysync.modelslist.helper.ModelHelper
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.FirestoreFieldDataType
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 
 class UserItemHelper(
@@ -51,7 +54,13 @@ class UserItemHelper(
     }
 
     override fun getFabClickHandler(): () -> Unit {
-        TODO("Not yet implemented")
+        return {
+            AddEditUserItemBottomSheetFragment.Companion.getInstance(
+                null,
+                Keys.TO_ADD
+            )
+                .show(this@UserItemHelper.fragmentManager, "userItemAdd")
+        }
     }
 
     override fun bind(
@@ -64,6 +73,8 @@ class UserItemHelper(
         binding.apply {
 
             name.text = model.name
+            details.text = model.details
+            price.text = Converters.numberToMoneyString(model.price)
 
             if (model.inStock > 0) {
                 inStock.text = "In stock: ${model.inStock}"
@@ -73,13 +84,30 @@ class UserItemHelper(
                 inStock.setTextColor(this@UserItemHelper.context.getColor(R.color.red))
             }
 
-            details.text = model.details
-            price.text = Converters.numberToMoneyString(model.price)
+            val message = """
+                Name: ${model.name}
+                ${if (model.inStock > 0) "In stock: ${model.inStock}" else "Out of stock"}
+                Price: ${Converters.numberToMoneyString(model.price)}
+                Details: ${model.details}
+            """.trimIndent()
 
             root.setOnClickListener {
+                MaterialAlertDialogBuilder(
+                    this@UserItemHelper.context,
+                    R.style.materialAlertDialogStyle
+                )
+                    .setMessage(message)
+                    .setPositiveButton("Close") { dialog, _ -> dialog.dismiss() }
+                    .setNeutralButton("Edit") { dialog, _ ->
 
+                        AddEditUserItemBottomSheetFragment.Companion.getInstance(
+                            model,
+                            Keys.TO_EDIT
+                        )
+                            .show(this@UserItemHelper.fragmentManager, "userItemEdit")
+
+                    }.show()
             }
-
         }
     }
 

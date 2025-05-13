@@ -1,9 +1,12 @@
 package com.sougata.supplysync.modelslist.helper.modelhelpers
 
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ItemOrderBinding
@@ -11,9 +14,12 @@ import com.sougata.supplysync.firestore.CustomerRepository
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.Order
 import com.sougata.supplysync.modelslist.helper.ModelHelper
+import com.sougata.supplysync.modelslist.helper.modelhelpers.OrderedItemHelper
+import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.FirestoreFieldDataType
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 
 class OrderHelper(
@@ -70,7 +76,16 @@ class OrderHelper(
     }
 
     override fun getFabClickHandler(): () -> Unit {
-        TODO("Not yet implemented")
+        return {
+            val bundle = Bundle().apply {
+                putBoolean(Keys.TO_ADD, true)
+            }
+            this.fragment.findNavController().navigate(
+                R.id.addEditOrderFragment,
+                bundle,
+                AnimationProvider.slideRightLeftNavOptions()
+            )
+        }
     }
 
     override fun bind(
@@ -94,8 +109,35 @@ class OrderHelper(
                 deliveryStatus.setTextColor(this@OrderHelper.context.getColor(R.color.red))
             }
 
-            root.setOnClickListener {
+            val message = """
+                Item name: ${model.userItemName}
+                Quantity: ${model.quantity}
+                Amount: ${Converters.numberToMoneyString(model.amount)}
+                Delivery date: ${DateTime.getDateStringFromTimestamp(model.deliveryTimestamp)}
+                ${if (model.delivered) "Status: Delivered" else "Status: Not delivered"}
+            """.trimIndent()
 
+            root.setOnClickListener {
+                MaterialAlertDialogBuilder(
+                    this@OrderHelper.context,
+                    R.style.materialAlertDialogStyle
+                )
+                    .setMessage(message)
+                    .setPositiveButton("Close") { dialog, _ -> dialog.dismiss() }
+                    .setNeutralButton("Edit") { dialog, _ ->
+
+                        val bundle = Bundle().apply {
+                            putBoolean(Keys.TO_EDIT, true)
+                            putParcelable(Model.ORDER, model)
+                        }
+                        this@OrderHelper.fragment.findNavController()
+                            .navigate(
+                                R.id.addEditOrderFragment,
+                                bundle,
+                                AnimationProvider.slideRightLeftNavOptions()
+                            )
+
+                    }.show()
             }
         }
     }

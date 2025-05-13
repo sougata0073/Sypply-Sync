@@ -11,7 +11,6 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ItemSupplierPaymentBinding
 import com.sougata.supplysync.firestore.SupplierRepository
-import com.sougata.supplysync.firestore.util.FirestoreNames
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.SupplierPayment
 import com.sougata.supplysync.modelslist.helper.ModelHelper
@@ -19,14 +18,14 @@ import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.FirestoreFieldDataType
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 
 class SupplierPaymentHelper(
     private val fragment: Fragment,
     private val supplierRepository: SupplierRepository
 ) :
-    ModelHelper  {
+    ModelHelper {
 
     private val context = this.fragment.requireContext()
 
@@ -70,7 +69,7 @@ class SupplierPaymentHelper(
     override fun getFabClickHandler(): () -> Unit {
         return {
             val bundle = Bundle().apply {
-                putBoolean(KeysAndMessages.TO_ADD_KEY, true)
+                putBoolean(Keys.TO_ADD, true)
             }
             this.fragment.findNavController().navigate(
                 R.id.addEditSupplierPaymentFragment,
@@ -96,17 +95,24 @@ class SupplierPaymentHelper(
             dateTime.text = "At: $dateString On: $timeString"
             amount.text = Converters.numberToMoneyString(model.amount)
 
+            val message = """
+                To: ${model.supplierName}
+                Amount: ${Converters.numberToMoneyString(model.amount)}
+                Payment date: $dateString
+                Payment time: $timeString
+                Note: ${model.note}
+            """.trimIndent()
+
             root.setOnClickListener {
                 MaterialAlertDialogBuilder(
                     this@SupplierPaymentHelper.context,
                     R.style.materialAlertDialogStyle
                 )
-                    .setTitle("To: ${model.supplierName}")
-                    .setMessage(model.note)
+                    .setMessage(message)
                     .setPositiveButton("Close") { dialog, _ -> dialog.dismiss() }
                     .setNeutralButton("Edit") { dialog, _ ->
                         val bundle = Bundle().apply {
-                            putBoolean(KeysAndMessages.TO_EDIT_KEY, true)
+                            putBoolean(Keys.TO_EDIT, true)
                             putParcelable(Model.SUPPLIER_PAYMENT, model)
                         }
                         this@SupplierPaymentHelper.fragment.findNavController()

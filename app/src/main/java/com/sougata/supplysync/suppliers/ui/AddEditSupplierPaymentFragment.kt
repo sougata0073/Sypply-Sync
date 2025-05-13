@@ -16,7 +16,6 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import com.sougata.supplysync.R
-import com.sougata.supplysync.firestore.SupplierRepository
 import com.sougata.supplysync.databinding.FragmentAddEditSupplierPaymentBinding
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.Supplier
@@ -24,7 +23,7 @@ import com.sougata.supplysync.models.SupplierPayment
 import com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierPaymentViewModel
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.DateTime
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -40,27 +39,26 @@ class AddEditSupplierPaymentFragment : Fragment() {
     private lateinit var prevSupplierPayment: SupplierPayment
     private var updatedSupplierPayment: SupplierPayment? = null
 
-    // If any other model related to this model they will be here
     private var supplier: Supplier? = null
 
-    // Flags
     private var toAdd: Boolean = false
     private var toEdit: Boolean = false
     private var isSupplierPaymentAdded = false
     private var isSupplierPaymentUpdated = false
     private var isSupplierPaymentDeleted = false
 
-    private val supplierRepository = SupplierRepository()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        this.toAdd = requireArguments().getBoolean(KeysAndMessages.TO_ADD_KEY)
-        this.toEdit = requireArguments().getBoolean(KeysAndMessages.TO_EDIT_KEY)
+        this.toAdd = requireArguments().getBoolean(Keys.TO_ADD)
+        this.toEdit = requireArguments().getBoolean(Keys.TO_EDIT)
 
         if (this.toEdit) {
             this.prevSupplierPayment = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                requireArguments().getParcelable(Model.SUPPLIER_PAYMENT, SupplierPayment::class.java)
+                requireArguments().getParcelable(
+                    Model.SUPPLIER_PAYMENT,
+                    SupplierPayment::class.java
+                )
             } else {
                 @Suppress("DEPRECATION")
                 requireArguments().getParcelable(Model.SUPPLIER_PAYMENT)
@@ -104,31 +102,31 @@ class AddEditSupplierPaymentFragment : Fragment() {
 
         if (this.isSupplierPaymentAdded) {
             val bundle = Bundle().apply {
-                putBoolean(KeysAndMessages.DATA_ADDED_KEY, isSupplierPaymentAdded)
+                putBoolean(Keys.DATA_ADDED, isSupplierPaymentAdded)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
+                Keys.RECENT_DATA_CHANGED_ADD_EDIT,
                 bundle
             )
         }
 
         if (this.isSupplierPaymentUpdated) {
             val bundle = Bundle().apply {
-                putParcelable(KeysAndMessages.DATA_UPDATED_KEY, updatedSupplierPayment)
+                putParcelable(Keys.DATA_UPDATED, updatedSupplierPayment)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
+                Keys.RECENT_DATA_CHANGED_ADD_EDIT,
                 bundle
             )
         }
 
         if (this.isSupplierPaymentDeleted) {
             val bundle = Bundle().apply {
-                putParcelable(KeysAndMessages.DATA_REMOVED_KEY, prevSupplierPayment)
+                putParcelable(Keys.DATA_REMOVED, prevSupplierPayment)
             }
 
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
+                Keys.RECENT_DATA_CHANGED_ADD_EDIT,
                 bundle
             )
         }
@@ -138,13 +136,105 @@ class AddEditSupplierPaymentFragment : Fragment() {
 
     private fun initializeUI() {
 
-        if (this.toAdd) {
-            binding.deleteBtn.visibility = View.INVISIBLE
+        if (this.toEdit) {
+            this.binding.deleteBtn.visibility = View.VISIBLE
+            this.viewModel.apply {
+                amount.value = prevSupplierPayment.amount.toString()
+
+                val dateString = DateTime.getDateStringFromTimestamp(prevSupplierPayment.timestamp)
+                val timeString = DateTime.getTimeStringFromTimestamp(prevSupplierPayment.timestamp)
+
+                date.value = dateString
+                time.value = timeString
+                note.value = prevSupplierPayment.note
+                supplierName.value = "Supplier: ${prevSupplierPayment.supplierName}"
+            }
         }
 
+        this.setUpDeleteButton()
+        this.setUpDateTimeButton()
+        this.setUpSaveButton()
+        this.setUpOpenSuppliersListButton()
+    }
+
+    private fun registerListeners() {
+        this.viewModel.supplierPaymentAddedIndicator.observe(this.viewLifecycleOwner) {
+            if (it.first == Status.SUCCESS) {
+                this.isSupplierPaymentAdded = true
+            }
+            observe(it, "Payment added successfully")
+        }
+        this.viewModel.supplierPaymentEditedIndicator.observe(this.viewLifecycleOwner) {
+            if (it.first == Status.SUCCESS) {
+                this.isSupplierPaymentUpdated = true
+            }
+            observe(it, "Payment updated successfully")
+        }
+        this.viewModel.supplierPaymentDeletedIndicator.observe(this.viewLifecycleOwner) {
+            if (it.first == Status.SUCCESS) {
+                this.isSupplierPaymentDeleted = true
+            }
+            observe(it, "Payment deleted successfully")
+        }
+
+        this.parentFragmentManager.setFragmentResultListener(
+            Keys.ITEM_SELECTED,
+            this
+        )
+        { requestKey, bundle ->
+            this.supplier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                bundle.getParcelable(
+                    Keys.MODEL,
+                    Supplier::class.java
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                bundle.getParcelable(Keys.MODEL)
+            }
+
+            this.viewModel.supplierName.value = "Supplier: ${supplier?.name}"
+        }
+    }
+
+    private fun setUpOpenSuppliersListButton() {
+        this.binding.openSuppliersListBtn.setOnClickListener {
+            val bundle = Bundle().apply {
+                putString(Keys.MODEL_NAME, Model.SUPPLIER)
+                putBoolean(Keys.SELECT_ONLY, true)
+            }
+            findNavController().navigate(
+                R.id.modelsListFragment,
+                bundle,
+                AnimationProvider.slideUpDownNavOptions()
+            )
+        }
+    }
+
+    private fun setUpDeleteButton() {
+        if (this.toAdd) {
+            binding.deleteBtn.visibility = View.INVISIBLE
+        } else if (this.toEdit) {
+            this.binding.deleteBtn.apply {
+                visibility = View.VISIBLE
+                setOnClickListener {
+                    MaterialAlertDialogBuilder(
+                        requireContext(),
+                        R.style.materialAlertDialogStyle
+                    ).setTitle("Warning")
+                        .setMessage("Are you sure you want to delete this payment?")
+                        .setPositiveButton("Yes") { dialog, _ ->
+                            viewModel.deleteSupplierPayment(prevSupplierPayment)
+                        }
+                        .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+                        .show()
+                }
+            }
+        }
+    }
+
+    private fun setUpSaveButton() {
         this.binding.saveBtn.setOnClickListener {
             if (this.toAdd) {
-
                 val supplier = this.supplier
 
                 if (supplier == null) {
@@ -168,31 +258,16 @@ class AddEditSupplierPaymentFragment : Fragment() {
                     supplier?.name ?: this.prevSupplierPayment.supplierName,
                     this.binding.root
                 )
-
             }
         }
+    }
 
-        this.binding.openSuppliersListBtn.setOnClickListener {
-
-            val bundle = Bundle().apply {
-                putString(KeysAndMessages.MODEL_NAME_KEY, Model.SUPPLIER)
-                putBoolean(KeysAndMessages.IS_SELECT_ONLY_KEY, true)
-            }
-
-            findNavController().navigate(
-                R.id.modelsListFragment,
-                bundle,
-                AnimationProvider.slideUpDownNavOptions()
-            )
-
-        }
-
+    private fun setUpDateTimeButton() {
         this.binding.calendarBtn.setOnClickListener {
 
             val datePicker =
                 MaterialDatePicker.Builder.datePicker()
                     .setTitleText("Select date")
-//                    .setTheme(R.style.materialDatePickerStyle)
                     .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
                     .build()
 
@@ -213,7 +288,6 @@ class AddEditSupplierPaymentFragment : Fragment() {
 
             val timePicker =
                 MaterialTimePicker.Builder()
-//                    .setTheme(R.style.materialTimePickerStyle)
                     .setTimeFormat(TimeFormat.CLOCK_24H)
                     .setHour(calendar.get(Calendar.HOUR_OF_DAY))
                     .setMinute(calendar.get(Calendar.MINUTE))
@@ -222,99 +296,13 @@ class AddEditSupplierPaymentFragment : Fragment() {
                     .build()
 
             timePicker.addOnPositiveButtonClickListener {
-
                 this.viewModel.time.value = "${timePicker.hour}:${timePicker.minute}"
-
             }
-
             timePicker.show(this.parentFragmentManager, "timePicker")
-
-        }
-
-        this.binding.deleteBtn.setOnClickListener {
-
-            MaterialAlertDialogBuilder(
-                requireContext(),
-                R.style.materialAlertDialogStyle
-            ).setTitle("Warning")
-                .setMessage("Are you sure you want to delete this payment?")
-                .setPositiveButton("Yes") { dialog, _ ->
-
-                    this.binding.parentLayout.alpha = 0.5f
-                    this.binding.progressBar.visibility = View.VISIBLE
-
-                    this.supplierRepository.deleteSupplierPayment(this.prevSupplierPayment) { status, message ->
-
-                        Snackbar.make(
-                            requireParentFragment().requireView(),
-                            message,
-                            Snackbar.LENGTH_SHORT
-                        ).show()
-
-                        if (status == Status.SUCCESS) {
-
-                            this.isSupplierPaymentDeleted = true
-
-                            findNavController().popBackStack()
-
-                        } else if (status == Status.FAILED) {
-                            this.binding.parentLayout.alpha = 1f
-                            this.binding.progressBar.visibility = View.GONE
-                        }
-
-                    }
-                }
-                .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
-                .show()
-
-        }
-
-        if (this.toEdit) {
-            this.binding.deleteBtn.visibility = View.VISIBLE
-            this.viewModel.apply {
-                amount.value = prevSupplierPayment.amount.toString()
-
-                val dateString = DateTime.getDateStringFromTimestamp(prevSupplierPayment.timestamp)
-                val timeString = DateTime.getTimeStringFromTimestamp(prevSupplierPayment.timestamp)
-
-                date.value = dateString
-                time.value = timeString
-                note.value = prevSupplierPayment.note
-                supplierName.value = "Supplier: ${prevSupplierPayment.supplierName}"
-            }
-
-        }
-
-    }
-
-    private fun registerListeners() {
-        this.viewModel.supplierPaymentAddedIndicator.observe(this.viewLifecycleOwner) {
-            howToObserve(it, "Payment added successfully")
-        }
-        this.viewModel.supplierPaymentEditedIndicator.observe(this.viewLifecycleOwner) {
-            howToObserve(it, "Payment updated successfully")
-        }
-
-        this.parentFragmentManager.setFragmentResultListener(
-            KeysAndMessages.ITEM_SELECTED_KEY,
-            this
-        )
-        { requestKey, bundle ->
-            this.supplier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                bundle.getParcelable(
-                    KeysAndMessages.MODEL_KEY,
-                    Supplier::class.java
-                )
-            } else {
-                @Suppress("DEPRECATION")
-                bundle.getParcelable(KeysAndMessages.MODEL_KEY)
-            }
-
-            this.viewModel.supplierName.value = "Supplier: ${supplier?.name}"
         }
     }
 
-    private fun howToObserve(observedData: Pair<Status, String>, successMessage: String) {
+    private fun observe(observedData: Pair<Status, String>, successMessage: String) {
         if (observedData.first == Status.STARTED) {
 
             this.binding.apply {
@@ -331,13 +319,6 @@ class AddEditSupplierPaymentFragment : Fragment() {
                 successMessage,
                 Snackbar.LENGTH_SHORT
             ).show()
-
-            if (this.toAdd) {
-                this.isSupplierPaymentAdded = true
-            }
-            if (this.toEdit) {
-                this.isSupplierPaymentUpdated = true
-            }
 
             findNavController().popBackStack()
 

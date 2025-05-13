@@ -17,7 +17,7 @@ import com.sougata.supplysync.customers.viewmodels.AddEditCustomerViewModel
 import com.sougata.supplysync.databinding.FragmentAddEditCustomerBinding
 import com.sougata.supplysync.models.Customer
 import com.sougata.supplysync.models.Model
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 
 class AddEditCustomerFragment : Fragment() {
@@ -36,8 +36,8 @@ class AddEditCustomerFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        this.toAdd = requireArguments().getBoolean(KeysAndMessages.TO_ADD_KEY)
-        this.toEdit = requireArguments().getBoolean(KeysAndMessages.TO_EDIT_KEY)
+        this.toAdd = requireArguments().getBoolean(Keys.TO_ADD)
+        this.toEdit = requireArguments().getBoolean(Keys.TO_EDIT)
 
         if (this.toEdit) {
             this.prevCustomer = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -80,29 +80,29 @@ class AddEditCustomerFragment : Fragment() {
 
         if (this.viewModel.isCustomerAdded) {
             val bundle = Bundle().apply {
-                putBoolean(KeysAndMessages.DATA_ADDED_KEY, viewModel.isCustomerAdded)
+                putBoolean(Keys.DATA_ADDED, viewModel.isCustomerAdded)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
+                Keys.RECENT_DATA_CHANGED_ADD_EDIT,
                 bundle
             )
             Log.d("TAG", "Added")
         }
         if (this.viewModel.isCustomerUpdated) {
             val bundle = Bundle().apply {
-                putParcelable(KeysAndMessages.DATA_UPDATED_KEY, updatedCustomer)
+                putParcelable(Keys.DATA_UPDATED, updatedCustomer)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
+                Keys.RECENT_DATA_CHANGED_ADD_EDIT,
                 bundle
             )
         }
         if (this.viewModel.isCustomerDeleted) {
             val bundle = Bundle().apply {
-                putParcelable(KeysAndMessages.DATA_REMOVED_KEY, prevCustomer)
+                putParcelable(Keys.DATA_REMOVED, prevCustomer)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT, bundle
+                Keys.RECENT_DATA_CHANGED_ADD_EDIT, bundle
             )
         }
 
@@ -110,6 +110,43 @@ class AddEditCustomerFragment : Fragment() {
     }
 
     private fun initializeUI() {
+        if (this.toEdit) {
+            this.viewModel.apply {
+                name.value = prevCustomer.name.toString()
+                email.value = prevCustomer.email.toString()
+                phone.value = prevCustomer.phone.toString()
+                receivableAmount.value = prevCustomer.receivableAmount.toString()
+                dueOrders.value = prevCustomer.dueOrders.toString()
+                note.value = prevCustomer.note.toString()
+            }
+        }
+
+        this.setUpSaveButton()
+        this.setUpDeleteButton()
+    }
+
+    private fun registerListeners() {
+        this.viewModel.customerAddedIndicator.observe(this.viewLifecycleOwner) {
+            if (it.first == Status.SUCCESS) {
+                this.viewModel.isCustomerAdded = true
+            }
+            this.observe(it, "Customer added successfully")
+        }
+        this.viewModel.customerEditedIndicator.observe(this.viewLifecycleOwner) {
+            if (it.first == Status.SUCCESS) {
+                this.viewModel.isCustomerUpdated = true
+            }
+            this.observe(it, "Customer updated successfully")
+        }
+        this.viewModel.customerDeletedIndicator.observe(this.viewLifecycleOwner) {
+            if (it.first == Status.SUCCESS) {
+                this.viewModel.isCustomerDeleted = true
+            }
+            this.observe(it, "Customer deleted successfully")
+        }
+    }
+
+    private fun setUpSaveButton() {
         this.binding.saveBtn.setOnClickListener {
             if (this.toAdd) {
                 this.viewModel.addCustomer(this.binding.root)
@@ -122,79 +159,31 @@ class AddEditCustomerFragment : Fragment() {
                 )
             }
         }
-
-        this.setUpDeleteButton()
-
-        if (this.toAdd) {
-            binding.deleteBtn.visibility = View.INVISIBLE
-        }
-
-        if (this.toEdit) {
-            this.binding.deleteBtn.visibility = View.VISIBLE
-            this.viewModel.apply {
-                name.value = prevCustomer.name.toString()
-                email.value = prevCustomer.email.toString()
-                phone.value = prevCustomer.phone.toString()
-                receivableAmount.value = prevCustomer.receivableAmount.toString()
-                dueOrders.value = prevCustomer.dueOrders.toString()
-                note.value = prevCustomer.note.toString()
-            }
-
-        }
-    }
-
-    private fun registerListeners() {
-
-        this.viewModel.customerAddedIndicator.observe(this.viewLifecycleOwner) {
-            this.howToObserve(it, "Customer added successfully")
-        }
-        this.viewModel.customerEditedIndicator.observe(this.viewLifecycleOwner) {
-            this.howToObserve(it, "Customer updated successfully")
-        }
-
     }
 
     private fun setUpDeleteButton() {
-        this.binding.deleteBtn.setOnClickListener {
-
-            MaterialAlertDialogBuilder(
-                requireContext(),
-                R.style.materialAlertDialogStyle
-            ).setTitle("Warning")
-                .setMessage("Are you sure you want to delete this customer?")
-                .setPositiveButton("Yes") { dialog, _ ->
-
-                    this.binding.parentLayout.alpha = 0.5f
-                    this.binding.progressBar.visibility = View.VISIBLE
-
-                    this.viewModel.customerRepository.deleteCustomer(this.prevCustomer) { status, message ->
-
-                        Snackbar.make(
-                            requireParentFragment().requireView(),
-                            message,
-                            Snackbar.LENGTH_SHORT
-                        ).show()
-
-                        if (status == Status.SUCCESS) {
-
-                            this.viewModel.isCustomerDeleted = true
-
-                            findNavController().popBackStack()
-
-                        } else if (status == Status.FAILED) {
-                            this.binding.parentLayout.alpha = 1f
-                            this.binding.progressBar.visibility = View.GONE
+        if (this.toAdd) {
+            binding.deleteBtn.visibility = View.INVISIBLE
+        } else if (this.toEdit) {
+            this.binding.deleteBtn.apply {
+                visibility = View.VISIBLE
+                setOnClickListener {
+                    MaterialAlertDialogBuilder(
+                        requireContext(),
+                        R.style.materialAlertDialogStyle
+                    ).setTitle("Warning")
+                        .setMessage("Are you sure you want to delete this customer?")
+                        .setPositiveButton("Yes") { dialog, _ ->
+                            viewModel.deleteCustomer(prevCustomer)
                         }
-
-                    }
+                        .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+                        .show()
                 }
-                .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
-                .show()
-
+            }
         }
     }
 
-    private fun howToObserve(observedData: Pair<Status, String>, successMessage: String) {
+    private fun observe(observedData: Pair<Status, String>, successMessage: String) {
         if (observedData.first == Status.STARTED) {
 
             this.binding.apply {
@@ -212,25 +201,15 @@ class AddEditCustomerFragment : Fragment() {
                 Snackbar.LENGTH_SHORT
             ).show()
 
-            if (this.toAdd) {
-                this.viewModel.isCustomerAdded = true
-            }
-            if (this.toEdit) {
-                this.viewModel.isCustomerUpdated = true
-            }
-
             this.findNavController().popBackStack()
 
         } else if (observedData.first == Status.FAILED) {
 
             this.binding.apply {
-
                 saveBtn.isClickable = true
                 progressBar.visibility = View.GONE
                 parentLayout.alpha = 1F
-
             }
-
             Snackbar.make(
                 requireParentFragment().requireView(), observedData.second, Snackbar.LENGTH_SHORT
             ).show()

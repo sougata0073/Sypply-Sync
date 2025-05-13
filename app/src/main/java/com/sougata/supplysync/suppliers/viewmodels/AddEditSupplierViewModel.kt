@@ -24,6 +24,7 @@ class AddEditSupplierViewModel() : ViewModel() {
 
     val supplierAddedIndicator = MutableLiveData<Pair<Status, String>>()
     val supplierEditedIndicator = MutableLiveData<Pair<Status, String>>()
+    val supplierDeletedIndicator = MutableLiveData<Pair<Status, String>>()
 
     var isSupplierAdded = false
     var isSupplierUpdated = false
@@ -62,6 +63,16 @@ class AddEditSupplierViewModel() : ViewModel() {
             this.supplierEditedIndicator.value = status to message
         }
         return supplier
+    }
+
+    fun deleteSupplier(supplier: Supplier) {
+        this.supplierDeletedIndicator.value = Status.STARTED to ""
+
+        this.supplierRepository.deleteSupplier(
+            supplier
+        ) { status, message ->
+            this.supplierDeletedIndicator.value = status to message
+        }
     }
 
     private fun processSupplier(supplierId: String, timestamp: Timestamp): Supplier {

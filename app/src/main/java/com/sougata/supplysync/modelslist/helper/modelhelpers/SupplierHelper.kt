@@ -13,14 +13,13 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ItemSupplierBinding
 import com.sougata.supplysync.firestore.SupplierRepository
-import com.sougata.supplysync.firestore.util.FirestoreNames
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.modelslist.helper.ModelHelper
 import com.sougata.supplysync.suppliers.ui.SupplierProfileBottomSheetFragment
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.FirestoreFieldDataType
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 
 class SupplierHelper(
@@ -68,7 +67,7 @@ class SupplierHelper(
     override fun getFabClickHandler(): () -> Unit {
         return {
             val bundle = Bundle().apply {
-                putBoolean(KeysAndMessages.TO_ADD_KEY, true)
+                putBoolean(Keys.TO_ADD, true)
             }
             this.fragment.findNavController().navigate(
                 R.id.addEditSupplierFragment, bundle, AnimationProvider.slideRightLeftNavOptions()

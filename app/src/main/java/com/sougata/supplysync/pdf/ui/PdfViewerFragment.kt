@@ -9,7 +9,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentPdfViewerBinding
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
 
 class PdfViewerFragment : Fragment() {
 
@@ -21,7 +21,7 @@ class PdfViewerFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        this.pdfByteArray = requireArguments().getByteArray(KeysAndMessages.BYTE_ARRAY_KEY)
+        this.pdfByteArray = requireArguments().getByteArray(Keys.BYTE_ARRAY)
     }
 
     override fun onCreateView(
@@ -46,7 +46,6 @@ class PdfViewerFragment : Fragment() {
                 Log.d("PdfError", it.message.toString())
             }
             .load()
-
     }
 
 }

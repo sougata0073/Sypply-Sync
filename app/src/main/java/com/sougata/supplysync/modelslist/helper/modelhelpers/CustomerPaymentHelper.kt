@@ -1,25 +1,30 @@
 package com.sougata.supplysync.modelslist.helper.modelhelpers
 
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.firestore.DocumentSnapshot
+import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.ItemCustomerPaymentBinding
 import com.sougata.supplysync.firestore.CustomerRepository
-import com.sougata.supplysync.firestore.util.FirestoreNames
 import com.sougata.supplysync.models.CustomerPayment
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.modelslist.helper.ModelHelper
+import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.FirestoreFieldDataType
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 
 class CustomerPaymentHelper(
     private val fragment: Fragment,
     private val customerRepository: CustomerRepository
-) : ModelHelper  {
+) : ModelHelper {
 
     private val context = this.fragment.requireContext()
     private val fragmentManager = this.fragment.parentFragmentManager
@@ -55,7 +60,16 @@ class CustomerPaymentHelper(
     }
 
     override fun getFabClickHandler(): () -> Unit {
-        TODO("Not yet implemented")
+        return {
+            val bundle = Bundle().apply {
+                putBoolean(Keys.TO_ADD, true)
+            }
+            this.fragment.findNavController().navigate(
+                R.id.addEditCustomerPaymentFragment,
+                bundle,
+                AnimationProvider.slideRightLeftNavOptions()
+            )
+        }
     }
 
     override fun bind(
@@ -74,8 +88,36 @@ class CustomerPaymentHelper(
             dateTime.text = "At: $dateString On: $timeString"
             amount.text = Converters.numberToMoneyString(model.amount)
 
-            root.setOnClickListener {
+            val message = """
+                From: ${model.customerName}
+                Amount: ${Converters.numberToMoneyString(model.amount)}
+                Payment date: $dateString
+                Payment time: $timeString
+                Note: ${model.note}
+            """.trimIndent()
 
+            root.setOnClickListener {
+                MaterialAlertDialogBuilder(
+                    this@CustomerPaymentHelper.context,
+                    R.style.materialAlertDialogStyle
+                )
+                    .setMessage(message)
+                    .setPositiveButton("Close") { dialog, _ -> dialog.dismiss() }
+                    .setNeutralButton("Edit") { dialog, _ ->
+
+                        val bundle = Bundle().apply {
+                            putBoolean(Keys.TO_EDIT, true)
+                            putParcelable(Model.CUSTOMER_PAYMENT, model)
+                        }
+
+                        this@CustomerPaymentHelper.fragment.findNavController()
+                            .navigate(
+                                R.id.addEditCustomerPaymentFragment,
+                                bundle,
+                                AnimationProvider.slideRightLeftNavOptions()
+                            )
+
+                    }.show()
             }
         }
     }

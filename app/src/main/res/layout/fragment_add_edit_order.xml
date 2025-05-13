@@ -1,14 +1,299 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".customers.ui.AddEditOrderFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.sougata.supplysync.customers.viewmodels.AddEditOrderViewModel" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:background="@color/primary_color"
+        tools:context=".suppliers.ui.AddEditOrderedItemFragment">
 
-</FrameLayout>
+        <ScrollView
+            android:id="@+id/parentLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/primary_color"
+                android:orientation="vertical"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/moneyImage"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="30dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_order" />
+
+                <ImageButton
+                    android:id="@+id/deleteBtn"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_gravity="end"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginBottom="20dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_delete"
+                    android:tooltipText="Delete"
+                    app:layout_constraintTop_toTopOf="@id/editBtn"
+                    app:tint="@color/white" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/top_curved_rectangular_bg_color_white"
+                    android:paddingStart="20dp"
+                    android:paddingTop="40dp"
+                    android:paddingEnd="20dp"
+                    android:paddingBottom="40dp">
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/amountLyt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:hint="Amount"
+                        app:boxStrokeColor="@color/material_text_input_border_color_black"
+                        app:hintTextColor="@color/grey"
+                        app:layout_constraintBottom_toTopOf="@id/quantityLyt"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintVertical_chainStyle="spread_inside">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/amount"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:maxLines="2"
+                            android:text="@={viewModel.amount}"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/quantityLyt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:hint="Quantity"
+                        app:boxStrokeColor="@color/material_text_input_border_color_black"
+                        app:hintTextColor="@color/grey"
+                        app:layout_constraintBottom_toTopOf="@id/dateMessage"
+                        app:layout_constraintEnd_toEndOf="@id/amountLyt"
+                        app:layout_constraintStart_toStartOf="@id/amountLyt"
+                        app:layout_constraintTop_toBottomOf="@id/amountLyt">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/quantity"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:maxLines="2"
+                            android:text="@={viewModel.quantity}"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <TextView
+                        android:id="@+id/dateMessage"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:text="Select a date or current date will be saved"
+                        android:textColor="@color/black"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toTopOf="@id/dateLyt"
+                        app:layout_constraintEnd_toEndOf="@id/quantityLyt"
+                        app:layout_constraintStart_toStartOf="@id/quantityLyt"
+                        app:layout_constraintTop_toBottomOf="@id/quantityLyt" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/dateLyt"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginEnd="20dp"
+                        android:hint="Date"
+                        app:boxStrokeColor="@color/material_text_input_border_color_black"
+                        app:hintTextColor="@color/grey"
+                        app:layout_constraintBottom_toTopOf="@id/itemName"
+                        app:layout_constraintEnd_toStartOf="@id/calendarBtn"
+                        app:layout_constraintStart_toStartOf="@id/quantityLyt"
+                        app:layout_constraintTop_toBottomOf="@id/dateMessage">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/deliveryDate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:clickable="false"
+                            android:cursorVisible="false"
+                            android:focusable="false"
+                            android:focusableInTouchMode="false"
+                            android:inputType="date"
+                            android:maxLines="2"
+                            android:text="@={viewModel.date}"
+                            android:textColor="@color/black"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <ImageButton
+                        android:id="@+id/calendarBtn"
+                        android:layout_width="30dp"
+                        android:layout_height="0dp"
+                        android:layout_marginEnd="5dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_calendar"
+                        app:layout_constraintBottom_toBottomOf="@id/dateLyt"
+                        app:layout_constraintEnd_toEndOf="@id/amountLyt"
+                        app:layout_constraintStart_toEndOf="@id/dateLyt"
+                        app:layout_constraintTop_toTopOf="@id/dateLyt" />
+
+                    <TextView
+                        android:id="@+id/itemName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="20dp"
+                        android:text="@={viewModel.itemName}"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toTopOf="@id/supplierName"
+                        app:layout_constraintEnd_toEndOf="@id/quantityLyt"
+                        app:layout_constraintStart_toStartOf="@id/quantityLyt"
+                        app:layout_constraintTop_toBottomOf="@id/dateLyt"
+                        tools:text="Item: Nike shoes" />
+
+                    <TextView
+                        android:id="@+id/supplierName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="@={viewModel.customerName}"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toTopOf="@id/openItemsListBtn"
+                        app:layout_constraintEnd_toEndOf="@id/itemName"
+                        app:layout_constraintStart_toStartOf="@+id/itemName"
+                        app:layout_constraintTop_toBottomOf="@id/itemName"
+                        tools:text="Customer: Sougata Saha" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/openItemsListBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:padding="12dp"
+                        android:text="Select item"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="8dp"
+                        app:layout_constraintBottom_toTopOf="@id/openCustomersListBtn"
+                        app:layout_constraintEnd_toEndOf="@+id/quantityLyt"
+                        app:layout_constraintStart_toStartOf="@+id/quantityLyt"
+                        app:layout_constraintTop_toBottomOf="@id/supplierName" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/openCustomersListBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:padding="12dp"
+                        android:text="Select customer"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="8dp"
+                        app:layout_constraintBottom_toTopOf="@id/deliveryStatus"
+                        app:layout_constraintEnd_toEndOf="@+id/openItemsListBtn"
+                        app:layout_constraintStart_toStartOf="@+id/openItemsListBtn"
+                        app:layout_constraintTop_toBottomOf="@id/openItemsListBtn" />
+
+                    <com.google.android.material.checkbox.MaterialCheckBox
+                        android:id="@+id/deliveryStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:checked="@={viewModel.isDelivered}"
+                        app:buttonIconTint="@color/white"
+                        app:layout_constraintBottom_toTopOf="@id/saveBtn"
+                        app:layout_constraintEnd_toStartOf="@id/isDeliveredMessage"
+                        app:layout_constraintStart_toStartOf="@+id/openCustomersListBtn"
+                        app:layout_constraintTop_toBottomOf="@+id/openCustomersListBtn" />
+
+                    <TextView
+                        android:id="@+id/isDeliveredMessage"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text="Tick the box if this item has already been delivered"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:layout_constraintBottom_toBottomOf="@id/deliveryStatus"
+                        app:layout_constraintEnd_toEndOf="@id/openCustomersListBtn"
+                        app:layout_constraintStart_toEndOf="@id/deliveryStatus"
+                        app:layout_constraintTop_toTopOf="@id/deliveryStatus" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/saveBtn"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:padding="12dp"
+                        android:text="Save"
+                        android:textColor="@color/white"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        app:cornerRadius="8dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="@id/openCustomersListBtn"
+                        app:layout_constraintStart_toStartOf="@id/openCustomersListBtn"
+                        app:layout_constraintTop_toBottomOf="@id/deliveryStatus" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+            </LinearLayout>
+        </ScrollView>
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminate="true"
+            android:visibility="gone"
+            app:indicatorColor="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

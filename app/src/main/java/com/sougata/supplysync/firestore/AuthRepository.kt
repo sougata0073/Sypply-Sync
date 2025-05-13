@@ -5,9 +5,9 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.sougata.supplysync.firestore.util.FirestoreNames
-import com.sougata.supplysync.firestore.util.HelperRepository
 import com.sougata.supplysync.models.User
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
+import com.sougata.supplysync.util.Messages
 import com.sougata.supplysync.util.Status
 
 class AuthRepository {
@@ -64,7 +64,7 @@ class AuthRepository {
 
         }.addOnCompleteListener {
             if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
@@ -99,7 +99,7 @@ class AuthRepository {
                         }
 
                     } else {
-                        onComplete(Status.FAILED, KeysAndMessages.USER_NOT_FOUND)
+                        onComplete(Status.FAILED, Messages.USER_NOT_FOUND)
                     }
 
                 } else {
@@ -115,7 +115,7 @@ class AuthRepository {
         currentUser?.sendEmailVerification()?.addOnCompleteListener { emailSendTask ->
             if (emailSendTask.isSuccessful) {
 
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
 
             } else {
 
@@ -136,16 +136,16 @@ class AuthRepository {
                 val newCurrentUser = this.auth.currentUser
 
                 if (newCurrentUser == null) {
-                    onComplete(Status.FAILED, KeysAndMessages.USER_NOT_FOUND)
+                    onComplete(Status.FAILED, Messages.USER_NOT_FOUND)
                     return@addOnCompleteListener
                 }
 
                 if (newCurrentUser.isEmailVerified) {
 
-                    onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                    onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
 
                 } else {
-                    onComplete(Status.FAILED, KeysAndMessages.EMAIL_IS_NOT_VERIFIED)
+                    onComplete(Status.FAILED, Messages.EMAIL_IS_NOT_VERIFIED)
                 }
 
             } else {
@@ -164,7 +164,7 @@ class AuthRepository {
             .addOnCompleteListener {
                 if (it.isSuccessful) {
 
-                    onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                    onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
 
                 } else {
 

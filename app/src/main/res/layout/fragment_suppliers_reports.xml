@@ -52,7 +52,7 @@
 
                     <include
                         android:id="@+id/supplierPayment"
-                        layout="@layout/card_pdf_selection"
+                        layout="@layout/pdf_creation_set"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_rowWeight="1"
@@ -61,7 +61,7 @@
 
                     <include
                         android:id="@+id/purchasedItem"
-                        layout="@layout/card_pdf_selection"
+                        layout="@layout/pdf_creation_set"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_rowWeight="1"

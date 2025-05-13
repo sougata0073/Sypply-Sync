@@ -5,13 +5,13 @@
         android:icon="@drawable/ic_home"
         android:title="Home"/>
 
-    <item android:id="@+id/suppliersHomeFragment"
-        android:icon="@drawable/ic_suppliers"
-        android:title="Suppliers"/>
-
     <item android:id="@+id/customersHomeFragment"
         android:icon="@drawable/ic_customers"
         android:title="Customers"/>
+
+    <item android:id="@+id/suppliersHomeFragment"
+        android:icon="@drawable/ic_suppliers"
+        android:title="Suppliers"/>
 
     <item android:id="@+id/staffsHomeFragment"
         android:icon="@drawable/ic_staffs"

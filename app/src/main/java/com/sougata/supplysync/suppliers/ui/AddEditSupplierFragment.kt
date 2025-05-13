@@ -16,7 +16,7 @@ import com.sougata.supplysync.databinding.FragmentAddEditSupplierBinding
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierViewModel
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 
 class AddEditSupplierFragment : Fragment() {
@@ -32,15 +32,11 @@ class AddEditSupplierFragment : Fragment() {
     private var toAdd: Boolean = false
     private var toEdit: Boolean = false
 
-//    private lateinit var pickImage: ActivityResultLauncher<PickVisualMediaRequest>
-
-//    private var profileImageUri: Uri? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        this.toAdd = requireArguments().getBoolean(KeysAndMessages.TO_ADD_KEY)
-        this.toEdit = requireArguments().getBoolean(KeysAndMessages.TO_EDIT_KEY)
+        this.toAdd = requireArguments().getBoolean(Keys.TO_ADD)
+        this.toEdit = requireArguments().getBoolean(Keys.TO_EDIT)
 
         if (this.toEdit) {
             this.prevSupplier = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -73,15 +69,6 @@ class AddEditSupplierFragment : Fragment() {
 
         this.binding.lifecycleOwner = this.viewLifecycleOwner
 
-//        this.pickImage = registerForActivityResult(PickVisualMedia()) {
-//            if (it != null) {
-//                Log.d("PhotoPicker", "Selected URI: $it")
-//                this.profileImageUri = it
-//            } else {
-//                Log.d("PhotoPicker", "No media selected")
-//            }
-//        }
-
         this.initializeUI()
 
         this.registerListeners()
@@ -92,28 +79,28 @@ class AddEditSupplierFragment : Fragment() {
 
         if (this.viewModel.isSupplierAdded) {
             val bundle = Bundle().apply {
-                putBoolean(KeysAndMessages.DATA_ADDED_KEY, viewModel.isSupplierAdded)
+                putBoolean(Keys.DATA_ADDED, viewModel.isSupplierAdded)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
+                Keys.RECENT_DATA_CHANGED_ADD_EDIT,
                 bundle
             )
         }
         if (this.viewModel.isSupplierUpdated) {
             val bundle = Bundle().apply {
-                putParcelable(KeysAndMessages.DATA_UPDATED_KEY, updatedSupplier)
+                putParcelable(Keys.DATA_UPDATED, updatedSupplier)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT,
+                Keys.RECENT_DATA_CHANGED_ADD_EDIT,
                 bundle
             )
         }
         if (this.viewModel.isSupplierDeleted) {
             val bundle = Bundle().apply {
-                putParcelable(KeysAndMessages.DATA_REMOVED_KEY, prevSupplier)
+                putParcelable(Keys.DATA_REMOVED, prevSupplier)
             }
             this.parentFragmentManager.setFragmentResult(
-                KeysAndMessages.RECENT_DATA_CHANGED_KEY_ADD_EDIT, bundle
+                Keys.RECENT_DATA_CHANGED_ADD_EDIT, bundle
             )
         }
 
@@ -122,33 +109,7 @@ class AddEditSupplierFragment : Fragment() {
 
     private fun initializeUI() {
 
-//        this.binding.profileImage.setOnClickListener {
-//            this.pickImage.launch(PickVisualMediaRequest(PickVisualMedia.ImageOnly))
-//        }
-
-
-        this.binding.saveBtn.setOnClickListener {
-
-            if (this.toAdd) {
-                this.viewModel.addSupplier(this.binding.root)
-            } else if (this.toEdit) {
-                this.updatedSupplier = this.viewModel.updateSupplier(
-                    this.prevSupplier.id, this.prevSupplier.timestamp,
-                    this.binding.root
-                )
-
-            }
-
-        }
-
-        this.setUpDeleteButton()
-
-        if (this.toAdd) {
-            binding.deleteBtn.visibility = View.INVISIBLE
-        }
-
         if (this.toEdit) {
-            this.binding.deleteBtn.visibility = View.VISIBLE
             this.viewModel.apply {
                 name.value = prevSupplier.name.toString()
                 email.value = prevSupplier.email.toString()
@@ -157,58 +118,67 @@ class AddEditSupplierFragment : Fragment() {
                 paymentDetails.value = prevSupplier.paymentDetails.toString()
                 note.value = prevSupplier.note.toString()
             }
-
         }
+        this.setUpSaveButton()
+        this.setUpDeleteButton()
     }
 
     private fun registerListeners() {
 
         this.viewModel.supplierAddedIndicator.observe(this.viewLifecycleOwner) {
+            if (it.first == Status.SUCCESS) {
+                this.viewModel.isSupplierAdded = true
+            }
             this.howToObserve(it, "Supplier added successfully")
         }
         this.viewModel.supplierEditedIndicator.observe(this.viewLifecycleOwner) {
+            if (it.first == Status.SUCCESS) {
+                this.viewModel.isSupplierUpdated = true
+            }
             this.howToObserve(it, "Supplier updated successfully")
+        }
+        this.viewModel.supplierDeletedIndicator.observe(this.viewLifecycleOwner) {
+            if (it.first == Status.SUCCESS) {
+                this.viewModel.isSupplierDeleted = true
+            }
+            this.howToObserve(it, "Supplier deleted successfully")
         }
 
     }
 
+    private fun setUpSaveButton() {
+        this.binding.saveBtn.setOnClickListener {
+            if (this.toAdd) {
+                this.viewModel.addSupplier(this.binding.root)
+            } else if (this.toEdit) {
+                this.updatedSupplier = this.viewModel.updateSupplier(
+                    this.prevSupplier.id, this.prevSupplier.timestamp,
+                    this.binding.root
+                )
+            }
+        }
+    }
+
     private fun setUpDeleteButton() {
-        this.binding.deleteBtn.setOnClickListener {
+        if (this.toAdd) {
+            binding.deleteBtn.visibility = View.INVISIBLE
+        } else if (this.toEdit) {
+            this.binding.deleteBtn.apply {
+                visibility = View.VISIBLE
+                setOnClickListener {
 
-            MaterialAlertDialogBuilder(
-                requireContext(),
-                R.style.materialAlertDialogStyle
-            ).setTitle("Warning")
-                .setMessage("Are you sure you want to delete this supplier?")
-                .setPositiveButton("Yes") { dialog, _ ->
-
-                    this.binding.parentLayout.alpha = 0.5f
-                    this.binding.progressBar.visibility = View.VISIBLE
-
-                    this.viewModel.supplierRepository.deleteSupplier(this.prevSupplier) { status, message ->
-
-                        Snackbar.make(
-                            requireParentFragment().requireView(),
-                            message,
-                            Snackbar.LENGTH_SHORT
-                        ).show()
-
-                        if (status == Status.SUCCESS) {
-
-                            this.viewModel.isSupplierDeleted = true
-
-                            findNavController().popBackStack()
-
-                        } else if (status == Status.FAILED) {
-                            this.binding.parentLayout.alpha = 1f
-                            this.binding.progressBar.visibility = View.GONE
+                    MaterialAlertDialogBuilder(
+                        requireContext(),
+                        R.style.materialAlertDialogStyle
+                    ).setTitle("Warning")
+                        .setMessage("Are you sure you want to delete this supplier?")
+                        .setPositiveButton("Yes") { dialog, _ ->
+                            viewModel.deleteSupplier(prevSupplier)
                         }
-
-                    }
+                        .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
+                        .show()
                 }
-                .setNegativeButton("No") { dialog, _ -> dialog.dismiss() }
-                .show()
-
+            }
         }
     }
 
@@ -230,25 +200,15 @@ class AddEditSupplierFragment : Fragment() {
                 Snackbar.LENGTH_SHORT
             ).show()
 
-            if (this.toAdd) {
-                this.viewModel.isSupplierAdded = true
-            }
-            if (this.toEdit) {
-                this.viewModel.isSupplierUpdated = true
-            }
-
             this.findNavController().popBackStack()
 
         } else if (observedData.first == Status.FAILED) {
 
             this.binding.apply {
-
                 saveBtn.isClickable = true
                 progressBar.visibility = View.GONE
                 parentLayout.alpha = 1F
-
             }
-
             Snackbar.make(
                 requireParentFragment().requireView(), observedData.second, Snackbar.LENGTH_SHORT
             ).show()

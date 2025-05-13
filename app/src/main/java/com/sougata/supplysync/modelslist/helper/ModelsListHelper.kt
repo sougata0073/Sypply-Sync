@@ -76,7 +76,7 @@ class ModelsListHelper(
     private fun getHelper() =
         when (this.modelName) {
             Model.SUPPLIER -> this.supplierHelper
-            Model.SUPPLIERS_ITEM -> this.supplierItemHelper
+            Model.SUPPLIER_ITEM -> this.supplierItemHelper
             Model.SUPPLIER_PAYMENT -> this.supplierPaymentHelper
             Model.ORDERED_ITEM -> this.orderedItemHelper
             Model.CUSTOMER -> this.customerHelper

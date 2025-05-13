@@ -18,7 +18,8 @@ import com.sougata.supplysync.models.Order
 import com.sougata.supplysync.models.UserItem
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.FirestoreFieldDataType
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
+import com.sougata.supplysync.util.Messages
 import com.sougata.supplysync.util.Status
 
 class CustomerRepository {
@@ -203,7 +204,7 @@ class CustomerRepository {
             )
         }.addOnCompleteListener {
             if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
@@ -228,7 +229,7 @@ class CustomerRepository {
             )
         }.addOnCompleteListener {
             if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
@@ -256,7 +257,7 @@ class CustomerRepository {
             )
         }.addOnCompleteListener {
             if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
@@ -266,7 +267,7 @@ class CustomerRepository {
     fun addUserItem(userItem: UserItem, onComplete: (Status, String) -> Unit) {
         this.userItemsCol.document(userItem.id).set(userItem).addOnCompleteListener {
             if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
@@ -276,7 +277,7 @@ class CustomerRepository {
     fun updateUserItem(userItem: UserItem, onComplete: (Status, String) -> Unit) {
         this.userItemsCol.document(userItem.id).update(userItem.toMap()).addOnCompleteListener {
             if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
@@ -286,7 +287,7 @@ class CustomerRepository {
     fun deleteUserItem(userItem: UserItem, onComplete: (Status, String) -> Unit) {
         this.userItemsCol.document(userItem.id).delete().addOnCompleteListener {
             if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
@@ -299,7 +300,7 @@ class CustomerRepository {
         this.customerPaymentsCol.document(customerPayment.id).set(customerPayment)
             .addOnCompleteListener {
                 if (it.isSuccessful) {
-                    onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                    onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
                 } else {
                     onComplete(Status.FAILED, it.exception?.message.toString())
                 }
@@ -312,7 +313,7 @@ class CustomerRepository {
         this.customerPaymentsCol.document(customerPayment.id).update(customerPayment.toMap())
             .addOnCompleteListener {
                 if (it.isSuccessful) {
-                    onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                    onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
                 } else {
                     onComplete(Status.FAILED, it.exception?.message.toString())
                 }
@@ -330,7 +331,7 @@ class CustomerRepository {
 
         }.addOnCompleteListener {
             if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
@@ -352,7 +353,7 @@ class CustomerRepository {
             }
         }.addOnCompleteListener {
             if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
@@ -384,6 +385,12 @@ class CustomerRepository {
                 )
             }
             it.update(this.ordersCol.document(order.id), order.toMap())
+        }.addOnCompleteListener {
+            if (it.isSuccessful) {
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
+            } else {
+                onComplete(Status.FAILED, it.exception?.message.toString())
+            }
         }
     }
 
@@ -402,7 +409,7 @@ class CustomerRepository {
             }
         }.addOnCompleteListener {
             if (it.isSuccessful) {
-                onComplete(Status.SUCCESS, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY)
+                onComplete(Status.SUCCESS, Messages.TASK_COMPLETED_SUCCESSFULLY)
             } else {
                 onComplete(Status.FAILED, it.exception?.message.toString())
             }
@@ -461,7 +468,7 @@ class CustomerRepository {
                 onComplete(
                     Status.SUCCESS,
                     resultList,
-                    KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                    Messages.TASK_COMPLETED_SUCCESSFULLY
                 )
             } else {
                 onComplete(Status.FAILED, null, it.exception?.message.toString())
@@ -497,10 +504,10 @@ class CustomerRepository {
                     onComplete(
                         Status.SUCCESS,
                         Converters.numberToDouble(sum),
-                        KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                        Messages.TASK_COMPLETED_SUCCESSFULLY
                     )
                 } else {
-                    onComplete(Status.FAILED, null, KeysAndMessages.TASK_FAILED_TO_COMPLETE)
+                    onComplete(Status.FAILED, null, Messages.TASK_FAILED_TO_COMPLETE)
                 }
             } else {
                 onComplete(Status.FAILED, null, it.exception?.message.toString())

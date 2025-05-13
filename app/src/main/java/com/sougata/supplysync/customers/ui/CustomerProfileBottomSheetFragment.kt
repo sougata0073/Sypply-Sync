@@ -13,10 +13,9 @@ import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.BottomSheetCustomerProfileBinding
 import com.sougata.supplysync.models.Customer
 import com.sougata.supplysync.models.Model
-import com.sougata.supplysync.models.Supplier
 import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
 
 class CustomerProfileBottomSheetFragment : BottomSheetDialogFragment() {
 
@@ -86,7 +85,7 @@ class CustomerProfileBottomSheetFragment : BottomSheetDialogFragment() {
         this.binding.editBtn.setOnClickListener {
 
             val bundle = Bundle().apply {
-                putBoolean(KeysAndMessages.TO_EDIT_KEY, true)
+                putBoolean(Keys.TO_EDIT, true)
                 putParcelable(Model.CUSTOMER, customer)
             }
 

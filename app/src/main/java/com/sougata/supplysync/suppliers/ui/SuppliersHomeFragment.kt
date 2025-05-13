@@ -4,16 +4,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.util.Pair
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentSuppliersHomeBinding
 import com.sougata.supplysync.sharedviewmodels.CommonDataViewModel
 import com.sougata.supplysync.suppliers.viewmodels.SuppliersHomeViewModel
 import com.sougata.supplysync.util.Converters
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 
 class SuppliersHomeFragment : Fragment() {
@@ -66,11 +68,11 @@ class SuppliersHomeFragment : Fragment() {
 
         val bundle = Bundle().apply {
             putBoolean(
-                KeysAndMessages.DATA_ADDED_KEY, isDataAdded
+                Keys.DATA_ADDED, isDataAdded
             )
         }
         this.parentFragmentManager.setFragmentResult(
-            KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+            Keys.RECENT_DATA_CHANGED,
             bundle
         )
 
@@ -81,7 +83,14 @@ class SuppliersHomeFragment : Fragment() {
         this.binding.apply {
             ordersToReceive.heading.text = "Orders to Receive"
             numberOfSuppliers.heading.text = "Number of Suppliers"
+            purchase.heading.text = "Purchase"
             dueToSuppliers.heading.text = "Due to Suppliers"
+        }
+
+        this.binding.purchase.calendarBtn.setOnClickListener {
+            this.openDateRangePicker { startDateMillis, endDateMillis ->
+                this.commonDataViewModel.loadPurchaseAmountByRange(startDateMillis, endDateMillis)
+            }
         }
     }
 
@@ -103,12 +112,13 @@ class SuppliersHomeFragment : Fragment() {
 
         }
 
-        this.viewModel.dueAmountToSuppliers.observe(this.viewLifecycleOwner) {
+        this.commonDataViewModel.numberOfOrdersToReceive.observe(this.viewLifecycleOwner) {
 
             if (it.second == Status.STARTED) {
 
             } else if (it.second == Status.SUCCESS) {
-                this.binding.dueToSuppliers.value.text = Converters.numberToMoneyString(it.first)
+
+                this.binding.ordersToReceive.value.text = it.first.toString()
 
             } else if (it.second == Status.FAILED) {
 
@@ -117,13 +127,26 @@ class SuppliersHomeFragment : Fragment() {
             }
         }
 
-        this.commonDataViewModel.numberOfOrdersToReceive.observe(this.viewLifecycleOwner) {
-
+        this.commonDataViewModel.purchaseAmountByRange.observe(this.viewLifecycleOwner) {
             if (it.second == Status.STARTED) {
 
             } else if (it.second == Status.SUCCESS) {
 
-                this.binding.ordersToReceive.value.text = it.first.toString()
+                this.binding.purchase.value.text = Converters.numberToMoneyString(it.first)
+                this.binding.purchase.dateRange.text =
+                    this.commonDataViewModel.purchaseAmountDateRange
+
+            } else if (it.second == Status.FAILED) {
+                Snackbar.make(requireView(), it.third, Snackbar.LENGTH_SHORT).show()
+            }
+        }
+
+        this.viewModel.dueAmountToSuppliers.observe(this.viewLifecycleOwner) {
+
+            if (it.second == Status.STARTED) {
+
+            } else if (it.second == Status.SUCCESS) {
+                this.binding.dueToSuppliers.value.text = Converters.numberToMoneyString(it.first)
 
             } else if (it.second == Status.FAILED) {
 
@@ -142,10 +165,10 @@ class SuppliersHomeFragment : Fragment() {
         }
 
         this.parentFragmentManager.setFragmentResultListener(
-            KeysAndMessages.RECENT_DATA_CHANGED_KEY, this.viewLifecycleOwner
+            Keys.RECENT_DATA_CHANGED, this.viewLifecycleOwner
         ) { requestKey, bundle ->
 
-            this.isDataAdded = bundle.getBoolean(KeysAndMessages.DATA_ADDED_KEY)
+            this.isDataAdded = bundle.getBoolean(Keys.DATA_ADDED)
 
             if (isDataAdded) {
                 this.viewModel.loadDueAmountToSuppliers()
@@ -159,5 +182,23 @@ class SuppliersHomeFragment : Fragment() {
             }
 
         }
+    }
+
+    private fun openDateRangePicker(onPositiveButtonClick: (Long, Long) -> Unit) {
+        val datePicker = MaterialDatePicker.Builder.dateRangePicker()
+            .setSelection(
+                Pair(
+                    MaterialDatePicker.thisMonthInUtcMilliseconds(),
+                    MaterialDatePicker.todayInUtcMilliseconds()
+                )
+            )
+            .setInputMode(MaterialDatePicker.INPUT_MODE_TEXT)
+            .setTitleText("Select dates")
+            .build()
+
+        datePicker.addOnPositiveButtonClickListener {
+            onPositiveButtonClick(it.first, it.second)
+        }
+        datePicker.show(this.parentFragmentManager, "dateRangePicker")
     }
 }

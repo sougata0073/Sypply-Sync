@@ -18,13 +18,13 @@ import com.sougata.supplysync.util.AnimationProvider
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.FirestoreFieldDataType
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 
 class OrderedItemHelper(
     private val fragment: Fragment,
     private val supplierRepository: SupplierRepository
-) : ModelHelper  {
+) : ModelHelper {
 
     private val context = this.fragment.requireContext()
 
@@ -81,7 +81,7 @@ class OrderedItemHelper(
     override fun getFabClickHandler(): () -> Unit {
         return {
             val bundle = Bundle().apply {
-                putBoolean(KeysAndMessages.TO_ADD_KEY, true)
+                putBoolean(Keys.TO_ADD, true)
             }
             this.fragment.findNavController().navigate(
                 R.id.addEditOrderedItemFragment,
@@ -98,7 +98,7 @@ class OrderedItemHelper(
         binding.apply {
 
             itemName.text = model.supplierItemName
-            date.text = DateTime.getDateStringFromTimestamp(model.orderTimestamp)
+            date.text = "Ordered at: ${DateTime.getDateStringFromTimestamp(model.orderTimestamp)}"
             amount.text = Converters.numberToMoneyString(model.amount)
 
             if (model.received) {
@@ -111,18 +111,22 @@ class OrderedItemHelper(
 
             root.setOnClickListener {
 
-                val message =
-                    "Supplier name: ${model.supplierName}\nItem quantity: ${model.quantity}"
+                val message = """
+                    Item name: ${model.supplierItemName}
+                    Quantity: ${model.quantity}
+                    Amount: ${Converters.numberToMoneyString(model.amount)}
+                    Order time: ${DateTime.getDateStringFromTimestamp(model.orderTimestamp)}
+                """.trimIndent()
 
                 MaterialAlertDialogBuilder(
                     this@OrderedItemHelper.context,
                     R.style.materialAlertDialogStyle
-                ).setTitle(model.supplierItemName)
+                )
                     .setMessage(message)
                     .setPositiveButton("Close") { dialog, _ -> dialog.dismiss() }
                     .setNeutralButton("Edit") { dialog, _ ->
                         val bundle = Bundle().apply {
-                            putBoolean(KeysAndMessages.TO_EDIT_KEY, true)
+                            putBoolean(Keys.TO_EDIT, true)
                             putParcelable(Model.ORDERED_ITEM, model)
                         }
                         this@OrderedItemHelper.fragment.findNavController()

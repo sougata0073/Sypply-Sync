@@ -123,7 +123,7 @@
                         android:layout_height="wrap_content"
                         android:onClick="@{viewModel::onItemsListBtnClicked}"
                         android:padding="12dp"
-                        android:text="Items List"
+                        android:text="Your items List"
                         android:textColor="@color/white"
                         android:textSize="18sp"
                         android:textStyle="bold"

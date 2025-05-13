@@ -20,6 +20,7 @@ class AddEditSupplierItemViewModel : ViewModel() {
 
     val supplierItemAddedIndicator = MutableLiveData<Pair<Status, String>>()
     val supplierItemEditedIndicator = MutableLiveData<Pair<Status, String>>()
+    val supplierItemDeletedIndicator = MutableLiveData<Pair<Status, String>>()
 
     fun addSupplierItem(view: View) {
         val supplierItem = try {
@@ -29,12 +30,12 @@ class AddEditSupplierItemViewModel : ViewModel() {
             return
         }
 
-        this.supplierItemAddedIndicator.postValue(Status.STARTED to "")
+        this.supplierItemAddedIndicator.value = Status.STARTED to ""
 
         this.supplierRepository.addSupplierItem(
             supplierItem
         ) { status, message ->
-            this.supplierItemAddedIndicator.postValue(status to message)
+            this.supplierItemAddedIndicator.value = status to message
         }
     }
 
@@ -46,14 +47,24 @@ class AddEditSupplierItemViewModel : ViewModel() {
             return null
         }
 
-        this.supplierItemEditedIndicator.postValue(Status.STARTED to "")
+        this.supplierItemEditedIndicator.value = Status.STARTED to ""
 
         this.supplierRepository.updateSupplierItem(
             supplierItem
         ) { status, message ->
-            this.supplierItemEditedIndicator.postValue(status to message)
+            this.supplierItemEditedIndicator.value = status to message
         }
         return supplierItem
+    }
+
+    fun deleteSupplierItem(supplierItem: SupplierItem) {
+
+        this.supplierItemDeletedIndicator.value = Status.STARTED to ""
+
+        this.supplierRepository.deleteSupplierItem(supplierItem) { status, message ->
+            this.supplierItemDeletedIndicator.value = status to message
+        }
+
     }
 
 
@@ -72,7 +83,7 @@ class AddEditSupplierItemViewModel : ViewModel() {
             try {
                 price = priceString.toDouble()
             } catch (_: Exception) {
-                throw Exception("Invalid due amount")
+                throw Exception("Invalid price")
             }
         }
 

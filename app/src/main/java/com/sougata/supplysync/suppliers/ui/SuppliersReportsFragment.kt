@@ -23,7 +23,7 @@ import com.sougata.supplysync.R
 import com.sougata.supplysync.databinding.FragmentSuppliersReportsBinding
 import com.sougata.supplysync.suppliers.viewmodels.SupplierReportsViewModel
 import com.sougata.supplysync.util.AnimationProvider
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 import java.io.File
 
@@ -236,7 +236,7 @@ class SuppliersReportsFragment : Fragment() {
 
     private fun onOpenClick(byteArray: ByteArray?) {
         val bundle = Bundle().apply {
-            putByteArray(KeysAndMessages.BYTE_ARRAY_KEY, byteArray)
+            putByteArray(Keys.BYTE_ARRAY, byteArray)
         }
 
         this.findNavController()

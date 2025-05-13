@@ -1,15 +1,14 @@
 package com.sougata.supplysync.firestore.util
 
-import android.util.Log
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.sougata.supplysync.models.Model
-import com.sougata.supplysync.models.User
 import com.sougata.supplysync.util.FirestoreFieldDataType
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
+import com.sougata.supplysync.util.Messages
 import com.sougata.supplysync.util.Status
 import kotlin.math.floor
 
@@ -55,13 +54,13 @@ class HelperRepository {
 
                 if (modelsList.isEmpty()) {
                     // When no more data is there
-                    onComplete(Status.SUCCESS, modelsList, null, KeysAndMessages.EMPTY_LIST)
+                    onComplete(Status.SUCCESS, modelsList, null, Messages.EMPTY_LIST)
                 } else {
                     onComplete(
                         Status.SUCCESS,
                         modelsList,
                         it.result.documents.last(),
-                        KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                        Messages.TASK_COMPLETED_SUCCESSFULLY
                     )
                 }
             } else {
@@ -116,13 +115,13 @@ class HelperRepository {
 
                 if (it.result.documents.isEmpty()) {
                     // When no more data is there
-                    onComplete(Status.SUCCESS, modelsList, null, KeysAndMessages.EMPTY_LIST)
+                    onComplete(Status.SUCCESS, modelsList, null, Messages.EMPTY_LIST)
                 } else {
                     onComplete(
                         Status.SUCCESS,
                         modelsList,
                         it.result.documents.last(),
-                        KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                        Messages.TASK_COMPLETED_SUCCESSFULLY
                     )
                 }
             } else {
@@ -149,10 +148,10 @@ class HelperRepository {
 
                 if (result != null) {
                     onComplete(
-                        Status.SUCCESS, result, KeysAndMessages.TASK_COMPLETED_SUCCESSFULLY
+                        Status.SUCCESS, result, Messages.TASK_COMPLETED_SUCCESSFULLY
                     )
                 } else {
-                    onComplete(Status.FAILED, null, KeysAndMessages.EMPTY_LIST)
+                    onComplete(Status.FAILED, null, Messages.EMPTY_LIST)
                 }
             } else {
                 onComplete(Status.FAILED, null, it.exception?.message.toString())

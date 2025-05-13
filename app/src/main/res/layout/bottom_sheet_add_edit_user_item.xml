@@ -7,7 +7,7 @@
 
         <variable
             name="viewModel"
-            type="com.sougata.supplysync.suppliers.viewmodels.AddEditSupplierItemViewModel" />
+            type="com.sougata.supplysync.customers.viewmodels.AddEditUserItemViewModel" />
 
     </data>
 
@@ -76,6 +76,28 @@
                     android:inputType="numberDecimal"
                     android:maxLines="2"
                     android:text="@={viewModel.price}"
+                    android:textColor="@color/bw"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/inStockLyt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:hint="In stock"
+                app:boxStrokeColor="@color/material_text_input_border_color_bw"
+                app:hintTextColor="@color/grey">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inStock"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="numberDecimal"
+                    android:maxLines="2"
+                    android:text="@={viewModel.inStock}"
                     android:textColor="@color/bw"
                     android:textSize="16sp"
                     android:textStyle="bold" />

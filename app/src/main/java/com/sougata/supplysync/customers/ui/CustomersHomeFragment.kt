@@ -15,7 +15,7 @@ import com.sougata.supplysync.customers.viewmodels.CustomersHomeViewModel
 import com.sougata.supplysync.databinding.FragmentCustomersHomeBinding
 import com.sougata.supplysync.sharedviewmodels.CommonDataViewModel
 import com.sougata.supplysync.util.Converters
-import com.sougata.supplysync.util.KeysAndMessages
+import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 
 class CustomersHomeFragment : Fragment() {
@@ -64,11 +64,11 @@ class CustomersHomeFragment : Fragment() {
 
         val bundle = Bundle().apply {
             putBoolean(
-                KeysAndMessages.DATA_ADDED_KEY, isDataAdded
+                Keys.DATA_ADDED, isDataAdded
             )
         }
         this.parentFragmentManager.setFragmentResult(
-            KeysAndMessages.RECENT_DATA_CHANGED_KEY,
+            Keys.RECENT_DATA_CHANGED,
             bundle
         )
 
@@ -146,10 +146,10 @@ class CustomersHomeFragment : Fragment() {
         }
 
         this.parentFragmentManager.setFragmentResultListener(
-            KeysAndMessages.RECENT_DATA_CHANGED_KEY, this.viewLifecycleOwner
+            Keys.RECENT_DATA_CHANGED, this.viewLifecycleOwner
         ) { requestKey, bundle ->
 
-            this.isDataAdded = bundle.getBoolean(KeysAndMessages.DATA_ADDED_KEY)
+            this.isDataAdded = bundle.getBoolean(Keys.DATA_ADDED)
 
             if (isDataAdded) {
                 this.viewModel.loadOrdersToDeliver()

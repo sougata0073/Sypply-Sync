@@ -10,4 +10,7 @@
     <color name="fragment_bg">#FF000000</color>
     <color name="toolbar_title_color">#FFFFFFFF</color>
     <color name="bottom_nav_border_color">#1A1D22</color>
+    <color name="chip_bg_selected">#FFFFFF</color>
+    <color name="chip_text_selected">#000000</color>
+    <color name="chip_check_selected">#000000</color>
 </resources>

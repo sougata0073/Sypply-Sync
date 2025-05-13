@@ -30,17 +30,4 @@ object Inputs {
         return "https://picsum.photos/id/$num/$width/$height"
     }
 
-    fun getCurrentDateString(): String {
-        val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
-
-        return dateFormat.format(Date())
-    }
-
-    fun getCurrentTimeString(): String {
-        val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-
-        return timeFormat.format(Date())
-    }
-
-
 }

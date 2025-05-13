@@ -124,8 +124,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         val entryList = mutableListOf<Entry>()
 
         for ((i, value) in dataList.withIndex()) {
-            val y = value.toFloat()
-            entryList.add(Entry(i.toFloat(), y))
+            entryList.add(Entry(i.toFloat(), value.toFloat()))
         }
 
         return LineDataSet(entryList, "Amount").apply {
