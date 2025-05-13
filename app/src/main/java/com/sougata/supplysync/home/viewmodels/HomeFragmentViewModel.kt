@@ -7,6 +7,9 @@ import androidx.lifecycle.MutableLiveData
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
+import com.google.firebase.Timestamp
 import com.sougata.supplysync.R
 import com.sougata.supplysync.firestore.CustomerRepository
 import com.sougata.supplysync.firestore.SupplierRepository
@@ -18,13 +21,15 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
     private val supplierRepo = SupplierRepository()
     private val customerRepo = CustomerRepository()
 
-    val purchaseChartData = MutableLiveData<Triple<LineData?, Status, String>>()
-    var purchaseChartDateRange = ""
-    var animatePurchaseChart = true
-
     val salesChartData = MutableLiveData<Triple<LineData?, Status, String>>()
+    val salesChartTimestampsList = mutableListOf<Timestamp>()
     var salesChartDateRange = ""
     var animateSalesChart = true
+
+    val purchaseChartData = MutableLiveData<Triple<LineData?, Status, String>>()
+    val purchaseChartTimestampsList = mutableListOf<Timestamp>()
+    var purchaseChartDateRange = ""
+    var animatePurchaseChart = true
 
     init {
         this.loadPast30DaysPurchaseChart()
@@ -62,7 +67,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 
                 val lineDataSet =
                     this.getDecoratedLineDataset(
-                        list!!,
+                        list!!, this.purchaseChartTimestampsList,
                         R.color.primary_color,
                         R.drawable.line_chart_gradient_normal
                     )
@@ -96,7 +101,7 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
 
                 val lineDataSet =
                     this.getDecoratedLineDataset(
-                        list!!,
+                        list!!, this.salesChartTimestampsList,
                         R.color.green_profit,
                         R.drawable.line_chart_gradient_profit
                     )
@@ -115,7 +120,8 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
     }
 
     private fun getDecoratedLineDataset(
-        dataList: List<Double>,
+        dataList: List<Pair<Double, Timestamp>>,
+        timestampsList: MutableList<Timestamp>,
         chartColorId: Int,
         gradientDrawableId: Int
     ): LineDataSet {
@@ -124,7 +130,8 @@ class HomeFragmentViewModel(application: Application) : AndroidViewModel(applica
         val entryList = mutableListOf<Entry>()
 
         for ((i, value) in dataList.withIndex()) {
-            entryList.add(Entry(i.toFloat(), value.toFloat()))
+            entryList.add(Entry(i.toFloat(), value.first.toFloat()))
+            timestampsList.add(value.second)
         }
 
         return LineDataSet(entryList, "Amount").apply {

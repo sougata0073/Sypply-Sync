@@ -437,10 +437,49 @@ class CustomerRepository {
         )
     }
 
+//    fun getSalesAmountListByRange(
+//        startTimestamp: Timestamp,
+//        endTimestamp: Timestamp,
+//        onComplete: (Status, List<Double>?, String) -> Unit
+//    ) {
+//        val query = this.ordersCol
+//            .whereGreaterThanOrEqualTo(
+//                Order::deliveryTimestamp.name,
+//                startTimestamp
+//            )
+//            .whereLessThanOrEqualTo(
+//                Order::deliveryTimestamp.name,
+//                endTimestamp
+//            )
+//            .orderBy(Order::deliveryTimestamp.name, Query.Direction.ASCENDING)
+//
+//        query.get().addOnCompleteListener {
+//            if (it.isSuccessful) {
+//
+//                val resultList = mutableListOf<Double>()
+//
+//                for (doc in it.result.documents) {
+//                    if (doc.exists()) {
+//                        val amount =
+//                            Converters.numberToDouble(doc.get(Order::amount.name) as Number)
+//                        resultList.add(amount)
+//                    }
+//                }
+//                onComplete(
+//                    Status.SUCCESS,
+//                    resultList,
+//                    Messages.TASK_COMPLETED_SUCCESSFULLY
+//                )
+//            } else {
+//                onComplete(Status.FAILED, null, it.exception?.message.toString())
+//            }
+//        }
+//    }
+
     fun getSalesAmountListByRange(
         startTimestamp: Timestamp,
         endTimestamp: Timestamp,
-        onComplete: (Status, List<Double>?, String) -> Unit
+        onComplete: (Status, List<Pair<Double, Timestamp>>?, String) -> Unit
     ) {
         val query = this.ordersCol
             .whereGreaterThanOrEqualTo(
@@ -456,13 +495,14 @@ class CustomerRepository {
         query.get().addOnCompleteListener {
             if (it.isSuccessful) {
 
-                val resultList = mutableListOf<Double>()
+                val resultList = mutableListOf<Pair<Double, Timestamp>>()
 
                 for (doc in it.result.documents) {
                     if (doc.exists()) {
                         val amount =
                             Converters.numberToDouble(doc.get(Order::amount.name) as Number)
-                        resultList.add(amount)
+                        val timestamp = doc.getTimestamp(Order::deliveryTimestamp.name) as Timestamp
+                        resultList.add(amount to timestamp)
                     }
                 }
                 onComplete(

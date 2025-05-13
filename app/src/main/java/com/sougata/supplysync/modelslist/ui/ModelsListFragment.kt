@@ -4,7 +4,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.text.InputType
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -133,7 +132,6 @@ class ModelsListFragment : Fragment() {
         this._binding = null
     }
 
-
     private fun initializeUI() {
         this.setUpSearchView()
 
@@ -141,7 +139,9 @@ class ModelsListFragment : Fragment() {
             this.loadChipsSearch()
         }
 
-        this.loadChipsFilter()
+        if (!this.viewModel.isSearchClicked) {
+            this.loadChipsFilter()
+        }
 
         this.setUpToolBar()
 

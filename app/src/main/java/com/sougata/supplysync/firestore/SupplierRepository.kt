@@ -18,7 +18,6 @@ import com.sougata.supplysync.models.SupplierItem
 import com.sougata.supplysync.models.SupplierPayment
 import com.sougata.supplysync.models.User
 import com.sougata.supplysync.util.Converters
-import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.Messages
 import com.sougata.supplysync.util.Status
@@ -471,10 +470,49 @@ class SupplierRepository {
         )
     }
 
+//    fun getPurchaseAmountListByRange(
+//        startTimestamp: Timestamp,
+//        endTimestamp: Timestamp,
+//        onComplete: (Status, List<Double>?, String) -> Unit
+//    ) {
+//        val query = this.orderedItemsCol
+//            .whereGreaterThanOrEqualTo(
+//                OrderedItem::orderTimestamp.name,
+//                startTimestamp
+//            )
+//            .whereLessThanOrEqualTo(
+//                OrderedItem::orderTimestamp.name,
+//                endTimestamp
+//            )
+//            .orderBy(OrderedItem::orderTimestamp.name, Query.Direction.ASCENDING)
+//
+//        query.get().addOnCompleteListener {
+//
+//            if (it.isSuccessful) {
+//                val resultList = mutableListOf<Double>()
+//
+//                for (doc in it.result.documents) {
+//                    if (doc.exists()) {
+//                        val amount =
+//                            Converters.numberToDouble(doc.get(OrderedItem::amount.name) as Number)
+//                        resultList.add(amount)
+//                    }
+//                }
+//                onComplete(
+//                    Status.SUCCESS,
+//                    resultList,
+//                    Messages.TASK_COMPLETED_SUCCESSFULLY
+//                )
+//            } else {
+//                onComplete(Status.FAILED, null, it.exception?.message.toString())
+//            }
+//        }
+//    }
+
     fun getPurchaseAmountListByRange(
         startTimestamp: Timestamp,
         endTimestamp: Timestamp,
-        onComplete: (Status, List<Double>?, String) -> Unit
+        onComplete: (Status, List<Pair<Double, Timestamp>>?, String) -> Unit
     ) {
         val query = this.orderedItemsCol
             .whereGreaterThanOrEqualTo(
@@ -490,54 +528,14 @@ class SupplierRepository {
         query.get().addOnCompleteListener {
 
             if (it.isSuccessful) {
-                val resultList = mutableListOf<Double>()
+                val resultList = mutableListOf<Pair<Double, Timestamp>>()
 
                 for (doc in it.result.documents) {
                     if (doc.exists()) {
                         val amount =
                             Converters.numberToDouble(doc.get(OrderedItem::amount.name) as Number)
-                        resultList.add(amount)
-                    }
-                }
-                onComplete(
-                    Status.SUCCESS,
-                    resultList,
-                    Messages.TASK_COMPLETED_SUCCESSFULLY
-                )
-            } else {
-                onComplete(Status.FAILED, null, it.exception?.message.toString())
-            }
-        }
-    }
-
-    fun getPurchaseAmountListByRange2(
-        startTimestamp: Timestamp,
-        endTimestamp: Timestamp,
-        onComplete: (Status, List<Pair<Double, String>>?, String) -> Unit
-    ) {
-        val query = this.orderedItemsCol
-            .whereGreaterThanOrEqualTo(
-                OrderedItem::orderTimestamp.name,
-                startTimestamp
-            )
-            .whereLessThanOrEqualTo(
-                OrderedItem::orderTimestamp.name,
-                endTimestamp
-            )
-            .orderBy(OrderedItem::orderTimestamp.name, Query.Direction.ASCENDING)
-
-        query.get().addOnCompleteListener {
-
-            if (it.isSuccessful) {
-                val resultList = mutableListOf<Pair<Double, String>>()
-
-                for (doc in it.result.documents) {
-                    if (doc.exists()) {
-                        val amount =
-                            Converters.numberToDouble(doc.get(OrderedItem::amount.name) as Number)
-                        val date =
-                            DateTime.getDateStringFromTimestamp(doc.get(OrderedItem::orderTimestamp.name) as Timestamp)
-                        resultList.add(amount to date)
+                        val timestamp = doc.get(OrderedItem::orderTimestamp.name) as Timestamp
+                        resultList.add(amount to timestamp)
                     }
                 }
                 onComplete(

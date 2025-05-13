@@ -66,7 +66,7 @@ class CreateAccountViewModel : ViewModel() {
         val authRepository = AuthRepository()
 
         authRepository.createAccount(user, password) { status, message ->
-            this.accountCreationIndicator.postValue(Triple(user, status, message))
+            this.accountCreationIndicator.value = Triple(user, status, message)
         }
 
     }

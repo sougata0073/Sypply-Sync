@@ -16,19 +16,19 @@ class EmailVerificationViewModel : ViewModel() {
 
     fun onVerifiedClick(view: View) {
 
-        this.emailVerifiedIndicator.postValue(Status.STARTED to "")
+        this.emailVerifiedIndicator.value = Status.STARTED to ""
 
         this.authRepository.verifyUsersEmail { status, message ->
-            this.emailVerifiedIndicator.postValue(status to message)
+            this.emailVerifiedIndicator.value = status to message
         }
 
     }
 
     fun onSendLinkAgainClick(view: View) {
-        this.emailAgainSendIndicator.postValue(Status.STARTED to "")
+        this.emailAgainSendIndicator.value = Status.STARTED to ""
 
         this.authRepository.sendEmailVerificationLink { status, message ->
-            this.emailAgainSendIndicator.postValue(status to message)
+            this.emailAgainSendIndicator.value = status to message
         }
 
     }

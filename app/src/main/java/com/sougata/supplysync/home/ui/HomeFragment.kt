@@ -9,9 +9,9 @@ import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
@@ -19,6 +19,7 @@ import com.sougata.supplysync.databinding.FragmentHomeBinding
 import com.sougata.supplysync.home.viewmodels.HomeFragmentViewModel
 import com.sougata.supplysync.sharedviewmodels.CommonDataViewModel
 import com.sougata.supplysync.util.Converters
+import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 
@@ -209,9 +210,21 @@ class HomeFragment : Fragment() {
                     }
 
                     this.xAxis.valueFormatter = object : IndexAxisValueFormatter() {
-                        override fun getFormattedValue(value: Float): String? {
-                            return ""
+                        override fun getAxisLabel(value: Float, axis: AxisBase?): String? {
+                            val dateTriple = DateTime.getDateFromTimestamp(
+                                viewModel.purchaseChartTimestampsList[value.toInt()]
+                            )
+                            val month = dateTriple.second
+                            val date = dateTriple.third
+
+                            return "$date ${DateTime.getShortMonthName(month)}"
                         }
+                    }
+
+                    this.xAxis.apply {
+                        this.labelCount = 5
+                        this.granularity = 1f
+                        this.isGranularityEnabled = true
                     }
 
                     this.setVisibleXRangeMaximum(15f)
@@ -251,6 +264,24 @@ class HomeFragment : Fragment() {
                         }
                     }
 
+                    this.xAxis.valueFormatter = object : IndexAxisValueFormatter() {
+                        override fun getAxisLabel(value: Float, axis: AxisBase?): String? {
+                            val dateTriple = DateTime.getDateFromTimestamp(
+                                viewModel.salesChartTimestampsList[value.toInt()]
+                            )
+                            val month = dateTriple.second
+                            val date = dateTriple.third
+
+                            return "$date ${DateTime.getShortMonthName(month)}"
+                        }
+                    }
+
+                    this.xAxis.apply {
+                        this.labelCount = 5
+                        this.granularity = 1f
+                        this.isGranularityEnabled = true
+                    }
+
                     this.setVisibleXRangeMaximum(15f)
 
                     this.notifyDataSetChanged()
@@ -283,14 +314,12 @@ class HomeFragment : Fragment() {
                 position = XAxis.XAxisPosition.BOTTOM
                 textColor = bwColor
                 textSize = 11f
-                granularity = 1f
             }
 
             axisLeft.apply {
                 setDrawGridLines(false)
                 textSize = 11f
                 textColor = bwColor
-
             }
 
             axisRight.isEnabled = false

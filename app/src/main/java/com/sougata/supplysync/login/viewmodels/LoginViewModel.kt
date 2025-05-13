@@ -34,12 +34,12 @@ class LoginViewModel : ViewModel() {
         }
 
         // When all validation is passed
-        this.accountLoginIndicator.postValue(Status.STARTED to "")
+        this.accountLoginIndicator.value = Status.STARTED to ""
 
         val authRepository = AuthRepository()
 
         authRepository.loginAccount(email, password) { status, message ->
-            this.accountLoginIndicator.postValue(status to message)
+            this.accountLoginIndicator.value = status to message
         }
 
     }

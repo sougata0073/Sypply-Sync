@@ -157,6 +157,8 @@ class SuppliersReportsFragment : Fragment() {
                     this.xAxis.apply {
                         this.valueFormatter =
                             IndexAxisValueFormatter(viewModel.purchasedItemsCompChartXStrings)
+
+                        labelCount = 8
                         this.labelRotationAngle = 270f
                         this.granularity = 1f
                         this.isGranularityEnabled = true
