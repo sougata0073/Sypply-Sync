@@ -1,6 +1,6 @@
 # Authentication demo
 
-https://github.com/user-attachments/assets/cc45ab29-de05-4385-b592-8f7059192372
+[https://github.com/user-attachments/assets/cc45ab29-de05-4385-b592-8f7059192372](https://youtube.com/shorts/7cn1le6hliM?feature=share)
 
 # Supplier section demo (Not fully completed)
 
