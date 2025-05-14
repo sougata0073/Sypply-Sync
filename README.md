@@ -4,6 +4,7 @@
 # Small app tour (Not fully completed yet)
 [Watch this video on youtube](https://youtu.be/22xSMe0UuDE)
 
+# Some sample image in light and dark mode
 <img src="https://github.com/user-attachments/assets/442997eb-6062-4fa9-a637-b01c173c6520" width="158" height="352">
 <img src="https://github.com/user-attachments/assets/0453e911-b02c-4578-83b8-c8f08f3fb099" width="158" height="352">
 <img src="https://github.com/user-attachments/assets/57ef93d2-668a-4b8f-b229-4f68ced68075" width="158" height="352">
