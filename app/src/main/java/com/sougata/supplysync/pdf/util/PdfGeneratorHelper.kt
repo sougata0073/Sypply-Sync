@@ -1,11 +1,14 @@
 package com.sougata.supplysync.pdf.util
 
 import com.itextpdf.io.font.constants.StandardFonts
+import com.itextpdf.kernel.colors.ColorConstants
 import com.itextpdf.kernel.font.PdfFontFactory
 import com.itextpdf.kernel.pdf.PdfDocument
 import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.kernel.pdf.action.PdfAction
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Cell
+import com.itextpdf.layout.element.Link
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
 import com.itextpdf.layout.element.Text
@@ -80,13 +83,27 @@ class PdfGeneratorHelper {
                             .setFont(boldFont).setFontSize(25f)
                     )
                         .add(
-                            Text("Email: ${user.email}\n")
+                            Text("Email: ")
                                 .setFont(normalFont).setFontSize(18f)
                         )
                         .add(
-                            Text("Phone number: ${user.phone}")
-                                .setFont(normalFont).setFontSize(18f)
+                            Link(
+                                "${user.email}\n", PdfAction.createURI("mailto:${user.email}")
+                            )
+                                .setFontColor(ColorConstants.BLUE).setFont(normalFont)
+                                .setFontSize(18f)
                         )
+                        .add(
+                            Text("Phone: ").setFont(normalFont).setFontSize(18f)
+                        )
+                        .add(
+                            Link(
+                                user.phone, PdfAction.createURI("tel:${user.phone}")
+                            )
+                                .setFontColor(ColorConstants.BLUE).setFont(normalFont)
+                                .setFontSize(18f)
+                        )
+
 
                 return@withContext Triple(Status.SUCCESS, paragraph, message)
             }
