@@ -1,6 +1,6 @@
 # Authentication demo
 
-[![Watch the video](https://github.com/user-attachments/assets/25538b33-be19-4dd5-a467-85b8789c5c6a)](https://www.youtube.com/watch?v=VIDEO_ID)
+[![Watch the video](https://github.com/user-attachments/assets/25538b33-be19-4dd5-a467-85b8789c5c6a)](https://youtube.com/shorts/7cn1le6hliM?feature=share)
 
 # Supplier section demo (Not fully completed)
 
