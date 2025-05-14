@@ -9,7 +9,7 @@ import com.itextpdf.layout.element.Text
 import com.itextpdf.layout.properties.HorizontalAlignment
 import com.itextpdf.layout.properties.TextAlignment
 import com.itextpdf.layout.properties.UnitValue
-import com.sougata.supplysync.firestore.SupplierRepository
+import com.sougata.supplysync.firestore.util.HelperRepository
 import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.util.Status
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +17,7 @@ import kotlinx.coroutines.withContext
 
 class Helper {
 
-    private val firestoreRepository = SupplierRepository()
+    private val helperRepo = HelperRepository()
 
     suspend fun <T : Model> tableMaker(
         headerNames: List<String>,
@@ -58,7 +58,7 @@ class Helper {
 
     suspend fun getCurrentUserDetailsParagraph(): Triple<Status, Paragraph?, String> =
         withContext(Dispatchers.Default) {
-            val result = firestoreRepository.getCurrentUserDetails()
+            val result = helperRepo.getCurrentUserDetails()
 
             val status = result.first
             val user = result.second
@@ -72,7 +72,7 @@ class Helper {
 
                 val paragraph =
                     Paragraph().add(
-                        Text("Name: ${user.name}\n")
+                        Text("Name: ${user.name.uppercase()}\n")
                             .setFont(boldFont).setFontSize(25f)
                     )
                         .add(

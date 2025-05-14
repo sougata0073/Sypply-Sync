@@ -1,6 +1,7 @@
 package com.sougata.supplysync.home.viewmodels
 
 import android.app.Application
+import android.util.Log
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData

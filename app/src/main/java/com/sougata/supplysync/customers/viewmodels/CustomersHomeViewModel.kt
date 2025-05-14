@@ -103,7 +103,8 @@ class CustomersHomeViewModel : ViewModel() {
     }
 
     fun onReportsBtnClicked(view: View) {
-
+        view.findNavController()
+            .navigate(R.id.action_customersHomeFragment_to_customersReportsFragment)
     }
 
 }

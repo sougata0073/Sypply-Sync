@@ -1,8 +1,9 @@
-package com.sougata.supplysync.suppliers.ui
+package com.sougata.supplysync.customers.ui
 
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,19 +21,20 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.sougata.supplysync.R
-import com.sougata.supplysync.databinding.FragmentSuppliersReportsBinding
-import com.sougata.supplysync.suppliers.viewmodels.SupplierReportsViewModel
+import com.sougata.supplysync.customers.viewmodels.CustomerReportsViewModel
+import com.sougata.supplysync.databinding.FragmentCustomersReportsBinding
 import com.sougata.supplysync.util.AnimationProvider
+import com.sougata.supplysync.util.DateTime
 import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Status
 import java.io.File
 
-class SuppliersReportsFragment : Fragment() {
+class CustomersReportsFragment : Fragment() {
 
-    private var _binding: FragmentSuppliersReportsBinding? = null
+    private var _binding: FragmentCustomersReportsBinding? = null
     private val binding get() = _binding!!
 
-    private lateinit var viewModel: SupplierReportsViewModel
+    private lateinit var viewModel: CustomerReportsViewModel
 
     private val fileLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -42,8 +44,9 @@ class SuppliersReportsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+
         this._binding =
-            DataBindingUtil.inflate(inflater, R.layout.fragment_suppliers_reports, container, false)
+            DataBindingUtil.inflate(inflater, R.layout.fragment_customers_reports, container, false)
 
         return this.binding.root
     }
@@ -51,16 +54,15 @@ class SuppliersReportsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        this.viewModel = ViewModelProvider(this)[SupplierReportsViewModel::class.java]
+        this.viewModel = ViewModelProvider(this)[CustomerReportsViewModel::class.java]
 
         this.binding.viewModel = this.viewModel
 
         this.binding.lifecycleOwner = this.viewLifecycleOwner
 
-        this.setUpBarChart(this.binding.purchasedItemsCompChart.barChart)
+        this.setUpBarChart(this.binding.receivedOrdersItemsCompChart.barChart)
 
         this.initializeUI()
-
         this.registerListeners()
     }
 
@@ -71,30 +73,30 @@ class SuppliersReportsFragment : Fragment() {
     }
 
     private fun initializeUI() {
-        this.setUpPurchasedItemsCompBarChart()
-        this.setUpSupplierPaymentPdfSelection()
-        this.setUpPurchasedItemPdfSelection()
+        this.setUpReceivedOrdersItemsCompBarChart()
+        this.setUpPaymentsReceivedPdfSelection()
+        this.setUpSalesPdfSelection()
     }
 
     private fun registerListeners() {
 
-        this.viewModel.supplierPaymentsListPdf.observe(this.viewLifecycleOwner) {
-            this.pdfCreationListener(it, this.binding.supplierPayment.actionButtonsLayout)
+        this.viewModel.paymentsReceivedListPdf.observe(this.viewLifecycleOwner) {
+            this.pdfCreationListener(it, this.binding.paymentsReceived.actionButtonsLayout)
         }
 
-        this.viewModel.orderedItemsListPdf.observe(this.viewLifecycleOwner) {
-            this.pdfCreationListener(it, this.binding.purchasedItem.actionButtonsLayout)
+        this.viewModel.salesListPdf.observe(this.viewLifecycleOwner) {
+            this.pdfCreationListener(it, this.binding.sales.actionButtonsLayout)
         }
 
-        this.registerPurchasedItemsCompChartListener()
+        this.registerReceivedOrdersItemsCompChartListener()
     }
 
-    private fun setUpPurchasedItemsCompBarChart() {
-        this.binding.purchasedItemsCompChart.apply {
-            heading.text = "Comparison of items purchased"
+    private fun setUpReceivedOrdersItemsCompBarChart() {
+        this.binding.receivedOrdersItemsCompChart.apply {
+            heading.text = "Comparison of items ordered by tour customers"
             calendarBtn.setOnClickListener {
                 openDateRangePicker { startDateMillis, endDateMillis ->
-                    viewModel.loadPurchasedItemsCompChartData(
+                    viewModel.loadReceivedOrdersItemsCompChartData(
                         startDateMillis, endDateMillis
                     )
                 }
@@ -102,77 +104,77 @@ class SuppliersReportsFragment : Fragment() {
         }
     }
 
-    private fun setUpSupplierPaymentPdfSelection() {
-        this.binding.supplierPayment.apply {
+    private fun setUpPaymentsReceivedPdfSelection() {
+        this.binding.paymentsReceived.apply {
             this.mainImage.setImageResource(R.drawable.ic_money)
-            this.heading.text = "Get a detailed PDF of payments to suppliers"
+            this.heading.text = "Get a detailed PDF of payments received"
             this.createBtn.setOnClickListener {
                 this.actionButtonsLayout.visibility = View.GONE
                 openDateRangePicker { startDateMillis, endDateMillis ->
-                    viewModel.generateSupplierPaymentsPdf(startDateMillis, endDateMillis)
+                    viewModel.generatePaymentsReceivedPdf(startDateMillis, endDateMillis)
                 }
             }
             this.open.setOnClickListener {
-                val byteArray = viewModel.supplierPaymentsListPdf.value?.second
+                val byteArray = viewModel.paymentsReceivedListPdf.value?.second
 
                 onOpenClick(byteArray)
             }
             this.saveLocally.setOnClickListener {
                 val byteArray =
-                    viewModel.supplierPaymentsListPdf.value?.second ?: byteArrayOf()
+                    viewModel.paymentsReceivedListPdf.value?.second ?: byteArrayOf()
 
-                onSaveLocallyClick("Payments to suppliers.pdf", byteArray)
+                onSaveLocallyClick("Payments received.pdf", byteArray)
             }
             this.send.setOnClickListener {
                 val byteArray =
-                    viewModel.supplierPaymentsListPdf.value?.second ?: byteArrayOf()
-                onSendClick("Payments to suppliers.pdf", byteArray)
+                    viewModel.paymentsReceivedListPdf.value?.second ?: byteArrayOf()
+                onSendClick("Payments received.pdf", byteArray)
             }
         }
     }
 
-    private fun setUpPurchasedItemPdfSelection() {
-        this.binding.purchasedItem.apply {
+    private fun setUpSalesPdfSelection() {
+        this.binding.sales.apply {
 
             this.mainImage.setImageResource(R.drawable.ic_item)
             this.heading.text = "Get a detailed PDF of items purchased"
             this.createBtn.setOnClickListener {
                 this.actionButtonsLayout.visibility = View.GONE
                 openDateRangePicker { startDateMillis, endDateMillis ->
-                    viewModel.generatePurchasePdf(startDateMillis, endDateMillis)
+                    viewModel.generateSalesListPdf(startDateMillis, endDateMillis)
                 }
             }
             this.open.setOnClickListener {
-                val byteArray = viewModel.orderedItemsListPdf.value?.second
+                val byteArray = viewModel.salesListPdf.value?.second
                 onOpenClick(byteArray)
             }
             this.saveLocally.setOnClickListener {
-                val byteArray = viewModel.orderedItemsListPdf.value?.second ?: byteArrayOf()
-                onSaveLocallyClick("Items purchased.pdf", byteArray)
+                val byteArray = viewModel.salesListPdf.value?.second ?: byteArrayOf()
+                onSaveLocallyClick("Items sold.pdf", byteArray)
             }
             this.send.setOnClickListener {
-                val byteArray = viewModel.orderedItemsListPdf.value?.second ?: byteArrayOf()
-                onSendClick("Items purchased.pdf", byteArray)
+                val byteArray = viewModel.salesListPdf.value?.second ?: byteArrayOf()
+                onSendClick("Items sold.pdf", byteArray)
             }
         }
     }
 
-    private fun registerPurchasedItemsCompChartListener() {
-        this.viewModel.purchasedItemsCompChartData.observe(this.viewLifecycleOwner) {
+    private fun registerReceivedOrdersItemsCompChartListener() {
+        this.viewModel.receivedOrdersItemsCompChartData.observe(this.viewLifecycleOwner) {
 
             if (it.second == Status.STARTED) {
 
-                this.binding.purchasedItemsCompChart.progressBar.visibility = View.VISIBLE
+                this.binding.receivedOrdersItemsCompChart.progressBar.visibility = View.VISIBLE
 
             } else if (it.second == Status.SUCCESS) {
 
-                this.binding.purchasedItemsCompChart.barChart.apply {
+                this.binding.receivedOrdersItemsCompChart.barChart.apply {
 
                     this.data = it.first
 
                     this.xAxis.apply {
                         this.valueFormatter =
-                            IndexAxisValueFormatter(viewModel.purchasedItemsCompChartXStrings)
+                            IndexAxisValueFormatter(viewModel.receivedOrdersItemsCompChartXStrings)
 
                         labelCount = 8
                         this.labelRotationAngle = 90f
@@ -186,15 +188,15 @@ class SuppliersReportsFragment : Fragment() {
 
                     this.visibility = View.VISIBLE
 
-                    if (viewModel.animatePurchasedItemsCompChart) {
+                    if (viewModel.animateReceivedOrdersItemsCompChart) {
                         animateY(1000)
-                        viewModel.animatePurchasedItemsCompChart = false
+                        viewModel.animateReceivedOrdersItemsCompChart = false
                     }
                 }
 
-                this.binding.purchasedItemsCompChart.progressBar.visibility = View.GONE
-                this.binding.purchasedItemsCompChart.dateRange.text =
-                    this.viewModel.purchasedItemsCompChartDateRange
+                this.binding.receivedOrdersItemsCompChart.progressBar.visibility = View.GONE
+                this.binding.receivedOrdersItemsCompChart.dateRange.text =
+                    this.viewModel.receivedOrdersItemsCompChartDateRange
 
 
             } else if (it.second == Status.FAILED) {
@@ -202,6 +204,7 @@ class SuppliersReportsFragment : Fragment() {
             }
         }
     }
+
 
     private fun setUpBarChart(myBarChart: BarChart) {
         val bwColor = requireContext().getColor(R.color.bw)

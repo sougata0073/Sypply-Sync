@@ -1,5 +1,6 @@
 package com.sougata.supplysync.firestore
 
+import android.util.Log
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.AggregateField
@@ -18,7 +19,6 @@ import com.sougata.supplysync.models.Order
 import com.sougata.supplysync.models.UserItem
 import com.sougata.supplysync.util.Converters
 import com.sougata.supplysync.util.FirestoreFieldDataType
-import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Messages
 import com.sougata.supplysync.util.Status
 
@@ -437,45 +437,6 @@ class CustomerRepository {
         )
     }
 
-//    fun getSalesAmountListByRange(
-//        startTimestamp: Timestamp,
-//        endTimestamp: Timestamp,
-//        onComplete: (Status, List<Double>?, String) -> Unit
-//    ) {
-//        val query = this.ordersCol
-//            .whereGreaterThanOrEqualTo(
-//                Order::deliveryTimestamp.name,
-//                startTimestamp
-//            )
-//            .whereLessThanOrEqualTo(
-//                Order::deliveryTimestamp.name,
-//                endTimestamp
-//            )
-//            .orderBy(Order::deliveryTimestamp.name, Query.Direction.ASCENDING)
-//
-//        query.get().addOnCompleteListener {
-//            if (it.isSuccessful) {
-//
-//                val resultList = mutableListOf<Double>()
-//
-//                for (doc in it.result.documents) {
-//                    if (doc.exists()) {
-//                        val amount =
-//                            Converters.numberToDouble(doc.get(Order::amount.name) as Number)
-//                        resultList.add(amount)
-//                    }
-//                }
-//                onComplete(
-//                    Status.SUCCESS,
-//                    resultList,
-//                    Messages.TASK_COMPLETED_SUCCESSFULLY
-//                )
-//            } else {
-//                onComplete(Status.FAILED, null, it.exception?.message.toString())
-//            }
-//        }
-//    }
-
     fun getSalesAmountListByRange(
         startTimestamp: Timestamp,
         endTimestamp: Timestamp,
@@ -549,6 +510,118 @@ class CustomerRepository {
                 } else {
                     onComplete(Status.FAILED, null, Messages.TASK_FAILED_TO_COMPLETE)
                 }
+            } else {
+                onComplete(Status.FAILED, null, it.exception?.message.toString())
+            }
+        }
+    }
+
+    fun getReceivedOrdersItemsFrequencyByRange(
+        startTimestamp: Timestamp,
+        endTimestamp: Timestamp,
+        onComplete: (Status, List<Pair<String, Int>>?, String) -> Unit
+    ) {
+        val query = this.ordersCol
+            .whereGreaterThanOrEqualTo(
+                Order::timestamp.name,
+                startTimestamp
+            )
+            .whereLessThanOrEqualTo(
+                Order::timestamp.name,
+                endTimestamp
+            )
+            .orderBy(Order::timestamp.name, Query.Direction.ASCENDING)
+
+        query.get().addOnCompleteListener {
+
+            if (it.isSuccessful) {
+                val map = hashMapOf<String, Int>()
+                for (doc in it.result.documents) {
+                    val itemName = doc.get(Order::userItemName.name) as String
+                    map[itemName] = map.getOrDefault(itemName, 0) + 1
+                }
+                onComplete(Status.SUCCESS, map.toList(), Messages.TASK_COMPLETED_SUCCESSFULLY)
+            } else {
+                onComplete(Status.FAILED, null, it.exception?.message.toString())
+            }
+        }
+    }
+
+    fun getDeliveredOrdersByRange(
+        startTimestamp: Timestamp,
+        endTimestamp: Timestamp,
+        onComplete: (Status, MutableList<Order>?, String) -> Unit
+    ) {
+        val query = this.ordersCol
+            .whereGreaterThanOrEqualTo(
+                Order::deliveryTimestamp.name,
+                startTimestamp
+            )
+            .whereLessThanOrEqualTo(
+                Order::deliveryTimestamp.name,
+                endTimestamp
+            )
+            .orderBy(
+                Order::deliveryTimestamp.name,
+                Query.Direction.ASCENDING
+            )
+
+        query.get().addOnCompleteListener {
+            if (it.isSuccessful) {
+                val resultList = mutableListOf<Order>()
+                for (doc in it.result.documents) {
+                    if (doc.exists()) {
+                        val order = doc.toObject(Order::class.java)!!
+                        if (order.delivered) {
+                            resultList.add(order)
+                        }
+                    }
+                }
+                onComplete(
+                    Status.SUCCESS,
+                    resultList,
+                    Messages.TASK_COMPLETED_SUCCESSFULLY
+                )
+            } else {
+                onComplete(Status.FAILED, null, it.exception?.message.toString())
+            }
+        }
+    }
+
+    fun getPaymentsReceivedByRange(
+        startTimestamp: Timestamp,
+        endTimestamp: Timestamp,
+        onComplete: (Status, MutableList<CustomerPayment>?, String) -> Unit
+    ) {
+        val query = this.customerPaymentsCol
+            .whereGreaterThanOrEqualTo(
+                CustomerPayment::paymentTimestamp.name,
+                startTimestamp
+            )
+            .whereLessThanOrEqualTo(
+                CustomerPayment::paymentTimestamp.name,
+                endTimestamp
+            )
+            .orderBy(
+                CustomerPayment::paymentTimestamp.name,
+                Query.Direction.ASCENDING
+            )
+
+        query.get().addOnCompleteListener {
+            if (it.isSuccessful) {
+                val resultList = mutableListOf<CustomerPayment>()
+
+                for (doc in it.result.documents) {
+                    if (doc.exists()) {
+                        val order = doc.toObject(CustomerPayment::class.java)!!
+                        resultList.add(order)
+                    }
+                }
+                onComplete(
+                    Status.SUCCESS,
+                    resultList,
+                    Messages.TASK_COMPLETED_SUCCESSFULLY
+                )
             } else {
                 onComplete(Status.FAILED, null, it.exception?.message.toString())
             }

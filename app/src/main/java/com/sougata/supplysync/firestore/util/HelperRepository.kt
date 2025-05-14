@@ -6,10 +6,15 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.sougata.supplysync.models.Model
+import com.sougata.supplysync.models.User
 import com.sougata.supplysync.util.FirestoreFieldDataType
 import com.sougata.supplysync.util.Keys
 import com.sougata.supplysync.util.Messages
 import com.sougata.supplysync.util.Status
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlin.math.floor
 
 class HelperRepository {
@@ -158,5 +163,32 @@ class HelperRepository {
             }
         }
     }
+
+    suspend fun getCurrentUserDetails(): Triple<Status, User?, String> =
+        withContext(Dispatchers.IO) {
+            suspendCoroutine { continuation ->
+                currentUserDoc.get().addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        val doc = task.result
+                        if (doc.exists()) {
+                            val user = doc.toObject(User::class.java)
+                            continuation.resume(Triple(Status.SUCCESS, user, ""))
+                        } else {
+                            continuation.resume(
+                                Triple(
+                                    Status.FAILED,
+                                    null,
+                                    "Document data is null"
+                                )
+                            )
+                        }
+                    } else {
+                        val errorMessage = task.exception?.message ?: "Unknown error"
+                        continuation.resume(Triple(Status.FAILED, null, errorMessage))
+                    }
+                }
+            }
+        }
+
 
 }

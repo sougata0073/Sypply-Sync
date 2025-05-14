@@ -31,15 +31,13 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:ellipsize="end"
-                android:maxLines="1"
                 android:textColor="@color/bw"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="@id/mainImage"
                 app:layout_constraintStart_toStartOf="@id/mainImage"
                 app:layout_constraintTop_toBottomOf="@id/mainImage"
-                tools:text="Payments to suppliers" />
+                tools:text="Heading" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/createBtn"

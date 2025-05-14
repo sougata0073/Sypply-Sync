@@ -27,7 +27,15 @@
         android:id="@+id/customersHomeFragment"
         android:name="com.sougata.supplysync.customers.ui.CustomersHomeFragment"
         android:label="fragment_customers_home"
-        tools:layout="@layout/fragment_customers_home" />
+        tools:layout="@layout/fragment_customers_home" >
+        <action
+            android:id="@+id/action_customersHomeFragment_to_customersReportsFragment"
+            app:destination="@id/customersReportsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+    </fragment>
     <fragment
         android:id="@+id/staffsHomeFragment"
         android:name="com.sougata.supplysync.staffs.fragments.ui.StaffsHomeFragment"
@@ -83,4 +91,9 @@
         android:name="com.sougata.supplysync.customers.ui.AddEditOrderFragment"
         android:label="fragment_add_edit_order"
         tools:layout="@layout/fragment_add_edit_order"/>
+    <fragment
+        android:id="@+id/customersReportsFragment"
+        android:name="com.sougata.supplysync.customers.ui.CustomersReportsFragment"
+        android:label="fragment_customers_reports"
+        tools:layout="@layout/fragment_customers_reports" />
 </navigation>

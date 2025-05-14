@@ -470,45 +470,6 @@ class SupplierRepository {
         )
     }
 
-//    fun getPurchaseAmountListByRange(
-//        startTimestamp: Timestamp,
-//        endTimestamp: Timestamp,
-//        onComplete: (Status, List<Double>?, String) -> Unit
-//    ) {
-//        val query = this.orderedItemsCol
-//            .whereGreaterThanOrEqualTo(
-//                OrderedItem::orderTimestamp.name,
-//                startTimestamp
-//            )
-//            .whereLessThanOrEqualTo(
-//                OrderedItem::orderTimestamp.name,
-//                endTimestamp
-//            )
-//            .orderBy(OrderedItem::orderTimestamp.name, Query.Direction.ASCENDING)
-//
-//        query.get().addOnCompleteListener {
-//
-//            if (it.isSuccessful) {
-//                val resultList = mutableListOf<Double>()
-//
-//                for (doc in it.result.documents) {
-//                    if (doc.exists()) {
-//                        val amount =
-//                            Converters.numberToDouble(doc.get(OrderedItem::amount.name) as Number)
-//                        resultList.add(amount)
-//                    }
-//                }
-//                onComplete(
-//                    Status.SUCCESS,
-//                    resultList,
-//                    Messages.TASK_COMPLETED_SUCCESSFULLY
-//                )
-//            } else {
-//                onComplete(Status.FAILED, null, it.exception?.message.toString())
-//            }
-//        }
-//    }
-
     fun getPurchaseAmountListByRange(
         startTimestamp: Timestamp,
         endTimestamp: Timestamp,
@@ -668,32 +629,6 @@ class SupplierRepository {
             }
         }
     }
-
-    suspend fun getCurrentUserDetails(): Triple<Status, User?, String> =
-        withContext(Dispatchers.IO) {
-            suspendCoroutine { continuation ->
-                currentUserDoc.get().addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        val doc = task.result
-                        if (doc.exists()) {
-                            val user = doc.toObject(User::class.java)
-                            continuation.resume(Triple(Status.SUCCESS, user, ""))
-                        } else {
-                            continuation.resume(
-                                Triple(
-                                    Status.FAILED,
-                                    null,
-                                    "Document data is null"
-                                )
-                            )
-                        }
-                    } else {
-                        val errorMessage = task.exception?.message ?: "Unknown error"
-                        continuation.resume(Triple(Status.FAILED, null, errorMessage))
-                    }
-                }
-            }
-        }
 
     fun getPurchaseAmountByRange(
         startTimestamp: Timestamp,

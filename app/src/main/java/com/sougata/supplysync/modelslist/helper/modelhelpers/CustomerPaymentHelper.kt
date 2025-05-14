@@ -84,7 +84,6 @@ class CustomerPaymentHelper(
             val timeString = DateTime.getTimeStringFromTimestamp(model.paymentTimestamp)
 
             name.text = "From: ${model.customerName}"
-            name.text = "To: ${model.customerName}"
             dateTime.text = "At: $dateString On: $timeString"
             amount.text = Converters.numberToMoneyString(model.amount)
 
