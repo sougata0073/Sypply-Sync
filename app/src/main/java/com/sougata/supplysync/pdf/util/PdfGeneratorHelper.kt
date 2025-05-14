@@ -2,6 +2,9 @@ package com.sougata.supplysync.pdf.util
 
 import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.kernel.font.PdfFontFactory
+import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.Cell
 import com.itextpdf.layout.element.Paragraph
 import com.itextpdf.layout.element.Table
@@ -14,8 +17,9 @@ import com.sougata.supplysync.models.Model
 import com.sougata.supplysync.util.Status
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 
-class Helper {
+class PdfGeneratorHelper {
 
     private val helperRepo = HelperRepository()
 
@@ -88,4 +92,48 @@ class Helper {
             }
             return@withContext Triple(Status.FAILED, null, message)
         }
+
+    suspend fun <T : Model> generateAnyPdfWithTable(
+        dataList: List<T>, headerNames: List<String>, fontSize: Float,
+        converter: (T) -> List<String>, onComplete: (Status, ByteArray?, String) -> Unit
+    ) {
+        val outputStream = ByteArrayOutputStream()
+
+        val writer = PdfWriter(outputStream)
+        val pdfDocument = PdfDocument(writer)
+        val document = Document(pdfDocument)
+
+        try {
+            val result = this.getCurrentUserDetailsParagraph()
+
+            val status = result.first
+            val paragraph = result.second
+            val message = result.third
+
+            if (status == Status.SUCCESS) {
+
+                val table = this.tableMaker(headerNames, dataList, fontSize, converter)
+
+                withContext(Dispatchers.Default) {
+                    paragraph?.setMarginBottom(30f)
+
+                    document.add(paragraph)
+                    document.add(table)
+                    document.close()
+                }
+
+                onComplete(
+                    Status.SUCCESS,
+                    outputStream.toByteArray(),
+                    message
+                )
+
+            } else if (status == Status.FAILED) {
+                onComplete(Status.FAILED, null, message)
+            }
+
+        } catch (e: Exception) {
+            onComplete(Status.FAILED, null, e.message.toString())
+        }
+    }
 }
