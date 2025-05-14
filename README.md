@@ -1,8 +1,8 @@
 # Authentication demo
-[Watch this video on youtube](https://youtube.com/shorts/7cn1le6hliM?feature=share)
+[Click to watch the demo video](https://drive.google.com/file/d/1wSBii2N94xfDM3dcWJCY5s4K4W-d2jvd/view?usp=drive_link)
 
 # Small app tour (Not fully completed yet)
-[Watch this video on youtube](https://youtu.be/22xSMe0UuDE)
+[Click to watch the demo video](https://drive.google.com/file/d/1sBdKvQU1Dvb8PLkPNd9jG-sc2UIoriku/view?usp=drive_link)
 
 # Some sample image in light and dark mode
 <img src="https://github.com/user-attachments/assets/442997eb-6062-4fa9-a637-b01c173c6520" width="158" height="352">
